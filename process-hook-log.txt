@@ -1,0 +1,134 @@
+[2025-07-14T00:42:25.291Z] {
+  "method": "SYSTEM",
+  "message": "All child_process methods successfully hooked",
+  "logFilePath": "C:\\Users\\user\\Desktop\\vvv\\vue3_v2.0\\process-hook-log.txt",
+  "timestamp": "2025-07-14T00:42:25.290Z"
+}
+
+[2025-07-14T00:42:26.307Z] {
+  "method": "exec",
+  "command": "%windir%\\System32\\REG.exe QUERY HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Cryptography /v MachineGuid",
+  "timestamp": "2025-07-14T00:42:26.307Z"
+}
+
+[2025-07-14T00:42:26.307Z] {
+  "method": "execFile",
+  "file": "%windir%\\System32\\REG.exe QUERY HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Cryptography /v MachineGuid",
+  "args": {
+    "shell": true
+  },
+  "timestamp": "2025-07-14T00:42:26.307Z"
+}
+
+[2025-07-14T00:42:26.333Z] {
+  "method": "execSync",
+  "command": "where.exe git",
+  "options": {
+    "shell": "C:\\WINDOWS\\system32\\cmd.exe",
+    "stdio": "pipe",
+    "encoding": "utf8",
+    "env": false
+  },
+  "timestamp": "2025-07-14T00:42:26.333Z"
+}
+
+[2025-07-14T00:42:26.473Z] {
+  "method": "execSync",
+  "command": "where.exe git",
+  "options": {
+    "shell": "C:\\WINDOWS\\system32\\cmd.exe",
+    "stdio": "pipe",
+    "encoding": "utf8",
+    "env": false
+  },
+  "timestamp": "2025-07-14T00:42:26.333Z",
+  "result": {
+    "success": true,
+    "output": "C:\\Program Files\\Git\\mingw64\\bin\\git.exe\r\nC:\\Program Files\\Git\\cmd\\git.exe\r\n",
+    "error": null
+  },
+  "endTimestamp": "2025-07-14T00:42:26.473Z"
+}
+
+[2025-07-14T00:42:26.473Z] {
+  "method": "execSync",
+  "command": "dir \"C:\\Program Files\\Git\\mingw64\\bin\\git.exe\r\nC:\\Program Files\\Git\\bin\\bash.exe\"",
+  "options": {
+    "shell": "C:\\WINDOWS\\system32\\cmd.exe",
+    "stdio": "pipe",
+    "env": false
+  },
+  "timestamp": "2025-07-14T00:42:26.473Z"
+}
+
+[2025-07-14T00:42:26.498Z] {
+  "method": "execSync",
+  "command": "dir \"C:\\Program Files\\Git\\mingw64\\bin\\git.exe\r\nC:\\Program Files\\Git\\bin\\bash.exe\"",
+  "options": {
+    "shell": "C:\\WINDOWS\\system32\\cmd.exe",
+    "stdio": "pipe",
+    "env": false
+  },
+  "timestamp": "2025-07-14T00:42:26.473Z",
+  "result": {
+    "success": true,
+    "output": " C ����̺��� �������� �̸��� �����ϴ�.\r\n ���� �Ϸ� ��ȣ: 7EB1-6905\r\n\r\n C:\\Program Files\\Git\\mingw64\\bin ���͸�\r\n\r\n2024-10-22  ���� 10:19         4,149,624 git.exe\r\n               1�� ����           4,149,624 ����Ʈ\r\n               0�� ���͸�  79,948,095,488 ����Ʈ ����\r\n",
+    "error": null
+  },
+  "endTimestamp": "2025-07-14T00:42:26.498Z"
+}
+
+[2025-07-14T00:42:26.529Z] {
+  "method": "execSync",
+  "command": "git rev-parse --show-toplevel",
+  "options": {
+    "cwd": "C:\\Users\\user\\Desktop\\vvv\\vue3_v2.0",
+    "encoding": "utf8",
+    "stdio": [
+      "pipe",
+      "pipe",
+      "ignore"
+    ],
+    "env": false
+  },
+  "timestamp": "2025-07-14T00:42:26.529Z"
+}
+
+[2025-07-14T00:42:26.531Z] {
+  "method": "execSync",
+  "command": "git rev-parse --show-toplevel",
+  "options": {
+    "cwd": "C:\\Users\\user\\Desktop\\vvv\\vue3_v2.0",
+    "encoding": "utf8",
+    "stdio": [
+      "pipe",
+      "pipe",
+      "ignore"
+    ],
+    "env": false
+  },
+  "timestamp": "2025-07-14T00:42:26.529Z",
+  "result": {
+    "success": false,
+    "output": "",
+    "error": "spawnSync C:\\Program Files\\Git\\mingw64\\bin\\git.exe\r\nC:\\Program Files\\Git\\bin\\bash.exe ENOENT",
+    "exitCode": null
+  },
+  "endTimestamp": "2025-07-14T00:42:26.531Z"
+}
+
+[2025-07-14T00:42:26.710Z] {
+  "method": "execFile",
+  "file": "%windir%\\System32\\REG.exe QUERY HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Cryptography /v MachineGuid",
+  "args": {
+    "shell": true
+  },
+  "timestamp": "2025-07-14T00:42:26.307Z",
+  "result": {
+    "error": null,
+    "stdout": "\r\nHKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Cryptography\r\n    MachineGuid    REG_SZ    6446d533-1867-4413-b5b7-cc706359081c\r\n\r\n",
+    "stderr": ""
+  },
+  "endTimestamp": "2025-07-14T00:42:26.710Z"
+}
+

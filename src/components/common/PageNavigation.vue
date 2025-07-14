@@ -4,38 +4,22 @@
       처음
     </button>
 
-    <button
-      :disabled="currentPage === 1"
-      class="pagination-button"
-      @click="handlePageChange(currentPage - 1)"
-    >
+    <button :disabled="currentPage === 1" class="pagination-button" @click="handlePageChange(currentPage - 1)">
       이전
     </button>
 
     <div class="pagination-numbers-container">
-      <button
-        v-for="page in pageNumbers"
-        :key="page"
-        :class="['pagination-number-button', { active: currentPage === page }]"
-        @click="handlePageChange(page)"
-      >
+      <button v-for="page in pageNumbers" :key="page"
+        :class="['pagination-number-button', { active: currentPage === page }]" @click="handlePageChange(page)">
         {{ page }}
       </button>
     </div>
 
-    <button
-      :disabled="currentPage === totalPages"
-      class="pagination-button"
-      @click="handlePageChange(currentPage + 1)"
-    >
+    <button :disabled="currentPage === totalPages" class="pagination-button" @click="handlePageChange(currentPage + 1)">
       다음
     </button>
 
-    <button
-      :disabled="currentPage === totalPages"
-      class="pagination-button"
-      @click="handlePageChange(totalPages)"
-    >
+    <button :disabled="currentPage === totalPages" class="pagination-button" @click="handlePageChange(totalPages)">
       마지막
     </button>
   </div>
@@ -44,6 +28,9 @@
 <script setup>
 import { ref, computed } from 'vue';
 
+// @totalItems : 총 리스트의 요소의 갯수
+// @itemsPerPage : 페이지당 보여줄 요소의 갯수
+// @onPageChange : 페이징 버튼 누를 때 마다 실행되는 함수
 const props = defineProps({
   totalItems: {
     type: Number,

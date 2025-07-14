@@ -1,4 +1,8 @@
-<script setup></script>
+<script setup>
+import { useModalState } from '@/stores/modalState';
+
+const modalState = useModalState();
+</script>
 
 <template>
   <Teleport to="body">
@@ -18,7 +22,7 @@
         <div class="button-container">
           <button type="button">저장</button>
           <button type="button">삭제</button>
-          <button type="button">나가기</button>
+          <button type="button" @click="modalState.$patch({ isOpen: false })">나가기</button>
         </div>
       </form>
     </div>
