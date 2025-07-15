@@ -10,6 +10,24 @@ const modalState = useModalState();
 const formRef = ref();
 const detail = ref({});
 
+const handlerDelete = async () => {
+  const formData = new FormData(formRef.value);
+  formData.append('noticeId', id);
+
+  try {
+    await axios.post('/api/support/noticeDelete.do', formData).then((res) => {
+      if (res.data.result === 'success') {
+        alert('삭제 되었습니다.')
+      }
+      modalState.$patch({ isOpen: false });
+      emit('postSuccess');
+    })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+// 저장 버튼 클릭시 저장
 const handlerInsert = () => {
   const formData = new FormData(formRef.value);
 
@@ -22,6 +40,7 @@ const handlerInsert = () => {
   })
 };
 
+// 수정 버튼 클릭시 수정
 const handlerUpdate = () => {
   const formData = new FormData(formRef.value);
   formData.append('noticeId', id);
@@ -35,6 +54,7 @@ const handlerUpdate = () => {
   })
 }
 
+// 제목 클릭시 모달창 조회
 const searchDetail = () => {
   const param = new URLSearchParams();
   param.append('noticeId', id);
@@ -71,7 +91,7 @@ onUnmounted(() => {
         </div>
         <div class="button-container">
           <button type="button" @click="!id ? handlerInsert() : handlerUpdate()">{{ !id ? '저장' : '수정' }}</button>
-          <button v-if="id" type="button">삭제</button>
+          <button v-if="id" type="button" @click="handlerDelete()">삭제</button>
           <button type="button" @click="modalState.$patch({ isOpen: false })">나가기</button>
         </div>
       </form>
