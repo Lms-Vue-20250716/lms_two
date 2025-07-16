@@ -1,6 +1,7 @@
 import Login from '@/views/Auth/Login.vue';
 import DashBoard from '@/views/DashBoard/DashBoard.vue';
 import Student from '@/views/Manage/Student.vue';
+import LectureList from '@/views/Lecture/LectureList.vue';
 import NotFound from '@/views/NotFound/NotFound.vue';
 import Notice from '@/views/Support/Notice.vue';
 import Qna from '@/views/Support/Qna.vue';
@@ -50,7 +51,18 @@ const router = createRouter({
             },
           ],
         },
-      ]
+        {
+          path: 'lecture',
+          name: 'lecture',
+          children: [
+            {
+              path: 'list',
+              name: 'list',
+              component: LectureList,
+            },
+          ],
+        },
+      ],
     },
   ],
 });
