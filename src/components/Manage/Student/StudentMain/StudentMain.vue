@@ -4,7 +4,6 @@ import axios from 'axios';
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useModalState } from '@/stores/modalState';
-import StudentModal from '../StudentModal/StudentModal.vue';
 
 const route = useRoute();
 const studentList = ref([]);
@@ -14,11 +13,11 @@ const detailId = ref(0);
 
 const studentSearch = (cPage = 1) => {
   const param = new URLSearchParams(route.query);
-  console.log(route.query);
   param.append('currentPage', cPage);
   param.append('pageSize', 5);
 
   axios.post('/api/manage/studentListBody.do', param).then((res) => {
+    console.log('응답:', res.data);
     studentList.value = res.data.list;
     studentCount.value = res.data.count;
   });
@@ -56,29 +55,6 @@ watch(
       </thead>
       <tbody>
         <template v-if="studentCount > 0">
-          <tr v-for="student in studentList" :key="student.studentId" class="student-table-row">
-            <td class="student-cell">{{ student.studentNumber }}</td>
-            <td
-              class="student-cell cursor-pointer hover:underline"
-              @click="studentDetail(student.studentId)"
-            >
-              {{ student.studentName }}
-            </td>
-            <td class="student-cell">{{ student.studentHp }}</td>
-            <td class="student-cell">{{ student.studentRegDate.substr(0, 10) }}</td>
-            <td class="student-cell">
-              <span>{{ student.studentEmpStatus === 'Y' ? '취업' : '미취업' }}</span>
-            </td>
-            <td class="student-cell">
-              <select v-model="student.statusYN">
-                <option value="W">승인 대기중</option>
-                <option value="Y">재학</option>
-                <option value="N">탈퇴</option>
-              </select>
-            </td>
-            =======
-          </tr>
-
           <tr v-for="student in studentList" :key="student.studentNumber" class="student-table-row">
             <td class="student-cell">{{ student.studentNumber }}</td>
             <td
@@ -91,7 +67,6 @@ watch(
             <td class="student-cell">{{ student.studentRegDate.substr(0, 10) }}</td>
             <td class="student-cell">{{ student.statusYN }}</td>
             <td class="student-cell">{{ student.studentEmpStatus }}</td>
-            >>>>>>> 9ae7f05 (fix : 병합 충돌 해결)
           </tr>
         </template>
         <template v-else>
@@ -107,16 +82,8 @@ watch(
       :on-page-change="studentSearch"
     />
   </div>
-  <StudentModal
-    v-if="modalState.isOpen"
-    :detail-id="detailId"
-    @post-success="studentSearch()"
-    @un-mounted-modal="detailId = $event"
-  />
-  =======
   <!--   <StudenteModal v-if="modalState.isOpen" :detail-id="detailId" @post-success="studentSearch()"
     @un-mounted-modal="detailId = $event" /> -->
-  >>>>>>> 9ae7f05 (fix : 병합 충돌 해결)
 </template>
 
 <style>
