@@ -3,7 +3,6 @@ import router from '@/router';
 import { useModalState } from '@/stores/modalState';
 import { onMounted, ref } from 'vue';
 
-
 const searchTitle = ref('');
 const searchStDate = ref('');
 const searchEdDate = ref('');
@@ -18,7 +17,7 @@ const handlerSearch = () => {
   !searchStDate.value || query.push(`startDate=${searchStDate.value}`);
   !searchEdDate.value || query.push(`endDate=${searchEdDate.value}`);
 
-  const queryString = query.length > 0 ? `?${query.join('$')}` : '';
+  const queryString = query.length > 0 ? `?${query.join('&')}` : '';
 
   router.push(queryString);
 };
@@ -26,10 +25,7 @@ const handlerSearch = () => {
 onMounted(() => {
   window.location.search && router.replace(window.location.pathname);
 });
-
 </script>
-
-
 
 <template>
   <div class="notice-container">
