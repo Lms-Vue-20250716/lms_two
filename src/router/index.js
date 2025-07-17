@@ -31,6 +31,7 @@ const router = createRouter({
               path: 'notice',
               name: 'notice',
               component: Notice,
+<<<<<<< HEAD
             },
             {
               path: 'qna',
@@ -38,6 +39,10 @@ const router = createRouter({
               component: Qna,
             },
           ],
+=======
+            }
+          ]
+>>>>>>> edf3d5dc0f0b876425b0ac673eeecf7469259959
         },
         {
           path: 'manage',
@@ -47,9 +52,15 @@ const router = createRouter({
               path: 'student',
               name: 'student',
               component: Student,
+<<<<<<< HEAD
             },
           ],
         },
+=======
+            }
+          ]
+        }
+>>>>>>> edf3d5dc0f0b876425b0ac673eeecf7469259959
       ]
     },
   ],
