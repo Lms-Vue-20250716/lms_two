@@ -22,24 +22,23 @@ const studentSearch = (cPage = 1) => {
     studentList.value = res.data.list;
     studentCount.value = res.data.count;
   });
-}
+};
 
 onMounted(() => {
   studentSearch();
 });
 
 const studentDetail = (id) => {
-  modalState.$patch({ isOpen: true })
+  modalState.$patch({ isOpen: true });
   detailId.value = id;
-}
+};
 
 watch(
   () => route.query,
   () => {
-    studentSearch()
+    studentSearch();
   },
-)
-
+);
 </script>
 
 <template>
@@ -59,8 +58,12 @@ watch(
         <template v-if="studentCount > 0">
           <tr v-for="student in studentList" :key="student.studentId" class="student-table-row">
             <td class="student-cell">{{ student.studentNumber }}</td>
-            <td class="student-cell cursor-pointer hover:underline" @click="studentDetail(student.studentId)">{{
-              student.studentName }}</td>
+            <td
+              class="student-cell cursor-pointer hover:underline"
+              @click="studentDetail(student.studentId)"
+            >
+              {{ student.studentName }}
+            </td>
             <td class="student-cell">{{ student.studentHp }}</td>
             <td class="student-cell">{{ student.studentRegDate.substr(0, 10) }}</td>
             <td class="student-cell">
@@ -73,6 +76,22 @@ watch(
                 <option value="N">탈퇴</option>
               </select>
             </td>
+            =======
+          </tr>
+
+          <tr v-for="student in studentList" :key="student.studentNumber" class="student-table-row">
+            <td class="student-cell">{{ student.studentNumber }}</td>
+            <td
+              class="student-cell cursor-pointer hover:underline"
+              @click="studentDetail(student.studentName)"
+            >
+              {{ student.studentName }}
+            </td>
+            <td class="student-cell">{{ student.studentHp }}</td>
+            <td class="student-cell">{{ student.studentRegDate.substr(0, 10) }}</td>
+            <td class="student-cell">{{ student.statusYN }}</td>
+            <td class="student-cell">{{ student.studentEmpStatus }}</td>
+            >>>>>>> 9ae7f05 (fix : 병합 충돌 해결)
           </tr>
         </template>
         <template v-else>
@@ -82,10 +101,22 @@ watch(
         </template>
       </tbody>
     </table>
-    <PageNavigation :total-items="studentCount" :items-per-page="5" :on-page-change="studentSearch" />
+    <PageNavigation
+      :total-items="studentCount"
+      :items-per-page="5"
+      :on-page-change="studentSearch"
+    />
   </div>
-  <StudentModal v-if="modalState.isOpen" :detail-id="detailId" @post-success="studentSearch()"
-    @un-mounted-modal="detailId = $event" />
+  <StudentModal
+    v-if="modalState.isOpen"
+    :detail-id="detailId"
+    @post-success="studentSearch()"
+    @un-mounted-modal="detailId = $event"
+  />
+  =======
+  <!--   <StudenteModal v-if="modalState.isOpen" :detail-id="detailId" @post-success="studentSearch()"
+    @un-mounted-modal="detailId = $event" /> -->
+  >>>>>>> 9ae7f05 (fix : 병합 충돌 해결)
 </template>
 
 <style>
