@@ -18,7 +18,6 @@ const studentSearch = (cPage = 1) => {
   param.append('pageSize', 5);
 
   axios.post('/api/manage/studentListBody.do', param).then((res) => {
-    console.log('응답:', res.data);
     studentList.value = res.data.list;
     studentCount.value = res.data.count;
   });
