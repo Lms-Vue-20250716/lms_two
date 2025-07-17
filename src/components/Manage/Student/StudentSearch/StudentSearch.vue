@@ -2,9 +2,8 @@
 import router from '@/router';
 import { onMounted, ref } from 'vue';
 
-
 const searchName = ref('');
-const searchStatusYn = ref('');
+const searchStatysYn = ref('');
 const regStDate = ref('');
 const regEdDate = ref('');
 
@@ -31,15 +30,15 @@ onMounted(() => {
 <template>
   <div class="student-container">
     <div class="input-box">
-      이름: <input v-model.lazy="searchName" />
-      재학 상태: <select v-model="searchStatusYn">
-        <option value selected="selected"> 선택 </option>
-        <option value="W"> 승인대기중 </option>
-        <option value="Y"> 재학 </option>
-        <option value="N"> 탈퇴 </option>
+      이름: <input v-model.lazy="searchName" /> 재학 상태:
+      <select v-model="searchStatusYn">
+        <option value selected="selected">선택</option>
+        <option value="W">승인대기중</option>
+        <option value="Y">재학</option>
+        <option value="N">탈퇴</option>
       </select>
-      가입 기간: <input v-model="regStDate" type="date" />
-      ~ <input v-model="regEdDate" type="date" />
+      가입 기간: <input v-model="regStDate" type="date" /> ~
+      <input v-model="regEdDate" type="date" />
       <button @click="handlerSearch">검색</button>
     </div>
   </div>

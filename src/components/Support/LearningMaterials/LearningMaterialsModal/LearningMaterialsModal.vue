@@ -13,7 +13,7 @@ const detail = ref({});
 const handlerDelete = () => {
   const param = new URLSearchParams();
   param.append('qnaId', id);
-  axios.post('/api/support/deleteQuestion.do', param).then((res) => {
+  axios.post('/api/support/deleteMtr.do', param).then((res) => {
     if (res.data.result === 'success') {
       alert('삭제 되었습니다');
       modalState.$patch({ isOpen: false });
@@ -22,34 +22,16 @@ const handlerDelete = () => {
       alert('삭제 실패');
     }
   });
+  console.log('삭제요청:', id);
 };
 
 // 저장 버튼 클릭시 저장
 const handlerInsert = () => {
   const formData = new FormData(formRef.value);
-  formData.append('qnaId', id);
 
-  try {
-    axios.post('/api/saveAnswer.do', formData).then((res) => {
-      if (res.data.result === 'success') {
-        alert('저장 되었습니다.');
-      }
-      modalState.$patch({ isOpen: false });
-      emit('postSuccess');
-    });
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-// 수정 버튼 클릭시 수정
-const handlerUpdate = () => {
-  const formData = new FormData(formRef.value);
-  formData.append('noticeId', id);
-
-  axios.post('/api/support/updateQuestion.do', formData).then((res) => {
+  axios.post('/api/support/saveMtr.do', formData).then((res) => {
     if (res.data.result === 'success') {
-      alert('수정 되었습니다.');
+      alert('저장 되었습니다.');
       modalState.$patch({ isOpen: false });
       emit('postSuccess');
     }
@@ -59,9 +41,9 @@ const handlerUpdate = () => {
 // 제목 클릭시 모달창 조회
 const searchDetail = () => {
   const param = new URLSearchParams();
-  param.append('qnaId', id);
+  param.append('materiId', id);
 
-  axios.post('/api/support/getQnaDetail.do', param).then((res) => {
+  axios.post('/api/support/getMtrDetail.do', param).then((res) => {
     detail.value = res.data.detailValue;
   });
 };
@@ -80,8 +62,11 @@ onUnmounted(() => {
     <div class="modal-overlay">
       <form ref="formRef" class="modal-form modal-container">
         <label> 강의명:<input v-model="detail.lecName" type="text" name="lecName" /> </label>
-        <label> 제목:<input v-model="detail.qnaTitle" type="text" name="qnaTitle" /> </label>
-        <label> 내용:<input v-model="detail.qnaContent" type="text" name="fileContent" /> </label>
+        <label> 작성자:<input v-model="detail.loginId" type="text" name="loginId" /> </label>
+        <label> 제목:<input v-model="detail.materiTitle" type="text" name="materiTitle" /> </label>
+        <label>
+          내용:<input v-model="detail.materiContent" type="text" name="materiContent" />
+        </label>
         <div class="button-container">
           <button type="button" @click="!id ? handlerInsert() : handlerUpdate()">
             {{ !id ? '저장' : '수정' }}

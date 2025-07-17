@@ -1,13 +1,9 @@
 <script setup>
 import router from '@/router';
-import { useModalState } from '@/stores/modalState';
 import { onMounted, ref } from 'vue';
 
 const select = ref('title');
 const inputText = ref('');
-// const searchTitle = ref('');
-// const searchWriter = ref('');
-const modalState = useModalState; // 함수 실행 잊지 말기!
 
 const handlerSearch = () => {
   const query = [];
@@ -29,7 +25,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="qna-container">
+  <div class="learningMaterials-container">
     <div class="input-box">
       <select v-model="select">
         <option value="title">제목</option>
@@ -37,7 +33,6 @@ onMounted(() => {
       </select>
       <input v-model="inputText" type="text" />
       <button @click="handlerSearch">검색</button>
-      <button @click="modalState.$patch({ isOpen: true })">신규</button>
     </div>
   </div>
 </template>
