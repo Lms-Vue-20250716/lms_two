@@ -57,7 +57,7 @@ watch(
 </script>
 <template>
   <ContentBox>강의 목록</ContentBox>
-  <div class="lecture-container">
+  <div class="lecture-manager-container">
     <form @submit.prevent="handleSearch">
       <select v-model="searchTag">
         <option value="lecName">강의명</option>

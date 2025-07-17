@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
-import LectureSearch from '../LectureSearch/LectureSearch.vue';
+import LectureSearch from '../LectureSearch/LectureManageSearch.vue';
 import { useRouter } from 'vue-router';
 import { watch } from 'vue';
 import { onMounted } from 'vue';
@@ -21,10 +21,10 @@ const lectureCount = ref(0);
  * 현재 URL의 쿼리 파라미터를 사용하여 필터링 및 페이지네이션을 처리하고,
  * 그 결과를 컴포넌트의 상태(state)에 반영합니다.
  */
-const fetchLectureList = async () => {
+const fetchLectureList = async (page) => {
   try {
     //1. url값 받아다가 유효성검사
-    let page = Number(route.query.page || 1);
+    let pageNumber = page || 1;
     let itemPerPage = 5;
 
     //2. 강의목록 fetch에 필요한 파라미터를 url에서 가져온다.
@@ -33,7 +33,7 @@ const fetchLectureList = async () => {
     //2. searchTitle, searchTag, searchStDate, searchEdDate
     const params = new URLSearchParams({
       ...route.query,
-      currentPage: page,
+      currentPage: pageNumber,
       pageSize: itemPerPage,
     });
 
@@ -45,15 +45,17 @@ const fetchLectureList = async () => {
     }
 
     //4. axios.get
-    const response = await axios.get(`/api/lecture/lectureListBody.do?${params.toString()}`);
+    // const response = await axios.get(`/api/lecture/lectureListBody.do?${params.toString()}`);
+    const response = await axios.get(`/api/lecture/lectureManageListBody.do?${params.toString()}`);
 
     if (response && response.data) {
       //테이블에 쓸 필드들
       //강의명 / 강사 / 강의시작일 / 강의종료일 / 정원 / 신청인원 / 강의실
-      lectureList.value = response.data.list || [];
-      lectureCount.value = response.data.count || 0;
+      lectureList.value = response.data.lectureManageList || [];
+      lectureCount.value = response.data.lectureManageCnt || 0;
 
-      // console.log(lectureList.value);
+      console.log('==============================');
+      console.log(response.data.lectureManageList);
     }
   } catch (err) {
     console.log(err);
@@ -87,35 +89,36 @@ onMounted(() => {
 </script>
 <template>
   <LectureSearch :initial-query="route.query" @search="handleSearch" />
-  <div class="lecture-main-container">
-    <table class="lecture-table">
-      <thead class="lecture-table-header">
+  <div class="lecture-manager-main-container">
+    <table class="lecture-manager-table">
+      <thead class="lecture-manager-table-header">
         <tr>
           <th>강의명</th>
           <th>강사</th>
           <th>강의시작일</th>
           <th>강의종료일</th>
           <th>정원</th>
-          <th>신청인원</th>
           <th>강의실</th>
+          <th>강의계획서</th>
         </tr>
       </thead>
       <tbody>
         <template v-if="lectureCount > 0">
-          <tr v-for="lecture in lectureList" :key="lecture.lecId" class="lecture-table-row">
-            <td class="lecture-cell cursor-pointer hover:underline">{{ lecture.lecName }}</td>
-            <td class="lecture-cell">{{ lecture.lecInstructorName }}</td>
-            <td class="lecture-cell">{{ lecture.lecStartDate.substr(0, 10) }}</td>
-            <td class="lecture-cell">{{ lecture.lecEndDate.substr(0, 10) }}</td>
-            <td class="lecture-cell">{{ lecture.lecPersonnel }}</td>
-            <td class="lecture-cell">{{ lecture.courseCntPersonnel }}</td>
-            <!-- lms_one에는 tb_courses_info 에 데이터 있어서 이게 찍히는데, lms_two에는 데이터 없어서안찍힘 -->
-            <td class="lecture-cell">{{ lecture.lecRoomName }}</td>
+          <tr v-for="lecture in lectureList" :key="lecture.lecId" class="lecture-manager-table-row">
+            <td class="lecture-manager-cell cursor-pointer hover:underline">
+              {{ lecture.lecName }}
+            </td>
+            <td class="lecture-manager-cell">{{ lecture.lecInstructorName }}</td>
+            <td class="lecture-manager-cell">{{ lecture.lecStartDate.substr(0, 10) }}</td>
+            <td class="lecture-manager-cell">{{ lecture.lecEndDate.substr(0, 10) }}</td>
+            <td class="lecture-manager-cell">{{ lecture.lecPersonnel }}</td>
+            <td class="lecture-manager-cell">{{ lecture.lecRoomName }}</td>
+            <td class="lecture-manager-cell">?</td>
           </tr>
         </template>
         <template v-else>
           <tr>
-            <td colspan="4" class="lecture-empty-row">일치하는 강의가 없습니다.</td>
+            <td colspan="4" class="lecture-manager-empty-row">일치하는 공지사항이 없습니다.</td>
           </tr>
         </template>
       </tbody>
@@ -127,6 +130,6 @@ onMounted(() => {
     />
   </div>
 </template>
-<style scoped>
+<style setup>
 @import './styled.css';
 </style>
