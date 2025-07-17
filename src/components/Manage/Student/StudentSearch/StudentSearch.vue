@@ -26,7 +26,7 @@ const handlerSearch = () => {
 onMounted(() => {
   window.location.search && router.replace(window.location.pathname);
 });
-
+//sdfsf
 </script>
 
 
