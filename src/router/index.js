@@ -4,7 +4,7 @@ import Student from '@/views/Manage/Student.vue';
 import NotFound from '@/views/NotFound/NotFound.vue';
 import Notice from '@/views/Support/Notice.vue';
 import Qna from '@/views/Support/Qna.vue';
-import { createRouter, createWebHistory  from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -38,9 +38,6 @@ const router = createRouter({
               component: Qna,
             },
           ],
-
-            }
-          ]
         },
         {
           path: 'manage',
@@ -53,7 +50,7 @@ const router = createRouter({
             },
           ],
         },
-      ],
+      ]
     },
   ],
 });
