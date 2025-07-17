@@ -2,6 +2,9 @@ import Login from '@/views/Auth/Login.vue';
 import DashBoard from '@/views/DashBoard/DashBoard.vue';
 import Student from '@/views/Manage/Student.vue';
 import NotFound from '@/views/NotFound/NotFound.vue';
+import LearningMaterials from '@/views/Support/LearningMaterials.vue';
+import LectureSurvey from '@/views/Support/LectureSurvey.vue';
+import ManageSurvey from '@/views/Support/ManageSurvey.vue';
 import Notice from '@/views/Support/Notice.vue';
 import Statistics from '@/views/User/Statistics.vue';
 import Qna from '@/views/Support/Qna.vue';
@@ -36,8 +39,23 @@ const router = createRouter({
             },
             {
               path: 'qna',
-              name: 'Qna',
+              name: 'qna',
               component: Qna,
+            },
+            {
+              path: 'learning-materials',
+              name: 'learningMaterials',
+              component: LearningMaterials,
+            },
+            {
+              path: 'lecture-survey',
+              name: 'lectureSurvey',
+              component: LectureSurvey,
+            },
+            {
+              path: 'manage-survey',
+              name: 'manageSurvey',
+              component: ManageSurvey,
             },
           ],
         },
