@@ -26,7 +26,7 @@ const handlerSearch = () => {
 onMounted(() => {
   window.location.search && router.replace(window.location.pathname);
 });
-
+// 지울거야
 </script>
 
 
