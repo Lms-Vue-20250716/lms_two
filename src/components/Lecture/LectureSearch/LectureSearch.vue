@@ -13,19 +13,19 @@ const props = defineProps({
 
 const emit = defineEmits(['search']);
 
-const searchTag = ref('');
-const searchTitle = ref('');
-const searchStDate = ref();
-const searchEdDate = ref();
+const selectOption = ref('');
+const title = ref('');
+const startDate = ref();
+const endDate = ref();
 
 const handleSearch = () => {
-  if (searchTag.value == '' || searchTag.value == undefined || searchTag.value == null) {
+  if (selectOption == '' || selectOption == undefined || selectOption == null) {
     alert('검색 옵션을 넣으세요!');
     return;
   }
-  if (searchStDate.value && searchEdDate.value) {
-    const from = new Date(searchStDate.value);
-    const to = new Date(searchEdDate.value);
+  if (startDate && endDate) {
+    const from = new Date(startDate);
+    const to = new Date(endDate);
 
     if (to < from) {
       alert('종료일이 시작일 보다 더 빠를 수 없습니다!');
@@ -35,10 +35,10 @@ const handleSearch = () => {
 
   const newQuery = {};
 
-  if (searchTag.value) newQuery.searchTag = searchTag.value;
-  if (searchTitle.value) newQuery.searchTitle = searchTitle.value;
-  if (searchStDate.value) newQuery.searchStDate = searchStDate.value;
-  if (searchEdDate.value) newQuery.searchEdDate = searchEdDate.value;
+  if (selectOption.value) newQuery.selectOption = selectOption.value;
+  if (title.value) newQuery.title = title.value;
+  if (startDate.value) newQuery.startDate = startDate.value;
+  if (endDate.value) newQuery.endDate = endDate.value;
 
   emit('search', newQuery);
 };
@@ -48,29 +48,31 @@ watch(
   () => props.initialQuery,
   //2. 값이 바뀌면 새로운 값을 newValue로 받아와서 로컬 ref 변수들에게 넣는다.
   (newValue) => {
-    searchTitle.value = newValue.searchTitle || '';
-    searchStDate.value = newValue.searchStDate || '';
-    searchEdDate.value = newValue.searchEdDate || '';
+    title.value = newValue.title || '';
+    startDate.value = newValue.startDate || '';
+    endDate.value = newValue.endDate || '';
   },
   { deep: true, immediate: true },
 );
 </script>
 <template>
   <ContentBox>강의 목록</ContentBox>
-  <form @submit.prevent="handleSearch">
-    <select v-model="searchTag">
-      <option value="lecName" selected="selected">강의명</option>
-      <option value="lecInstructorName">강사명</option>
-      <option value="lecRoomName">강의실</option>
-    </select>
-    <input v-model="searchTitle" placeholder="검색어를 입력해주세요." />
-    <span>기간</span>
-    <BaseDataPicker v-model="searchStDate" />
-    ~
-    <BaseDataPicker v-model="searchEdDate" />
-    <button>검색</button>
-  </form>
+  <div class="lecture-container">
+    <form @submit.prevent="handleSearch">
+      <select>
+        <option value="강의명" selected="selected">강의명</option>
+        <option value="강사명">강사명</option>
+        <option value="강의실">강의실</option>
+      </select>
+      <input v-model="title" placeholder="검색어를 입력해주세요." />
+      <span>기간</span>
+      <BaseDataPicker v-model="startDate" />
+      ~
+      <BaseDataPicker v-model="endDate" />
+      <button>검색</button>
+    </form>
+  </div>
 </template>
-<style scoped>
+<style>
 @import './styled.css';
 </style>
