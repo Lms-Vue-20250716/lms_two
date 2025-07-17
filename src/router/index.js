@@ -4,7 +4,8 @@ import Student from '@/views/Manage/Student.vue';
 import NotFound from '@/views/NotFound/NotFound.vue';
 import Notice from '@/views/Support/Notice.vue';
 import Qna from '@/views/Support/Qna.vue';
-import { createRouter, createWebHistory  from 'vue-router';
+import Classroom from '@/views/System/Classroom.vue';
+import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,7 +26,6 @@ const router = createRouter({
       children: [
         {
           path: 'support',
-          name: 'support',
           children: [
             {
               path: 'notice',
@@ -34,22 +34,28 @@ const router = createRouter({
             },
             {
               path: 'qna',
-              name: 'Qna',
+              name: 'qna',
               component: Qna,
             },
           ],
-
-            }
-          ]
         },
         {
           path: 'manage',
-          name: 'manage',
           children: [
             {
               path: 'student',
               name: 'student',
               component: Student,
+            },
+          ],
+        },
+        {
+          path: 'system',
+          children: [
+            {
+              path: 'classroom',
+              name: 'classroom',
+              component: Classroom,
             },
           ],
         },
