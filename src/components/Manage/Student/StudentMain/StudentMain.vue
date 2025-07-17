@@ -14,31 +14,32 @@ const detailId = ref(0);
 
 const studentSearch = (cPage = 1) => {
   const param = new URLSearchParams(route.query);
+  console.log(route.query);
   param.append('currentPage', cPage);
   param.append('pageSize', 5);
 
   axios.post('/api/manage/studentListBody.do', param).then((res) => {
-    console.log('응답:', res.data);
     studentList.value = res.data.list;
     studentCount.value = res.data.count;
   });
-};
+}
 
 onMounted(() => {
   studentSearch();
 });
 
 const studentDetail = (id) => {
-  modalState.$patch({ isOpen: true });
+  modalState.$patch({ isOpen: true })
   detailId.value = id;
-};
+}
 
 watch(
   () => route.query,
   () => {
-    studentSearch();
+    studentSearch()
   },
-);
+)
+
 </script>
 
 <template>
@@ -58,13 +59,20 @@ watch(
         <template v-if="studentCount > 0">
           <tr v-for="student in studentList" :key="student.studentId" class="student-table-row">
             <td class="student-cell">{{ student.studentNumber }}</td>
-            <td class="student-cell cursor-pointer hover:underline" @click="studentDetail(student.studentName)">
-              {{ student.studentName }}
-            </td>
+            <td class="student-cell cursor-pointer hover:underline" @click="studentDetail(student.studentId)">{{
+              student.studentName }}</td>
             <td class="student-cell">{{ student.studentHp }}</td>
             <td class="student-cell">{{ student.studentRegDate.substr(0, 10) }}</td>
-            <td class="student-cell">{{ student.statusYN }}</td>
-            <td class="student-cell">{{ student.studentEmpStatus }}</td>
+            <td class="student-cell">
+              <span>{{ student.studentEmpStatus === 'Y' ? '취업' : '미취업' }}</span>
+            </td>
+            <td class="student-cell">
+              <select v-model="student.statusYN">
+                <option value="W">승인 대기중</option>
+                <option value="Y">재학</option>
+                <option value="N">탈퇴</option>
+              </select>
+            </td>
           </tr>
         </template>
         <template v-else>

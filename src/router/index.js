@@ -10,6 +10,7 @@ import Statistics from '@/views/User/Statistics.vue';
 import Qna from '@/views/Support/Qna.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import Classroom from '@/views/System/Classroom.vue';
+import LectureList from '@/views/Lecture/LectureList.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
