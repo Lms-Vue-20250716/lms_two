@@ -4,22 +4,38 @@
       처음
     </button>
 
-    <button :disabled="currentPage === 1" class="pagination-button" @click="handlePageChange(currentPage - 1)">
+    <button
+      :disabled="currentPage === 1"
+      class="pagination-button"
+      @click="handlePageChange(currentPage - 1)"
+    >
       이전
     </button>
 
     <div class="pagination-numbers-container">
-      <button v-for="page in pageNumbers" :key="page"
-        :class="['pagination-number-button', { active: currentPage === page }]" @click="handlePageChange(page)">
+      <button
+        v-for="page in pageNumbers"
+        :key="page"
+        :class="['pagination-number-button', { active: currentPage === page }]"
+        @click="handlePageChange(page)"
+      >
         {{ page }}
       </button>
     </div>
 
-    <button :disabled="currentPage === totalPages" class="pagination-button" @click="handlePageChange(currentPage + 1)">
+    <button
+      :disabled="currentPage === totalPages"
+      class="pagination-button"
+      @click="handlePageChange(currentPage + 1)"
+    >
       다음
     </button>
 
-    <button :disabled="currentPage === totalPages" class="pagination-button" @click="handlePageChange(totalPages)">
+    <button
+      :disabled="currentPage === totalPages"
+      class="pagination-button"
+      @click="handlePageChange(totalPages)"
+    >
       마지막
     </button>
   </div>

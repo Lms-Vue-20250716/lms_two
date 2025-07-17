@@ -4,6 +4,7 @@ import Student from '@/views/Manage/Student.vue';
 import LectureList from '@/views/Lecture/LectureList.vue';
 import NotFound from '@/views/NotFound/NotFound.vue';
 import Notice from '@/views/Support/Notice.vue';
+import Statistics from '@/views/User/Statistics.vue';
 import Qna from '@/views/Support/Qna.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 
@@ -37,6 +38,17 @@ const router = createRouter({
               path: 'qna',
               name: 'Qna',
               component: Qna,
+            },
+          ],
+        },
+        {
+          path: 'user',
+          name: 'user',
+          children: [
+            {
+              path: 'statistics',
+              name: 'statistics',
+              component: Statistics,
             },
           ],
         },
