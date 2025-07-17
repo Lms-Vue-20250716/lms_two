@@ -5,6 +5,7 @@ import NotFound from '@/views/NotFound/NotFound.vue';
 import Notice from '@/views/Support/Notice.vue';
 import Qna from '@/views/Support/Qna.vue';
 import Classroom from '@/views/System/Classroom.vue';
+import Equipment from '@/views/System/Equipment.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
@@ -56,6 +57,11 @@ const router = createRouter({
               path: 'classroom',
               name: 'classroom',
               component: Classroom,
+            },
+            {
+              path: 'equipment',
+              name: 'equipment',
+              component: Equipment,
             },
           ],
         },
