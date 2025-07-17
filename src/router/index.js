@@ -7,6 +7,7 @@ import Notice from '@/views/Support/Notice.vue';
 import Statistics from '@/views/User/Statistics.vue';
 import Qna from '@/views/Support/Qna.vue';
 import { createRouter, createWebHistory } from 'vue-router';
+import Classroom from '@/views/System/Classroom.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -71,6 +72,16 @@ const router = createRouter({
               path: 'list',
               name: 'list',
               component: LectureList,
+            },
+          ],
+        },
+        {
+          path: 'system',
+          children: [
+            {
+              path: 'classroom',
+              name: 'classroom',
+              component: Classroom,
             },
           ],
         },
