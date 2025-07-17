@@ -1,23 +1,24 @@
 <script setup>
 import router from '@/router';
-import { useModalState } from '@/stores/modalState';
 import { onMounted, ref } from 'vue';
 
-const searchTitle = ref('');
-const searchStDate = ref('');
-const searchEdDate = ref('');
-const modalState = useModalState();
+
+const searchName = ref('');
+const searchStatysYn = ref('');
+const regStDate = ref('');
+const regEdDate = ref('');
 
 // 검색 버튼을 클릭할 때, 검색 데이터가 QueryParam에 들어가도록 하는 함수
 const handlerSearch = () => {
   const query = [];
 
   // 1. searchTitle의 값이 있을 경우, 쿼리라는 array에 담아둠
-  !searchTitle.value || query.push(`title=${searchTitle.value}`);
-  !searchStDate.value || query.push(`startDate=${searchStDate.value}`);
-  !searchEdDate.value || query.push(`endDate=${searchEdDate.value}`);
+  searchName.value && query.push(`name=${searchName.value}`);
+  searchStatysYn.value && query.push(`status=${searchStatysYn.value}`);
+  regStDate.value && query.push(`startDate=${regStDate.value}`);
+  regEdDate.value && query.push(`endDate=${regEdDate.value}`);
 
-  const queryString = query.length > 0 ? `?${query.join('&')}` : '';
+  const queryString = query.length > 0 ? `?${query.join('$')}` : '';
 
   router.push(queryString);
 };
@@ -25,16 +26,24 @@ const handlerSearch = () => {
 onMounted(() => {
   window.location.search && router.replace(window.location.pathname);
 });
+// 지울거야
 </script>
 
+
+
 <template>
-  <div class="notice-container">
+  <div class="student-container">
     <div class="input-box">
-      제목: <input v-model.lazy="searchTitle" />
-      <input v-model="searchStDate" type="date" />
-      <input v-model="searchEdDate" type="date" />
+      이름: <input v-model.lazy="searchName" />
+      재학 상태: <select v-model="searchStatysYn">
+        <option value selected="selected"> 선택 </option>
+        <option value="W"> 승인대기중 </option>
+        <option value="Y"> 재학 </option>
+        <option value="N"> 탈퇴 </option>
+      </select>
+      가입 기간: <input v-model="regStDate" type="date" />
+      ~ <input v-model="regEdDate" type="date" />
       <button @click="handlerSearch">검색</button>
-      <button @click="modalState.$patch({ isOpen: true })">등록</button>
     </div>
   </div>
 </template>
