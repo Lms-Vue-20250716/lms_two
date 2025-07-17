@@ -4,6 +4,7 @@ import axios from 'axios';
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useModalState } from '@/stores/modalState';
+import StudentModal from '../StudentModal/StudentModal.vue';
 
 const route = useRoute();
 const studentList = ref([]);
@@ -55,12 +56,9 @@ watch(
       </thead>
       <tbody>
         <template v-if="studentCount > 0">
-          <tr v-for="student in studentList" :key="student.studentNumber" class="student-table-row">
+          <tr v-for="student in studentList" :key="student.studentId" class="student-table-row">
             <td class="student-cell">{{ student.studentNumber }}</td>
-            <td
-              class="student-cell cursor-pointer hover:underline"
-              @click="studentDetail(student.studentName)"
-            >
+            <td class="student-cell cursor-pointer hover:underline" @click="studentDetail(student.studentName)">
               {{ student.studentName }}
             </td>
             <td class="student-cell">{{ student.studentHp }}</td>
@@ -76,14 +74,10 @@ watch(
         </template>
       </tbody>
     </table>
-    <PageNavigation
-      :total-items="studentCount"
-      :items-per-page="5"
-      :on-page-change="studentSearch"
-    />
+    <PageNavigation :total-items="studentCount" :items-per-page="5" :on-page-change="studentSearch" />
   </div>
-  <!--   <StudenteModal v-if="modalState.isOpen" :detail-id="detailId" @post-success="studentSearch()"
-    @un-mounted-modal="detailId = $event" /> -->
+  <StudentModal v-if="modalState.isOpen" :detail-id="detailId" @post-success="studentSearch()"
+    @un-mounted-modal="detailId = $event" />
 </template>
 
 <style>

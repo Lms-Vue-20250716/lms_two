@@ -112,11 +112,8 @@ const searchDetail = () => {
           </table>
         </div>
         <div class="mt-4 flex justify-center">
-          <button
-            type="button"
-            @click="modalState.$patch({ isOpen: false })"
-            class="rounded bg-[#7f8cb6] px-6 py-2 text-white transition-colors hover:bg-[#6b7aa1]"
-          >
+          <button type="button" @click="modalState.$patch({ isOpen: false })"
+            class="rounded bg-[#7f8cb6] px-6 py-2 text-white transition-colors hover:bg-[#6b7aa1]">
             닫기
           </button>
         </div>

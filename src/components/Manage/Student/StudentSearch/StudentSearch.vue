@@ -3,7 +3,7 @@ import router from '@/router';
 import { onMounted, ref } from 'vue';
 
 const searchName = ref('');
-const searchStatysYn = ref('');
+const searchStatusYn = ref('');
 const regStDate = ref('');
 const regEdDate = ref('');
 
