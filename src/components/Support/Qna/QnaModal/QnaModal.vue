@@ -1,7 +1,7 @@
 <script setup>
 import { useModalState } from '@/stores/modalState';
 import axios from 'axios';
-import { onUnmounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 
 const emit = defineEmits(['postSuccess', 'unMountedModal']);
 const { detaiId: id } = defineProps({ detailId: { type: Number, default: 0 } });
@@ -9,6 +9,20 @@ const { detaiId: id } = defineProps({ detailId: { type: Number, default: 0 } });
 const modalState = useModalState();
 const formRef = ref();
 const detail = ref({});
+
+const handlerDelete = () => {
+  const param = new URLSearchParams();
+  param.append('qnaId', id);
+  axios.post('/api/support/deleteQuestion.do', param).then((res) => {
+    if (res.data.result === 'success') {
+      alert('삭제 되었습니다');
+      modalState.$patch({ isOpen: false });
+      emit('postSuccess');
+    } else {
+      alert('삭제 실패');
+    }
+  });
+};
 
 // 저장 버튼 클릭시 저장
 const handlerInsert = () => {
@@ -18,7 +32,7 @@ const handlerInsert = () => {
   try {
     axios.post('/api/saveAnswer.do', formData).then((res) => {
       if (res.data.result === 'success') {
-        alert('삭제 되었습니다.');
+        alert('저장 되었습니다.');
       }
       modalState.$patch({ isOpen: false });
       emit('postSuccess');
@@ -26,6 +40,20 @@ const handlerInsert = () => {
   } catch (error) {
     console.log(error);
   }
+};
+
+// 수정 버튼 클릭시 수정
+const handlerUpdate = () => {
+  const formData = new FormData(formRef.value);
+  formData.append('noticeId', id);
+
+  axios.post('/api/support/updateQuestion.do', formData).then((res) => {
+    if (res.data.result === 'success') {
+      alert('수정 되었습니다.');
+      modalState.$patch({ isOpen: false });
+      emit('postSuccess');
+    }
+  });
 };
 
 // 제목 클릭시 모달창 조회
@@ -58,7 +86,7 @@ onUnmounted(() => {
           <button type="button" @click="!id ? handlerInsert() : handlerUpdate()">
             {{ !id ? '저장' : '수정' }}
           </button>
-          <button v-if="id" type="button" @click="handlerDelete()">삭제</button>""
+          <button v-if="id" type="button" @click="handlerDelete()">삭제</button>
           <button type="button" @click="useModalState.$patch({ isOpen: false })">나가기</button>
         </div>
       </form>
