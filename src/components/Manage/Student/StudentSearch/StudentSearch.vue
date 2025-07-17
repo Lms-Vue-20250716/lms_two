@@ -4,7 +4,7 @@ import { onMounted, ref } from 'vue';
 
 
 const searchName = ref('');
-const searchStatysYn = ref('');
+const searchStatusYn = ref('');
 const regStDate = ref('');
 const regEdDate = ref('');
 
@@ -13,12 +13,12 @@ const handlerSearch = () => {
   const query = [];
 
   // 1. searchTitle의 값이 있을 경우, 쿼리라는 array에 담아둠
-  searchName.value && query.push(`name=${searchName.value}`);
-  searchStatysYn.value && query.push(`status=${searchStatysYn.value}`);
-  regStDate.value && query.push(`startDate=${regStDate.value}`);
-  regEdDate.value && query.push(`endDate=${regEdDate.value}`);
+  searchName.value && query.push(`searchName=${searchName.value}`);
+  searchStatusYn.value && query.push(`status=${searchStatusYn.value}`);
+  regStDate.value && query.push(`regStDate=${regStDate.value}`);
+  regEdDate.value && query.push(`regEdDate=${regEdDate.value}`);
 
-  const queryString = query.length > 0 ? `?${query.join('$')}` : '';
+  const queryString = query.length > 0 ? `?${query.join('&')}` : '';
 
   router.push(queryString);
 };
@@ -32,7 +32,7 @@ onMounted(() => {
   <div class="student-container">
     <div class="input-box">
       이름: <input v-model.lazy="searchName" />
-      재학 상태: <select v-model="searchStatysYn">
+      재학 상태: <select v-model="searchStatusYn">
         <option value selected="selected"> 선택 </option>
         <option value="W"> 승인대기중 </option>
         <option value="Y"> 재학 </option>
