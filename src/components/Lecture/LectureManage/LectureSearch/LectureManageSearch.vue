@@ -1,6 +1,7 @@
 <script setup>
 import BaseDataPicker from '@/components/common/BaseDataPicker.vue';
 import ContentBox from '@/components/common/ContentBox.vue';
+import { useModalState } from '@/stores/lectureManageModalState';
 import { watch } from 'vue';
 import { ref } from 'vue';
 
@@ -12,6 +13,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['search']);
+
+const modalState = useModalState();
 
 const searchTag = ref('lecName');
 const searchTitle = ref('');
@@ -71,6 +74,7 @@ watch(
       <BaseDataPicker v-model="searchEdDate" />
       <button>검색</button>
     </form>
+    <button @click="modalState.$patch({ isOpen: true, type: 'lecture-manage-save' })">신규</button>
   </div>
 </template>
 <style setup>

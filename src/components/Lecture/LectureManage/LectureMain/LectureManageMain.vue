@@ -7,6 +7,8 @@ import { watch } from 'vue';
 import { onMounted } from 'vue';
 import axios from 'axios';
 import PageNavigation from '@/components/common/PageNavigation.vue';
+import LectureSaveModal from '../LectureModal/LectureSaveModal.vue';
+import { useModalState } from '@/stores/lectureManageModalState';
 
 //router
 const route = useRoute();
@@ -15,6 +17,9 @@ const router = useRouter();
 //bbs
 const lectureList = ref([]);
 const lectureCount = ref(0);
+
+//modal
+const modalState = useModalState();
 
 /**
  * 서버에서 강의 목록 데이터를 비동기적으로 가져옵니다.
@@ -68,8 +73,10 @@ const handleSearch = (filters) => {
   router.push({ query: filters });
 };
 
-//pagination
-// const onPageChange = (page) => {};
+const handleSaveSuccess = () => {
+  router.push({ query: {} });
+  fetchLectureList();
+};
 
 //watch -> url바뀌는감지하고 search lecture list
 watch(
@@ -127,6 +134,10 @@ onMounted(() => {
       :total-items="lectureCount"
       :items-per-page="5"
       :on-page-change="fetchLectureList"
+    />
+    <LectureSaveModal
+      v-if="modalState.isOpen && modalState.type === 'lecture-manage-save'"
+      @save-success="handleSaveSuccess"
     />
   </div>
 </template>
