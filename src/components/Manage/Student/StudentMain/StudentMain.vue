@@ -75,8 +75,6 @@ watch(
                 <option value="N">탈퇴</option>
               </select>
             </td>
-            <td class="student-cell">{{ student.statusYN }}</td>
-            <td class="student-cell">{{ student.studentEmpStatus }}</td>
           </tr>
         </template>
         <template v-else>
