@@ -1,6 +1,7 @@
 <script setup>
 import BaseDataPicker from '@/components/common/BaseDataPicker.vue';
 import ContentBox from '@/components/common/ContentBox.vue';
+import { useModalState } from '@/stores/lectureManageModalState';
 import { watch } from 'vue';
 import { ref } from 'vue';
 
@@ -12,6 +13,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['search']);
+
+const modalState = useModalState();
 
 const searchTag = ref('lecName');
 const searchTitle = ref('');
@@ -57,7 +60,7 @@ watch(
 </script>
 <template>
   <ContentBox>강의 목록</ContentBox>
-  <div class="lecture-container">
+  <div class="lecture-manager-container">
     <form @submit.prevent="handleSearch">
       <select v-model="searchTag">
         <option value="lecName">강의명</option>
@@ -69,10 +72,16 @@ watch(
       <BaseDataPicker v-model="searchStDate" />
       ~
       <BaseDataPicker v-model="searchEdDate" />
-      <button>검색</button>
+      <button type="submit">검색</button>
+      <button
+        @click="modalState.$patch({ isOpen: true, type: 'lecture-manage-save' })"
+        type="button"
+      >
+        신규
+      </button>
     </form>
   </div>
 </template>
-<style setup>
+<style scoped>
 @import './styled.css';
 </style>

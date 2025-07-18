@@ -12,6 +12,7 @@ import Qna from '@/views/Support/Qna.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import Classroom from '@/views/System/Classroom.vue';
 import LectureList from '@/views/Lecture/LectureList.vue';
+import LectureManage from '@/views/Lecture/LectureManage.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -96,6 +97,11 @@ const router = createRouter({
               path: 'list',
               name: 'list',
               component: LectureList,
+            },
+            {
+              path: 'lecture-manage-list',
+              name: 'manage',
+              component: LectureManage,
             },
           ],
         },
