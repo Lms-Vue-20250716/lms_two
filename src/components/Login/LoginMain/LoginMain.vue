@@ -5,6 +5,7 @@ import { useUserInfo } from '@/stores/loginInfoState';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useModalState } from '@/stores/modalState';
+import RegisterModal from '@/components/User/RegisterModal/RegisterModal.vue';
 
 const loginInfo = ref({});
 const { setUserData } = useUserInfo();
@@ -76,8 +77,9 @@ const handlerLogin = () => {
       </div>
     </div>
   </div>
+  <RegisterModal v-if="modalState.type === 'register' && modalState.isOpen" />
 </template>
 
-<style lang="css">
+<style>
 @import './styled.css';
 </style>
