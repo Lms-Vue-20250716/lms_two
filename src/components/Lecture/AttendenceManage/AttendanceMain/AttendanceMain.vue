@@ -3,83 +3,111 @@ import PageNavigation from '@/components/common/PageNavigation.vue';
 import axios from 'axios';
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import NoticeModal from '../NoticeModal/NoticeModal.vue';
 import { useModalState } from '@/stores/modalState';
 
 const route = useRoute();
-const noticeList = ref([]);
-const noticeCount = ref(0);
+const attendanceList = ref([]);
+const attendanceCount = ref(0);
 const modalState = useModalState();
 const detailId = ref(0);
 
-const noticeSearch = (cPage = 1) => {
+const attendanceSearch = async (cPage = 1) => {
   const param = new URLSearchParams(route.query);
   param.append('currentPage', cPage);
   param.append('pageSize', 5);
 
-  axios.post('/api/support/noticeListBody.do', param).then((res) => {
-    noticeList.value = res.data.list;
-    noticeCount.value = res.data.count;
+  await axios.post('/api/lecture/AttendanceLectureListBody.do', param).then((res) => {
+    attendanceList.value = res.data.list || [];
+    attendanceCount.value = res.data.count || 0;
+
+    console.log(res.data);
+    console.log(attendanceList.value);
+    console.log(attendanceCount.value);
   });
 };
 
-const noticeDetail = (id) => {
-  modalState.$patch({ isOpen: true, type: 'notice' });
+const attendanceDetail = (id) => {
+  modalState.$patch({ isOpen: true, type: 'attendance' });
   detailId.value = id;
+};
+
+/**
+ * 타임스탬프를 'YYYY-MM-DD' 형식의 문자열로 변환하는 함수입니다.
+ * @param {number} timestamp - 변환할 타임스탬프 숫자
+ * @returns {string} 포맷팅된 날짜 문자열
+ */
+const formatDate = (timestamp) => {
+  // 타임스탬프 값이 유효하지 않으면 빈 문자열을 반환합니다.
+  if (!timestamp) return '';
+
+  const date = new Date(timestamp);
+  const year = date.getFullYear();
+  // getMonth()는 0부터 시작하므로 1을 더하고, 10보다 작으면 앞에 '0'을 붙여줍니다.
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  // getDate()가 10보다 작으면 앞에 '0'을 붙여줍니다.
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
 };
 
 watch(
   () => route.query,
   () => {
-    noticeSearch();
+    attendanceSearch();
   },
 );
 
 onMounted(() => {
-  noticeSearch();
+  attendanceSearch();
 });
 </script>
 
 <template>
-  <div class="notice-main-container">
-    <table class="notice-table">
-      <thead class="notice-table-header">
+  <div class="attendance-main-container">
+    <table class="attendance-table">
+      <thead class="attendance-table-header">
         <tr>
-          <th>공지번호</th>
-          <th>공지 제목</th>
-          <th>공지 날짜</th>
-          <th>작성자</th>
+          <th>번호</th>
+          <th>강의이름</th>
+          <th>개강일자</th>
+          <th>종강일자</th>
+          <th>강의실</th>
+          <th>-</th>
         </tr>
       </thead>
       <tbody>
-        <template v-if="noticeCount > 0">
-          <tr v-for="notice in noticeList" :key="notice.noticeId" class="notice-table-row">
-            <td class="notice-cell">{{ notice.noticeId }}</td>
+        <template v-if="attendanceCount > 0">
+          <tr
+            v-for="attendance in attendanceList"
+            :key="attendance.lecId"
+            class="attendance-table-row"
+          >
+            <td class="attendance-cell">{{ attendance.lecId }}</td>
             <td
-              class="notice-cell cursor-pointer hover:underline"
-              @click="noticeDetail(notice.noticeId)"
+              class="attendance-cell cursor-pointer hover:underline"
+              @click="attendanceDetail(attendance.lecId)"
             >
-              {{ notice.noticeTitle }}
+              {{ attendance.lecName }}
             </td>
-            <td class="notice-cell">{{ notice.regDate.substr(0, 10) }}</td>
-            <td class="notice-cell">{{ notice.loginId }}</td>
+            <td class="attendance-cell">{{ formatDate(attendance.lecStartDate) }}</td>
+            <td class="attendance-cell">{{ formatDate(attendance.lecEndDate) }}</td>
+            <td class="attendance-cell">{{ attendance.roomName }}</td>
+            <td>-</td>
           </tr>
         </template>
         <template v-else>
           <tr>
-            <td colspan="4" class="notice-empty-row">일치하는 검색 결과가 없습니다</td>
+            <td colspan="4" class="attendance-empty-row">일치하는 검색 결과가 없습니다</td>
           </tr>
         </template>
       </tbody>
     </table>
-    <PageNavigation :total-items="noticeCount" :items-per-page="5" :on-page-change="noticeSearch" />
+    <PageNavigation
+      :total-items="attendanceCount"
+      :items-per-page="5"
+      :on-page-change="attendanceSearch"
+    />
   </div>
-  <NoticeModal
-    v-if="modalState.isOpen && modalState.type === 'notice'"
-    :detail-id
-    @post-success="noticeSearch()"
-    @un-mounted-modal="detailId = $event"
-  />
 </template>
 
 <style scoped>
