@@ -6,11 +6,15 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useModalState } from '@/stores/modalState';
 import RegisterModal from '@/components/User/RegisterModal/RegisterModal.vue';
+import UserFindInfo from '@/components/User/UserFindInfo/UserFindInfo.vue';
+import ChangePwdModal from '@/components/User/ChangePwdModal/ChangePwdModal.vue';
 
 const loginInfo = ref({});
 const { setUserData } = useUserInfo();
 const router = useRouter();
 const modalState = useModalState();
+
+const userEmail = ref('');
 
 const handlerLogin = () => {
   if (!loginInfo.value.lgn_Id || !loginInfo.value.pwd) {
@@ -30,6 +34,11 @@ const handlerLogin = () => {
       return;
     }
   });
+};
+
+const changePwdModalOn = (data) => {
+  userEmail.value = data.email;
+  modalState.$patch({ isOpen: true, type: 'pwdChange' });
 };
 </script>
 
@@ -78,6 +87,14 @@ const handlerLogin = () => {
     </div>
   </div>
   <RegisterModal v-if="modalState.type === 'register' && modalState.isOpen" />
+  <UserFindInfo
+    v-if="modalState.type === 'find' && modalState.isOpen"
+    @auth-complete="changePwdModalOn"
+  />
+  <ChangePwdModal
+    v-if="modalState.type === 'pwdChange' && modalState.isOpen"
+    :user-email="userEmail"
+  />
 </template>
 
 <style>
