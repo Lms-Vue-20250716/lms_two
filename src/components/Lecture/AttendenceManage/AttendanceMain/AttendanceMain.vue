@@ -3,13 +3,22 @@ import PageNavigation from '@/components/common/PageNavigation.vue';
 import axios from 'axios';
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { useModalState } from '@/stores/modalState';
 
 const route = useRoute();
 const attendanceList = ref([]);
 const attendanceCount = ref(0);
-const modalState = useModalState();
-const detailId = ref(0);
+// const attendState = ref('');
+
+/**
+ * [추가] 출석 상태 코드를 한글 텍스트로 변환하는 객체입니다.
+ * 템플릿에서 v-if를 여러 번 쓰는 대신, 이 객체를 사용하여 코드를 간결하게 만듭니다.
+ */
+const attendanceStatusText = {
+  E: '출석',
+  L: '지각',
+  F: '결석',
+  J: '조퇴',
+};
 
 const attendanceSearch = async (cPage = 1) => {
   const param = new URLSearchParams(route.query);
@@ -24,11 +33,6 @@ const attendanceSearch = async (cPage = 1) => {
     console.log(attendanceList.value);
     console.log(attendanceCount.value);
   });
-};
-
-const attendanceDetail = (id) => {
-  modalState.$patch({ isOpen: true, type: 'attendance' });
-  detailId.value = id;
 };
 
 /**
@@ -48,6 +52,40 @@ const formatDate = (timestamp) => {
   const day = String(date.getDate()).padStart(2, '0');
 
   return `${year}-${month}-${day}`;
+};
+
+/**
+ * '출석' 버튼을 눌렀을 때 실행되는 함수입니다.
+ */
+const handleAttendanceCheck = async (lecId) => {
+  if (window.confirm('출석 처리 하시겠습니까?')) {
+    try {
+      const params = new URLSearchParams({ lecId });
+      await axios.post('/api/lecture/attendanceEnter.do', params);
+      alert('출석 처리되었습니다.');
+      attendanceSearch(); // 목록 새로고침
+    } catch (error) {
+      console.error('출석 처리 중 오류 발생:', error);
+      alert('오류가 발생했습니다.');
+    }
+  }
+};
+
+/**
+ * '퇴실' 버튼을 눌렀을 때 실행되는 함수입니다.
+ */
+const handleAttendanceOut = async (lecId) => {
+  if (window.confirm('퇴실 처리 하시겠습니까?')) {
+    try {
+      const params = new URLSearchParams({ lecId });
+      await axios.post('/api/lecture/attendanceOut.do', params);
+      alert('퇴실 처리되었습니다.');
+      attendanceSearch(); // 목록 새로고침
+    } catch (error) {
+      console.error('퇴실 처리 중 오류 발생:', error);
+      alert('오류가 발생했습니다.');
+    }
+  }
 };
 
 watch(
@@ -83,16 +121,36 @@ onMounted(() => {
             class="attendance-table-row"
           >
             <td class="attendance-cell">{{ attendance.lecId }}</td>
-            <td
-              class="attendance-cell cursor-pointer hover:underline"
-              @click="attendanceDetail(attendance.lecId)"
-            >
+            <td class="attendance-cell cursor-pointer hover:underline">
               {{ attendance.lecName }}
             </td>
             <td class="attendance-cell">{{ formatDate(attendance.lecStartDate) }}</td>
             <td class="attendance-cell">{{ formatDate(attendance.lecEndDate) }}</td>
             <td class="attendance-cell">{{ attendance.roomName }}</td>
-            <td>-</td>
+            <td class="attendance-action-cell">
+              <!-- 1. 아직 출석하지 않은 상태 (attendState가 없는 경우) -->
+              <button
+                v-if="!attendance.attendState"
+                class="attendance-button attend"
+                @click="handleAttendanceCheck(attendance.lecId)"
+              >
+                출석
+              </button>
+
+              <!-- 2. 출석은 했지만, 아직 퇴실하지 않은 상태 -->
+              <button
+                v-else-if="attendance.attendState && !attendance.attendEnddate"
+                class="attendance-button leave"
+                @click="handleAttendanceOut(attendance.lecId)"
+              >
+                퇴실
+              </button>
+
+              <!-- 3. 출석과 퇴실이 모두 완료된 상태 -->
+              <span v-else>
+                {{ attendanceStatusText[attendance.attendState] || '완료' }}
+              </span>
+            </td>
           </tr>
         </template>
         <template v-else>
