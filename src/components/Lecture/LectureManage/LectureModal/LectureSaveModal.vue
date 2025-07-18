@@ -5,7 +5,7 @@ import axios from 'axios';
 import { computed, onMounted, ref } from 'vue';
 
 //emit
-const emit = defineEmits(['save-success']); // 부모에게 보낼 이벤트를 정의합니다.
+const emit = defineEmits(['save-success', 'save-modal-close']); // 부모에게 보낼 이벤트를 정의합니다.
 
 //modal state
 const modalState = useModalState();
@@ -146,6 +146,8 @@ const handleSave = async () => {
 
     //부모에게 save 성공했다 보내기
     emit('save-success'); // 부모에게 성공 이벤트를 보냅니다.
+    //exit modal
+    emit('save-modal-close');
 
     //close modal
     modalState.$patch({ isOpen: false, type: 'lecture-manage-save' });
@@ -244,4 +246,5 @@ onMounted(() => {
 </template>
 <style scoped>
 @import './modal_saved_styled.css';
+/* TODO: prettify css  */
 </style>

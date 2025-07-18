@@ -9,6 +9,7 @@ import axios from 'axios';
 import PageNavigation from '@/components/common/PageNavigation.vue';
 import LectureSaveModal from '../LectureModal/LectureSaveModal.vue';
 import { useModalState } from '@/stores/lectureManageModalState';
+import LecturePlanModal from '../LectureModal/LecturePlanModal.vue';
 
 //router
 const route = useRoute();
@@ -17,6 +18,8 @@ const router = useRouter();
 //bbs
 const lectureList = ref([]);
 const lectureCount = ref(0);
+const selectedLecId = ref(0);
+const selectedLecInstructorId = ref('');
 
 //modal
 const modalState = useModalState();
@@ -78,6 +81,33 @@ const handleSaveSuccess = () => {
   fetchLectureList();
 };
 
+/**
+ * '강의계획서 보기'를 클릭했을 때 실행될 전용 함수를 만듭니다.
+ */
+const openPlanModal = (lecId, lecInstructorId) => {
+  // 클릭된 강의의 ID를 상태 변수에 저장합니다.
+  selectedLecId.value = lecId;
+  // 클릭된 강의의 강사의 id를 상태 변수에 저장합니다.
+  selectedLecInstructorId.value = lecInstructorId;
+  // Pinia 스토어를 통해 모달을 엽니다.
+  modalState.$patch({ isOpen: true, type: 'lecture-manage-plan' });
+};
+
+const closePlanModal = () => {
+  modalState.$patch({ isOpen: false, type: 'lecture-manage-plan' });
+};
+
+const closeSaveModal = () => {
+  modalState.$patch({ isOpen: false, type: 'lecture-manage-save' });
+  router.push({ query: {} });
+  fetchLectureList();
+};
+
+const handlePlanSaveSuccess = () => {
+  router.push({ query: {} });
+  fetchLectureList();
+};
+
 //watch -> url바뀌는감지하고 search lecture list
 watch(
   //1. 감시하는 값: url
@@ -120,7 +150,12 @@ onMounted(() => {
             <td class="lecture-manager-cell">{{ lecture.lecEndDate.substr(0, 10) }}</td>
             <td class="lecture-manager-cell">{{ lecture.lecPersonnel }}</td>
             <td class="lecture-manager-cell">{{ lecture.lecRoomName }}</td>
-            <td class="lecture-manager-cell">?</td>
+            <td
+              class="lecture-manager-cell cursor-pointer hover:underline"
+              @click="openPlanModal(lecture.lecId, lecture.lecInstructorId)"
+            >
+              강의계획서보기
+            </td>
           </tr>
         </template>
         <template v-else>
@@ -138,6 +173,14 @@ onMounted(() => {
     <LectureSaveModal
       v-if="modalState.isOpen && modalState.type === 'lecture-manage-save'"
       @save-success="handleSaveSuccess"
+      @save-modal-close="closeSaveModal"
+    />
+    <LecturePlanModal
+      v-if="modalState.isOpen && modalState.type === 'lecture-manage-plan'"
+      :lec-id="selectedLecId"
+      :lec-instructor-id="selectedLecInstructorId"
+      @plan-save-success="handlePlanSaveSuccess"
+      @plan-modal-close="closePlanModal"
     />
   </div>
 </template>
