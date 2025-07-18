@@ -7,6 +7,7 @@ import LectureSurvey from '@/views/Support/LectureSurvey.vue';
 import ManageSurvey from '@/views/Support/ManageSurvey.vue';
 import Notice from '@/views/Support/Notice.vue';
 import Statistics from '@/views/User/Statistics.vue';
+import Resume from '@/views/User/Resume.vue';
 import Qna from '@/views/Support/Qna.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import Classroom from '@/views/System/Classroom.vue';
@@ -68,6 +69,11 @@ const router = createRouter({
               path: 'statistics',
               name: 'statistics',
               component: Statistics,
+            },
+            {
+              path: 'resume',
+              name: 'resume',
+              component: Resume,
             },
           ],
         },

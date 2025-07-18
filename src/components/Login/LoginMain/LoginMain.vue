@@ -4,12 +4,18 @@ import { ref } from 'vue';
 import { useUserInfo } from '@/stores/loginInfoState';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { useModalState } from '@/stores/modalState';
 
 const loginInfo = ref({});
 const { setUserData } = useUserInfo();
 const router = useRouter();
+const modalState = useModalState();
 
 const handlerLogin = () => {
+  if (!loginInfo.value.lgn_Id || !loginInfo.value.pwd) {
+    alert('아이디와 비밀번호를 입력해주세요....');
+    return;
+  }
   const param = new URLSearchParams(loginInfo.value);
 
   axios.post('/api/loginProc.do', param).then((res) => {
@@ -57,7 +63,15 @@ const handlerLogin = () => {
         </div>
         <div>
           <button class="login-button" @click="handlerLogin">Login</button>
-          <button class="signup-button">Sign Up</button>
+          <button
+            class="signup-button"
+            @click="modalState.$patch({ isOpen: true, type: 'register' })"
+          >
+            Sign Up
+          </button>
+          <button class="find-button" @click="modalState.$patch({ isOpen: true, type: 'find' })">
+            Find ID/PW
+          </button>
         </div>
       </div>
     </div>
