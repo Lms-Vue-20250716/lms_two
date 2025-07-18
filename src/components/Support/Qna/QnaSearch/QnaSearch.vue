@@ -7,7 +7,7 @@ const select = ref('title');
 const inputText = ref('');
 // const searchTitle = ref('');
 // const searchWriter = ref('');
-const modalState = useModalState; // 함수 실행 잊지 말기!
+const modalState = useModalState(); // 함수 실행 잊지 말기!
 
 const handlerSearch = () => {
   const query = [];
