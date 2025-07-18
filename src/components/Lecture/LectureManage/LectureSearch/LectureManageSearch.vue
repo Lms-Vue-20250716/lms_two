@@ -72,11 +72,16 @@ watch(
       <BaseDataPicker v-model="searchStDate" />
       ~
       <BaseDataPicker v-model="searchEdDate" />
-      <button>검색</button>
+      <button type="submit">검색</button>
+      <button
+        @click="modalState.$patch({ isOpen: true, type: 'lecture-manage-save' })"
+        type="button"
+      >
+        신규
+      </button>
     </form>
-    <button @click="modalState.$patch({ isOpen: true, type: 'lecture-manage-save' })">신규</button>
   </div>
 </template>
-<style setup>
+<style scoped>
 @import './styled.css';
 </style>
