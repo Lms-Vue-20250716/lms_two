@@ -289,6 +289,6 @@ onUnmounted(() => {
   </Teleport>
 </template>
 
-<style scoped>
+<style>
 @import './styled.css';
 </style>
