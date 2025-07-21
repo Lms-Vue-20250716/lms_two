@@ -18,7 +18,7 @@ import LectureAttendance from '@/views/Lecture/LectureAttendance.vue';
 import Tutor from '@/views/Manage/Tutor.vue';
 import Company from '@/views/System/Company.vue';
 import Counsel from '@/views/Manage/Counsel.vue';
-
+import LectureTest from '@/views/Lecture/LectureTest.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -123,6 +123,11 @@ const router = createRouter({
               path: 'attendance',
               name: 'attendance',
               component: LectureAttendance,
+            },
+            {
+              path: 'test-info',
+              name: 'test-info',
+              component: LectureTest,
             },
           ],
         },
