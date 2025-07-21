@@ -10,6 +10,10 @@
   input {
     @apply mt-4 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 transition duration-300 ease-in-out focus:border-blue-400 focus:outline-none;
   }
+
+  select {
+    @apply mt-4 rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 focus:border-blue-400 focus:outline-none;
+  }
 }
 
 /* 1170px 이하일 때의 스타일 */
@@ -18,7 +22,8 @@
     @apply flex-row items-center gap-4;
 
     button,
-    input {
+    input,
+    select {
       @apply mt-0; /* 상단 여백 제거 */
     }
 

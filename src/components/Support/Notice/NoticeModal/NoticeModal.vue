@@ -15,7 +15,7 @@ const downloadFile = () => {
   const param = new URLSearchParams();
   param.append('noticeId', id);
 
-  axios.post('/api/support/noticeDownload.do', param, { responseType: 'blob' }).then((res => {
+  axios.post('/api/support/noticeDownload.do', param, { responseType: 'blob' }).then((res) => {
     const url = window.URL.createObjectURL(new Blob([res.data]));
     const link = document.createElement('a');
     link.href = url;
@@ -23,21 +23,19 @@ const downloadFile = () => {
     document.body.appendChild(link);
     link.click();
     link.remove();
-  }))
-
-}
+  });
+};
 
 // 상세조회 썸네일 구현
 const getFileImage = () => {
   const param = new URLSearchParams();
   param.append('noticeId', id);
 
-  axios.post('/api/support/noticeDownload.do', param, { responseType: 'blob' }).then((res => {
+  axios.post('/api/support/noticeDownload.do', param, { responseType: 'blob' }).then((res) => {
     const url = window.URL.createObjectURL(new Blob([res.data]));
     imageUrl.value = url;
-  }))
-
-}
+  });
+};
 
 // 미리보기 구현
 const handlerFile = (e) => {
@@ -51,9 +49,7 @@ const handlerFile = (e) => {
   if (['jpg', 'gif', 'png'].includes(fileExtension)) {
     imageUrl.value = URL.createObjectURL(fileInfo[0]);
   }
-
-
-}
+};
 
 const handlerDelete = async () => {
   const formData = new FormData(formRef.value);
@@ -62,15 +58,15 @@ const handlerDelete = async () => {
   try {
     await axios.post('/api/support/noticeFileDelete.do', formData).then((res) => {
       if (res.data.result === 'success') {
-        alert('삭제 되었습니다.')
+        alert('삭제 되었습니다.');
       }
       modalState.$patch({ isOpen: false });
       emit('postSuccess');
-    })
+    });
   } catch (error) {
     console.log(error);
   }
-}
+};
 
 // 저장 버튼 클릭시 저장
 const handlerInsert = () => {
@@ -78,11 +74,11 @@ const handlerInsert = () => {
 
   axios.post('/api/support/noticeFileSave.do', formData).then((res) => {
     if (res.data.result === 'success') {
-      alert('저장 되었습니다.')
+      alert('저장 되었습니다.');
       modalState.$patch({ isOpen: false });
       emit('postSuccess');
     }
-  })
+  });
 };
 
 // 수정 버튼 클릭시 수정
@@ -92,12 +88,12 @@ const handlerUpdate = () => {
 
   axios.post('/api/support/noticeFileUpdate.do', formData).then((res) => {
     if (res.data.result === 'success') {
-      alert('수정 되었습니다.')
+      alert('수정 되었습니다.');
       modalState.$patch({ isOpen: false });
       emit('postSuccess');
     }
-  })
-}
+  });
+};
 
 // 제목 클릭시 모달창 조회
 const searchDetail = () => {
@@ -110,7 +106,7 @@ const searchDetail = () => {
     if (['jpg', 'gif', 'png'].includes(detail.value.fileExt)) {
       getFileImage();
     }
-  })
+  });
 };
 
 onMounted(() => {
@@ -119,8 +115,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   emit('unMountedModal', 0);
-})
-
+});
 </script>
 
 <template>
@@ -128,7 +123,9 @@ onUnmounted(() => {
     <div class="modal-overlay">
       <form ref="formRef" class="modal-form modal-container">
         <label> 제목 :<input v-model="detail.noticeTitle" type="text" name="fileTitle" /> </label>
-        <label> 내용 :<input v-model="detail.noticeContent" type="text" name="fileContent" /> </label>
+        <label>
+          내용 :<input v-model="detail.noticeContent" type="text" name="fileContent" />
+        </label>
         파일 :
         <input id="fileInput" type="file" name="file" @change="handlerFile" />
         <label class="img-label" htmlFor="fileInput"> 파일 첨부하기 </label>
@@ -139,7 +136,9 @@ onUnmounted(() => {
           </div>
         </div>
         <div class="button-container">
-          <button type="button" @click="!id ? handlerInsert() : handlerUpdate()">{{ !id ? '저장' : '수정' }}</button>
+          <button type="button" @click="!id ? handlerInsert() : handlerUpdate()">
+            {{ !id ? '저장' : '수정' }}
+          </button>
           <button v-if="id" type="button" @click="handlerDelete()">삭제</button>
           <button type="button" @click="modalState.$patch({ isOpen: false })">나가기</button>
         </div>

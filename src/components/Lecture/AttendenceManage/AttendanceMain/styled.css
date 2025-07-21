@@ -1,0 +1,57 @@
+@import 'tailwindcss';
+.attendance-main-container {
+  @apply flex min-h-screen flex-col items-center justify-start p-5;
+}
+
+.attendance-table {
+  @apply w-full max-w-6xl overflow-hidden rounded-lg bg-white shadow-lg;
+}
+
+.attendance-table-header {
+  @apply bg-blue-950 text-gray-900;
+}
+
+.attendance-table-header th {
+  @apply border-b border-blue-400 px-6 py-4 text-left text-sm font-semibold tracking-wider text-white uppercase;
+}
+
+.attendance-table-row {
+  @apply transition duration-300 ease-in-out hover:bg-gray-50;
+}
+
+.attendance-table-row td {
+  @apply border-b border-gray-200 px-6 py-4 text-sm text-gray-700;
+}
+
+.attendance-cell {
+  @apply border-b border-gray-200 px-6 py-4 text-sm font-medium text-gray-700;
+}
+
+.attendance-empty-row {
+  @apply py-8 text-center text-gray-500;
+}
+
+.attendance-action-cell {
+  @apply m-0 p-0 text-center;
+}
+
+.attendance-button {
+  @apply m-0 h-4/5 w-4/5 cursor-pointer rounded border-none py-2 font-bold text-white;
+}
+
+.attendance-button.attend {
+  /* Tailwind JIT 컴파일러가 인식할 수 있도록 임의 값을 사용합니다. */
+  @apply bg-[#5367d9];
+}
+
+.attendance-button.attend:hover {
+  @apply hover:bg-[#4556b3];
+}
+
+.attendance-button.leave {
+  @apply bg-[#d95e53];
+}
+
+.attendance-button.leave:hover {
+  @apply hover:bg-[#b84f46];
+}

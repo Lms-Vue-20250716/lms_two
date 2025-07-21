@@ -4,12 +4,23 @@ import { ref } from 'vue';
 import { useUserInfo } from '@/stores/loginInfoState';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { useModalState } from '@/stores/modalState';
+import RegisterModal from '@/components/User/RegisterModal/RegisterModal.vue';
+import UserFindInfo from '@/components/User/UserFindInfo/UserFindInfo.vue';
+import ChangePwdModal from '@/components/User/ChangePwdModal/ChangePwdModal.vue';
 
 const loginInfo = ref({});
 const { setUserData } = useUserInfo();
 const router = useRouter();
+const modalState = useModalState();
+
+const userEmail = ref('');
 
 const handlerLogin = () => {
+  if (!loginInfo.value.lgn_Id || !loginInfo.value.pwd) {
+    alert('아이디와 비밀번호를 입력해주세요....');
+    return;
+  }
   const param = new URLSearchParams(loginInfo.value);
 
   axios.post('/api/loginProc.do', param).then((res) => {
@@ -23,6 +34,11 @@ const handlerLogin = () => {
       return;
     }
   });
+};
+
+const changePwdModalOn = (data) => {
+  userEmail.value = data.email;
+  modalState.$patch({ isOpen: true, type: 'pwdChange' });
 };
 </script>
 
@@ -57,13 +73,30 @@ const handlerLogin = () => {
         </div>
         <div>
           <button class="login-button" @click="handlerLogin">Login</button>
-          <button class="signup-button">Sign Up</button>
+          <button
+            class="signup-button"
+            @click="modalState.$patch({ isOpen: true, type: 'register' })"
+          >
+            Sign Up
+          </button>
+          <button class="find-button" @click="modalState.$patch({ isOpen: true, type: 'find' })">
+            Find ID/PW
+          </button>
         </div>
       </div>
     </div>
   </div>
+  <RegisterModal v-if="modalState.type === 'register' && modalState.isOpen" />
+  <UserFindInfo
+    v-if="modalState.type === 'find' && modalState.isOpen"
+    @auth-complete="changePwdModalOn"
+  />
+  <ChangePwdModal
+    v-if="modalState.type === 'pwdChange' && modalState.isOpen"
+    :user-email="userEmail"
+  />
 </template>
 
-<style lang="css">
+<style>
 @import './styled.css';
 </style>

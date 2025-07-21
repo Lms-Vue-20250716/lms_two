@@ -53,7 +53,7 @@ const fetchLectureList = async () => {
       lectureList.value = response.data.list || [];
       lectureCount.value = response.data.count || 0;
 
-      console.log(lectureList.value);
+      // console.log(lectureList.value);
     }
   } catch (err) {
     console.log(err);
@@ -115,7 +115,7 @@ onMounted(() => {
         </template>
         <template v-else>
           <tr>
-            <td colspan="4" class="lecture-empty-row">일치하는 공지사항이 없습니다.</td>
+            <td colspan="4" class="lecture-empty-row">일치하는 강의가 없습니다.</td>
           </tr>
         </template>
       </tbody>

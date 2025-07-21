@@ -73,6 +73,6 @@ watch(
     </form>
   </div>
 </template>
-<style>
+<style setup>
 @import './styled.css';
 </style>
