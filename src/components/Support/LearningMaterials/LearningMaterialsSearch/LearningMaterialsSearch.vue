@@ -37,6 +37,6 @@ onMounted(() => {
   </div>
 </template>
 
-<style>
+<style scoped>
 @import './styled.css';
 </style>
