@@ -11,9 +11,13 @@ import Resume from '@/views/User/Resume.vue';
 import Qna from '@/views/Support/Qna.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import Classroom from '@/views/System/Classroom.vue';
+
+import Equipment from '@/views/System/Equipment.vue';
+
 import LectureList from '@/views/Lecture/LectureList.vue';
 import LectureManage from '@/views/Lecture/LectureManage.vue';
 import LectureAttendance from '@/views/Lecture/LectureAttendance.vue';
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -113,11 +117,17 @@ const router = createRouter({
         },
         {
           path: 'system',
+          name: 'system',
           children: [
             {
               path: 'classroom',
               name: 'classroom',
               component: Classroom,
+            },
+            {
+              path: 'equipment',
+              name: 'equipment',
+              component: Equipment,
             },
           ],
         },
