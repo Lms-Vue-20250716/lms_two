@@ -17,14 +17,18 @@ onUnmounted(() => {
   emit('unMountedModal', 0);
 })
 
-const searchDetail = () => {
+const searchDetail = async () => {
   const param = new URLSearchParams();
   param.append('studentId', id);
 
-  axios.post(`/api/manage/student-detail/${id}`, param).then((res) => {
+  try {
+    const res = await axios.post(`/api/manage/student-detail/${id}`, param);
     detail.value = res.data;
     lectureList.value = res.data.lectureInfo || [];
-  })
+  } catch (error) {
+    console.log(error);
+  }
+
 };
 
 </script>
@@ -87,7 +91,7 @@ const searchDetail = () => {
                   <td class="student-modal-table-td">{{ lecture.lecId }}</td>
                   <td class="student-modal-table-td">{{ lecture.lectureName }}</td>
                   <td class="student-modal-table-td">{{ new Date(lecture.lectureStartDate).toISOString().split('T')[0]
-                    }}</td>
+                  }}</td>
                   <td class="student-modal-table-td">{{ new Date(lecture.lectureEndDate).toISOString().split('T')[0] }}
                   </td>
                 </tr>

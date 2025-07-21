@@ -60,7 +60,7 @@ const handlerDelete = async () => {
       if (res.data.result === 'success') {
         alert('삭제 되었습니다.');
       }
-      modalState.$patch({ isOpen: false });
+      modalState.$patch({ isOpen: false, type: null });
       emit('postSuccess');
     });
   } catch (error) {
@@ -75,7 +75,7 @@ const handlerInsert = () => {
   axios.post('/api/support/noticeFileSave.do', formData).then((res) => {
     if (res.data.result === 'success') {
       alert('저장 되었습니다.');
-      modalState.$patch({ isOpen: false });
+      modalState.$patch({ isOpen: false, type: null });
       emit('postSuccess');
     }
   });
@@ -89,7 +89,7 @@ const handlerUpdate = () => {
   axios.post('/api/support/noticeFileUpdate.do', formData).then((res) => {
     if (res.data.result === 'success') {
       alert('수정 되었습니다.');
-      modalState.$patch({ isOpen: false });
+      modalState.$patch({ isOpen: false, type: null });
       emit('postSuccess');
     }
   });
@@ -140,7 +140,7 @@ onUnmounted(() => {
             {{ !id ? '저장' : '수정' }}
           </button>
           <button v-if="id" type="button" @click="handlerDelete()">삭제</button>
-          <button type="button" @click="modalState.$patch({ isOpen: false })">나가기</button>
+          <button type="button" @click="modalState.$patch({ isOpen: false, type: null })">나가기</button>
         </div>
       </form>
     </div>
