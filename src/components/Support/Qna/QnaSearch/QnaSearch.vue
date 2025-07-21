@@ -1,7 +1,9 @@
 <script setup>
 import router from '@/router';
 import { useModalState } from '@/stores/modalState';
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
+
+const emit = defineEmits(['open-create-modal']);
 
 const select = ref('title');
 const inputText = ref('');
@@ -22,10 +24,6 @@ const handlerSearch = () => {
 
   router.push(queryString);
 };
-
-onMounted(() => {
-  window.location.search && router.replace(window.location.pathname);
-});
 </script>
 
 <template>
@@ -37,7 +35,9 @@ onMounted(() => {
       </select>
       <input v-model="inputText" type="text" />
       <button @click="handlerSearch">검색</button>
-      <button @click="modalState.$patch({ isOpen: true })">신규</button>
+
+      <!-- emit을 부모로 보내기 -->
+      <button @click="emit('open-create-modal')">신규</button>
     </div>
   </div>
 </template>

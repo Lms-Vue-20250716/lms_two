@@ -7,12 +7,14 @@ import QnaModal from '../QnaModal/QnaModal.vue';
 import { onMounted } from 'vue';
 import { watch } from 'vue';
 import axios from 'axios';
+import QnaSearch from '../QnaSearch/QnaSearch.vue';
 
 const route = useRoute();
 const qnaList = ref([]); // ref([])에서 []는 초깃값이고, 빈 배열로 시작하되 나중에 목록 데이터를 넣겠다는 의도
 const qnaCount = ref(0);
 const modalState = useModalState();
 const detailId = ref(0);
+const modalMode = ref('create');
 
 const qnaSearch = (cPage = 1) => {
   const param = new URLSearchParams(route.query);
@@ -29,9 +31,16 @@ onMounted(() => {
   qnaSearch();
 });
 
-const qnaDetail = (id) => {
-  modalState.$patch({ isOpen: true });
+const openDetailModal = (id) => {
   detailId.value = id;
+  modalMode.value = 'detail';
+  modalState.isOpen = true;
+};
+
+const openCreateModal = () => {
+  detailId.value = 0;
+  modalMode.value = 'create';
+  modalState.isOpen = true;
 };
 
 watch(
@@ -43,6 +52,9 @@ watch(
 </script>
 
 <template>
+  <!-- QnaSearch 컴포넌트, 이벤트 연결 -->
+  <QnaSearch @open-create-modal="openCreateModal" />
+
   <div class="qna-main-container">
     <table class="qna-table">
       <thead class="qna-table-header">
@@ -59,7 +71,7 @@ watch(
           <tr v-for="qna in qnaList" :key="qna.qnaId" class="qna-table-row">
             <td class="qna-cell">{{ qna.qnaId }}</td>
             <td class="qna-cell">{{ qna.lecName }}</td>
-            <td class="qna-cell cursor-pointer hover:underline" @click="qnaDetail(qna.qnaId)">
+            <td class="qna-cell cursor-pointer hover:underline" @click="openDetailModal(qna.qnaId)">
               {{ qna.qnaTitle }}
             </td>
             <td class="qna-cell">{{ qna.qnaAnswerDate }}</td>
@@ -68,16 +80,18 @@ watch(
         </template>
         <template v-else>
           <tr>
-            <td colspan="4" class="qna-empty-row">일치하는 QnA가 없습니다.</td>
+            <td colspan="5" class="qna-empty-row">일치하는 QnA가 없습니다.</td>
           </tr>
         </template>
       </tbody>
     </table>
     <PageNavigation :total-items="qnaCount" :items-per-page="5" :on-page-change="qnaSearch" />
   </div>
+
   <QnaModal
     v-if="modalState.isOpen"
     :detail-id="detailId"
+    :mode="modalMode"
     @post-success="qnaSearch()"
     @un-mounted-modal="detailId = $event"
   />
