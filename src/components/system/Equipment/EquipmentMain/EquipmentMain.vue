@@ -114,7 +114,7 @@ onMounted(() => {
     />
   </div>
   <EquipmentModal
-    v-if="modalState.isOpen"
+    v-if="modalState.isOpen "
     :detail-id="detailId"
     :room-id="roomId"
     @post-success="EquipmentSearch()"

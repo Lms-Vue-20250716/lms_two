@@ -87,7 +87,7 @@ onMounted(() => {
     />
   </div>
   <ClassroomModal
-    v-if="modalState.isOpen"
+    v-if="modalState.isOpen "
     :detail-id
     @post-success="classroomSearch()"
     @un-mounted-modal="detailId = $event"

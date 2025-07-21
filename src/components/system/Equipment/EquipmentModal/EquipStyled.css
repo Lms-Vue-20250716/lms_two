@@ -1,42 +1,38 @@
 @import 'tailwindcss';
 
-.equipModal-overlay {
+.equip-modal-overlay {
   @apply fixed inset-0 flex items-center justify-center bg-gray-500/50 font-bold backdrop-blur-xs;
 }
 
-.equipModal-container {
+.equip-modal-container {
   @apply relative w-[500px] rounded-lg bg-white p-6 opacity-100 shadow-lg;
 }
 
-.equipModal-form {
+.equip-modal-form {
   @apply space-y-3;
 }
 
-.equipModal-form label {
+.equip-modal-form label {
   @apply flex items-center gap-4;
 }
 
-.equipModal-form label > span {
+.equip-modal-form label > span {
   @apply w-28 font-semibold text-gray-800;
 }
 
-.equipModal-form input[type='text'],
-.equipModal-form input[type='number'],
-.equipModal-form input[type='date'],
-.equipModal-form select {
+.equip-modal-form input[type='text'],
+.equip-modal-form input[type='number'],
+.equip-modal-form input[type='date'],
+.equip-modal-form select {
   @apply flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none;
 }
 
-.equipModal-form input[type='file'] {
+.equip-modal-form input[type='file'] {
   @apply hidden;
 }
 
 .preview-image {
-  @apply h-[100px] w-[100px] rounded-md border border-gray-300 object-cover;
-}
-
-.no-image {
-  @apply flex h-[100px] w-[100px] items-center justify-center rounded-md border border-gray-300 bg-gray-100 text-sm text-gray-500;
+  @apply h-[100px] w-[100px] object-cover;
 }
 
 .img-label {
@@ -48,7 +44,7 @@
 }
 
 .button-container button {
-  @apply cursor-pointer rounded-md px-4 py-2 transition-colors duration-200 first:bg-blue-900 first:text-white last:bg-gray-300 last:text-gray-700 first:hover:bg-blue-950 last:hover:bg-gray-400;
+  @apply rounded-md px-4 py-2 transition-colors duration-200 first:bg-blue-500 first:text-white last:bg-gray-300 last:text-gray-700 first:hover:bg-blue-600 last:hover:bg-gray-400;
 }
 
 .required {
