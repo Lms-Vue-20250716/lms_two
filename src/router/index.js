@@ -17,6 +17,7 @@ import Equipment from '@/views/System/Equipment.vue';
 import LectureList from '@/views/Lecture/LectureList.vue';
 import LectureManage from '@/views/Lecture/LectureManage.vue';
 import LectureAttendance from '@/views/Lecture/LectureAttendance.vue';
+import Tutor from '@/views/Manage/Tutor.vue';
 
 
 const router = createRouter({
@@ -91,6 +92,11 @@ const router = createRouter({
               path: 'student',
               name: 'student',
               component: Student,
+            },
+            {
+              path: 'tutor',
+              name: 'tutor',
+              component: Tutor,
             },
           ],
         },
