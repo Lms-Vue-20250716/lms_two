@@ -52,12 +52,13 @@ watch(
   () => {
     EquipmentSearch();
   },
-  { immediate: true },
 );
 
 onMounted(() => {
   EquipmentSearch();
 });
+
+
 </script>
 
 <template>

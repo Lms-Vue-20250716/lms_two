@@ -85,7 +85,7 @@ onUnmounted(() => {
           <button type="button" @click="!id ? handlerInsert() : handlerUpdate()">
             {{ !id ? '저장' : '수정' }}
           </button>
-          <button v-if="!!id" type="button" @click="handlerDelete">삭제</button>
+          <button v-if="id" type="button" @click="handlerDelete">삭제</button>
           <button type="button" @click="modalState.$patch({ isOpen: false })">나가기</button>
         </div>
       </form>

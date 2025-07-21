@@ -6,26 +6,23 @@ import { onMounted, onUnmounted, ref } from 'vue';
 const emit = defineEmits(['postSuccess', 'unMountedModal']);
 const props = defineProps({
   detailId: { type: Number, default: 0 },
-  roomId: { type: Number, default: 0 },
+  roomId: { type: Number, default: 0 }, // 등록모드에서 전달받음
 });
 
 const id = props.detailId;
-
 const modalState = useModalState();
 const formRef = ref();
 const detail = ref({});
 const imageUrl = ref('');
-const roomList = ref({});
+const roomList = ref([]);
 
-// 강의실 select box 정보를 가져옴
-const searchRoomList = () => {
-  axios.post('/api/system/classroomJsonList.do').then((res) => {
-    console.log(res.data.detailValue);
-    roomList.value = res.data.detailValue;
-  });
+// 강의실 리스트 불러오기
+const searchRoomList = async () => {
+  const res = await axios.post('/api/system/classroomJsonList.do');
+  roomList.value = res.data.detailValue;
 };
 
-// 날짜 변환
+//  날짜 변환
 const formatDate = (timestamp) => {
   if (!timestamp) return '';
   const date = new Date(Number(timestamp));
@@ -35,136 +32,137 @@ const formatDate = (timestamp) => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
-// 제목 클릭시 모달창 조회
-const searchDetail = () => {
+// 장비 상세정보 조회
+const searchDetail = async () => {
   const param = new URLSearchParams();
   param.append('equipId', id);
 
-  axios.post('/api/system/equipmentDetail.do', param).then((res) => {
-    const raw = res.data.detailValue;
+  const res = await axios.post('/api/system/equipmentDetail.do', param);
+  const raw = res.data.detailValue;
 
-    // 날짜 필드를 변환
-    raw.equipPurchaseDate = formatDate(raw.equipPurchaseDate);
-    raw.equipPerioduseDate = formatDate(raw.equipPerioduseDate);
+  // roomList 로딩 완료될 때까지 대기
+  while (roomList.value.length === 0) {
+    await new Promise((r) => setTimeout(r, 10));
+  }
 
-    detail.value = raw;
+  // 날짜 및 기타 필드 가공
+  detail.value = {
+    ...raw,
+    roomId: Number(raw.roomId),
+    equipPurchaseDate: formatDate(raw.equipPurchaseDate),
+    equipPerioduseDate: formatDate(raw.equipPerioduseDate),
+  };
 
-    if (['jpg', 'gif', 'png'].includes(detail.value.fileExt)) {
-      getFileImage();
-    }
-  });
-};
-
-// 상세조회 썸네일 구현
-const getFileImage = () => {
-  const param = new URLSearchParams();
-  param.append('equipId', id);
-
-  axios.post('/api/system/equipFileSave.do', param, { responseType: 'blob' }).then((res) => {
-    const url = window.URL.createObjectURL(new Blob([res.data]));
-    imageUrl.value = url;
-  });
-};
-
-// 미리보기
-const handlerFile = (e) => {
-  const fileInfo = e.target.files;
-  const fileInfoSplit = fileInfo[0].name.split('.');
-  const fileExtension = fileInfoSplit[1].toLowerCase();
-
-  if (['jpg', 'gif', 'png'].includes(fileExtension)) {
-    imageUrl.value = URL.createObjectURL(fileInfo[0]);
+  // 이미지 경로 설정
+  if (['jpg', 'gif', 'png'].includes(raw.fileExt?.toLowerCase())) {
+    imageUrl.value = '/api' + raw.logicalPath.replace(/\\/g, '/');
+  } else {
+    imageUrl.value = '';
   }
 };
 
-// 저장
-const handlerInsert = () => {
+// 등록
+const handlerInsert = async () => {
   const formData = new FormData(formRef.value);
+  if (props.roomId) {
+    formData.set('Fileclassroom', String(props.roomId));
+  }
+  const res = await axios.post('/api/system/equipFileSave.do', formData);
+  if (res.data.result === 'success') {
+    alert('저장 되었습니다.');
+    modalState.$patch({ isOpen: false });
+    emit('postSuccess');
+  }
+};
 
-  axios.post('/api/system/equipFileSave.do', formData).then((res) => {
-    if (res.data.result === 'success') {
-      alert('저장 되었습니다.');
-      modalState.$patch({ isOpen: false });
-      emit('postSuccess');
-    }
-  });
+//파일 미리보기
+const handlerFile = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (['jpg', 'gif', 'png'].includes(ext)) {
+    imageUrl.value = URL.createObjectURL(file);
+  }
 };
 
 // 수정
-const handlerUpdate = () => {
+const handlerUpdate = async () => {
   const formData = new FormData(formRef.value);
   formData.append('equipId', id);
-
-  axios.post('/api/system/equipmentUpdate.do', formData).then((res) => {
-    if (res.data.result === 'success') {
-      alert('수정 되었습니다.');
-      modalState.$patch({ isOpen: false });
-      emit('postSuccess');
-    }
-  });
+  const res = await axios.post('/api/system/equipmentUpdate.do', formData);
+  if (res.data.result === 'success') {
+    alert('수정 되었습니다.');
+    modalState.$patch({ isOpen: false });
+    emit('postSuccess');
+  }
 };
 
-//삭제
+// 삭제
 const handlerDelete = async () => {
   const formData = new FormData(formRef.value);
   formData.append('equipId', id);
-
-  try {
-    await axios.post('/api/system/equipmentDelete.do', formData).then((res) => {
-      if (res.data.result === 'success') {
-        alert('삭제 되었습니다.');
-      }
-      modalState.$patch({ isOpen: false });
-      emit('postSuccess');
-    });
-  } catch (error) {
-    console.log(error);
+  const res = await axios.post('/api/system/equipmentDelete.do', formData);
+  if (res.data.result === 'success') {
+    alert('삭제 되었습니다.');
+    modalState.$patch({ isOpen: false });
+    emit('postSuccess');
   }
 };
 
-// onMounted(() => {
-//   id && searchDetail();
-//   searchRoomList();
-// });
+// 초기 실행 로직
+onMounted(async () => {
+  await searchRoomList(); // 반드시 먼저 실행
 
-onMounted(() => {
-  if (!props.detailId && props.roomId) {
-    detail.value.roomId = props.roomId;
+  if (id) {
+    await searchDetail(); // 수정 모드
+  } else {
+    detail.value.roomId = props.roomId; // 등록 모드
   }
-  props.detailId && searchDetail();
-  searchRoomList();
 });
 
 onUnmounted(() => {
   emit('unMountedModal', 0);
 });
 </script>
+
 <template>
   <teleport to="body">
     <div class="equipModal-overlay">
       <form ref="formRef" class="equipModal-form equipModal-container">
+        <h2 class="mb-4 text-center text-xl font-bold">장비 관리</h2>
+
         <label
-          >시리얼넘버 : <input v-model="detail.equipSerial" type="text" name="equipSerial"
-        /></label>
-        <label>
-          강의실 :
-          <select v-model="detail.roomId" name="roomId">
+          >시리얼넘버<span class="required">*</span>:
+          <input v-model="detail.equipSerial" type="text" name="equipSerial" />
+        </label>
+
+        <label
+          >강의실<span class="required">*</span>:
+          <select v-if="roomList.length > 0" v-model.number="detail.roomId" name="roomId">
             <option disabled value="">강의실 선택</option>
-            <option v-for="room in roomList" :key="room.roomId" :value="room.roomId">
+            <option v-for="room in roomList" :key="room.roomId" :value="Number(room.roomId)">
               {{ room.roomName }}
             </option>
           </select>
         </label>
-        <label>장비명 : <input v-model="detail.equipName" type="text" name="equipName" /></label>
+
         <label
-          >수량 : <input v-model="detail.equipQuantity" type="number" min="0" name="equipQuantity"
-        /></label>
+          >장비명<span class="required">*</span>:
+          <input v-model="detail.equipName" type="text" name="equipName" />
+        </label>
+
         <label
-          >구매일자 :
-          <input v-model="detail.equipPerioduseDate" type="date" name="equipPerioduseDate"
-        /></label>
-        <label>
-          분류 :
+          >수량<span class="required">*</span>:
+          <input v-model="detail.equipQuantity" type="number" min="0" name="equipQuantity" />
+        </label>
+
+        <label
+          >구매일자<span class="required">*</span>:
+          <input v-model="detail.equipPerioduseDate" type="date" name="equipPerioduseDate" />
+        </label>
+
+        <label
+          >분류<span class="required">*</span>:
           <select v-model="detail.equipGroup" name="equipGroup">
             <option value="">장비를 선택하세요</option>
             <option value="com">컴퓨터</option>
@@ -178,19 +176,21 @@ onUnmounted(() => {
             <option value="etc">기타</option>
           </select>
         </label>
+
         <label
-          >사용연한 :
-          <input v-model="detail.equipPurchaseDate" type="date" name="equipPurchaseDate"
-        /></label>
-        파일 :
+          >사용연한<span class="required">*</span>:
+          <input v-model="detail.equipPurchaseDate" type="date" name="equipPurchaseDate" />
+        </label>
+
+        파일:
         <input id="fileInput" type="file" name="file" @change="handlerFile" />
-        <label class="img-label" htmlFor="fileInput"> 파일 첨부하기 </label>
+        <label class="img-label" for="fileInput">파일 첨부하기</label>
+
         <div>
-          <div>
-            <label>미리보기</label>
-            <img :src="imageUrl" class="preview-image" />
-          </div>
+          <label>미리보기</label>
+          <img :src="imageUrl" class="preview-image" />
         </div>
+
         <div class="button-container">
           <button type="button" @click="!id ? handlerInsert() : handlerUpdate()">
             {{ !id ? '저장' : '수정' }}
