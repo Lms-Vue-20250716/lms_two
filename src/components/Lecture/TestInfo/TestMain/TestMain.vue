@@ -4,7 +4,6 @@ import axios from 'axios';
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useModalState } from '@/stores/modalState';
-import TestModal from '../TestModal/TestModal.vue';
 
 const route = useRoute();
 const testList = ref([]);
@@ -17,9 +16,12 @@ const testSearch = (cPage = 1) => {
   param.append('currentPage', cPage);
   param.append('pageSize', 5);
 
-  axios.post('/api/support/testListBody.do', param).then((res) => {
+  axios.post('/api/lecture/testInfoListBody.do', param).then((res) => {
     testList.value = res.data.list;
     testCount.value = res.data.count;
+
+    console.log('&&&&&&&&&&&&&&&&&&&');
+    console.log(res.data);
   });
 };
 
@@ -45,21 +47,31 @@ onMounted(() => {
     <table class="test-table">
       <thead class="test-table-header">
         <tr>
-          <th>공지번호</th>
-          <th>공지 제목</th>
-          <th>공지 날짜</th>
-          <th>작성자</th>
+          <th>강의</th>
+          <th>강사</th>
+          <th>강의실</th>
+          <th>시험 시작일</th>
+          <th>시험 종료일</th>
+          <th>시험 등록일</th>
+          <th>시험문제보기</th>
         </tr>
       </thead>
       <tbody>
         <template v-if="testCount > 0">
           <tr v-for="test in testList" :key="test.testId" class="test-table-row">
-            <td class="test-cell">{{ test.testId }}</td>
             <td class="test-cell cursor-pointer hover:underline" @click="testDetail(test.testId)">
-              {{ test.testTitle }}
+              {{ test.lecId }}
             </td>
-            <td class="test-cell">{{ test.regDate.substr(0, 10) }}</td>
-            <td class="test-cell">{{ test.loginId }}</td>
+            <td class="test-cell">
+              {{ test.lecInstructorName }}
+            </td>
+            <td class="test-cell">
+              {{ test.lecRoomName }}
+            </td>
+            <td class="test-cell">{{ test.testBeginDate.substr(0, 19) }}</td>
+            <td class="test-cell">{{ test.testEndDate.substr(0, 19) }}</td>
+            <td class="test-cell">{{ test.testRegDate.substr(0, 10) }}</td>
+            <td class="test-cell">시험문제보기</td>
           </tr>
         </template>
         <template v-else>
@@ -71,12 +83,12 @@ onMounted(() => {
     </table>
     <PageNavigation :total-items="testCount" :items-per-page="5" :on-page-change="testSearch" />
   </div>
-  <TestModal
+  <!-- <TestModal
     v-if="modalState.isOpen && modalState.type === 'test'"
     :detail-id
     @post-success="testSearch()"
     @un-mounted-modal="detailId = $event"
-  />
+  /> -->
 </template>
 
 <style>
