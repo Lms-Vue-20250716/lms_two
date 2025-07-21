@@ -12,6 +12,7 @@ const detail = ref({});
 
 // 저장
 const handlerInsert = () => {
+  if (!validateForm()) return;
   const formData = new FormData(formRef.value);
   axios.post('/api/system/classroomSave.do', formData).then((res) => {
     if (res.data.result === 'success') {
@@ -24,6 +25,7 @@ const handlerInsert = () => {
 
 //수정
 const handlerUpdate = () => {
+  if (!validateForm()) return;
   const formData = new FormData();
   formData.append('roomId', id);
   axios.post('/api/system/classroomUpdate.do', formData).then((res) => {
@@ -56,6 +58,23 @@ const searchDetail = () => {
   });
 };
 
+const validateForm = () => {
+  if (!detail.value.roomName) {
+    alert('강의실 이름을 입력해주세요.');
+    return false;
+  }
+  if (!detail.value.roomPersonnel || detail.value.roomPersonnel <= 0) {
+    alert('강의실 정원을 입력해주세요.');
+    return false;
+  }
+  if (!detail.value.roomSize) {
+    alert('강의실 사이즈를 입력해주세요.');
+    return false;
+  }
+  // 비고는 선택 입력이므로 검사 제외
+  return true;
+};
+
 onMounted(() => {
   id && searchDetail();
 });
@@ -65,32 +84,28 @@ onUnmounted(() => {
 });
 </script>
 <template>
-  <teleport to="body">
-    <div class="modal-overlay">
-      <form ref="formRef" class="modal-form modal-container">
-        <label>강의실 이름 :<input v-model="detail.roomName" type="text" name="roomName" /> </label>
-        <label
-          >강의실 정원 :<input
-            v-model="detail.roomPersonnel"
-            type="number"
-            step="10"
-            min="0"
-            name="roomPersonnel"
-        /></label>
-        <label
-          >강의실 사이즈 :<input v-model="detail.roomSize" type="text" name="roomSize"
-        /></label>
-        <label>비고 :<input v-model="detail.roomRemark" type="text" name="roomRemark" /></label>
-        <div class="button-container">
-          <button type="button" @click="!id ? handlerInsert() : handlerUpdate()">
-            {{ !id ? '저장' : '수정' }}
-          </button>
-          <button v-if="id" type="button" @click="handlerDelete">삭제</button>
-          <button type="button" @click="modalState.$patch({ isOpen: false })">나가기</button>
-        </div>
-      </form>
-    </div>
-  </teleport>
+  <div class="modal-overlay">
+    <form ref="formRef" class="modal-form modal-container">
+      <label>강의실 이름 :<input v-model="detail.roomName" type="text" name="roomName" /> </label>
+      <label
+        >강의실 정원 :<input
+          v-model="detail.roomPersonnel"
+          type="number"
+          step="10"
+          min="0"
+          name="roomPersonnel"
+      /></label>
+      <label>강의실 사이즈 :<input v-model="detail.roomSize" type="text" name="roomSize" /></label>
+      <label>비고 :<input v-model="detail.roomRemark" type="text" name="roomRemark" /></label>
+      <div class="button-container">
+        <button type="button" @click="!id ? handlerInsert() : handlerUpdate()">
+          {{ !id ? '저장' : '수정' }}
+        </button>
+        <button v-if="id" type="button" @click="handlerDelete">삭제</button>
+        <button type="button" @click="modalState.$patch({ isOpen: false })">나가기</button>
+      </div>
+    </form>
+  </div>
 </template>
 
 <style>

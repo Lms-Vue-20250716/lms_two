@@ -63,6 +63,7 @@ const searchDetail = async () => {
 
 // 등록
 const handlerInsert = async () => {
+  if (!validateEquipForm()) return;
   const formData = new FormData(formRef.value);
   if (props.roomId) {
     formData.set('Fileclassroom', String(props.roomId));
@@ -87,6 +88,7 @@ const handlerFile = (e) => {
 
 // 수정
 const handlerUpdate = async () => {
+  if (!validateEquipForm()) return;
   const formData = new FormData(formRef.value);
   formData.append('equipId', id);
   const res = await axios.post('/api/system/equipmentUpdate.do', formData);
@@ -109,6 +111,42 @@ const handlerDelete = async () => {
   }
 };
 
+const validateEquipForm = () => {
+  if (!detail.value.equipSerial?.trim()) {
+    alert('시리얼넘버를 입력해주세요.');
+    return false;
+  }
+  if (!detail.value.roomId) {
+    alert('강의실을 선택해주세요.');
+    return false;
+  }
+  if (!detail.value.equipName?.trim()) {
+    alert('장비명을 입력해주세요.');
+    return false;
+  }
+  if (
+    detail.value.equipQuantity === undefined ||
+    detail.value.equipQuantity === null ||
+    Number(detail.value.equipQuantity) <= 0
+  ) {
+    alert('수량을 1 이상으로 입력해주세요.');
+    return false;
+  }
+  if (!detail.value.equipPerioduseDate) {
+    alert('구매일자를 입력해주세요.');
+    return false;
+  }
+  if (!detail.value.equipGroup) {
+    alert('분류를 선택해주세요.');
+    return false;
+  }
+  if (!detail.value.equipPurchaseDate) {
+    alert('사용연한을 입력해주세요.');
+    return false;
+  }
+  return true;
+};
+
 // 초기 실행 로직
 onMounted(async () => {
   await searchRoomList(); // 반드시 먼저 실행
@@ -126,81 +164,79 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <teleport to="body">
-    <div class="equipModal-overlay">
-      <form ref="formRef" class="equipModal-form equipModal-container">
-        <h2 class="mb-4 text-center text-xl font-bold">장비 관리</h2>
+  <div class="equipModal-overlay">
+    <form ref="formRef" class="equipModal-form equipModal-container">
+      <h2 class="mb-4 text-center text-xl font-bold">장비 관리</h2>
 
-        <label
-          >시리얼넘버<span class="required">*</span>:
-          <input v-model="detail.equipSerial" type="text" name="equipSerial" />
-        </label>
+      <label
+        >시리얼넘버<span class="required">*</span>:
+        <input v-model="detail.equipSerial" type="text" name="equipSerial" />
+      </label>
 
-        <label
-          >강의실<span class="required">*</span>:
-          <select v-if="roomList.length > 0" v-model.number="detail.roomId" name="roomId">
-            <option disabled value="">강의실 선택</option>
-            <option v-for="room in roomList" :key="room.roomId" :value="Number(room.roomId)">
-              {{ room.roomName }}
-            </option>
-          </select>
-        </label>
+      <label
+        >강의실<span class="required">*</span>:
+        <select v-if="roomList.length > 0" v-model.number="detail.roomId" name="roomId">
+          <option disabled value="">강의실 선택</option>
+          <option v-for="room in roomList" :key="room.roomId" :value="Number(room.roomId)">
+            {{ room.roomName }}
+          </option>
+        </select>
+      </label>
 
-        <label
-          >장비명<span class="required">*</span>:
-          <input v-model="detail.equipName" type="text" name="equipName" />
-        </label>
+      <label
+        >장비명<span class="required">*</span>:
+        <input v-model="detail.equipName" type="text" name="equipName" />
+      </label>
 
-        <label
-          >수량<span class="required">*</span>:
-          <input v-model="detail.equipQuantity" type="number" min="0" name="equipQuantity" />
-        </label>
+      <label
+        >수량<span class="required">*</span>:
+        <input v-model="detail.equipQuantity" type="number" min="0" name="equipQuantity" />
+      </label>
 
-        <label
-          >구매일자<span class="required">*</span>:
-          <input v-model="detail.equipPerioduseDate" type="date" name="equipPerioduseDate" />
-        </label>
+      <label
+        >구매일자<span class="required">*</span>:
+        <input v-model="detail.equipPerioduseDate" type="date" name="equipPerioduseDate" />
+      </label>
 
-        <label
-          >분류<span class="required">*</span>:
-          <select v-model="detail.equipGroup" name="equipGroup">
-            <option value="">장비를 선택하세요</option>
-            <option value="com">컴퓨터</option>
-            <option value="ms">마우스</option>
-            <option value="msp">마우스패드</option>
-            <option value="kb">키보드</option>
-            <option value="mt">모니터</option>
-            <option value="dk">책상</option>
-            <option value="chr">의자</option>
-            <option value="wb">화이트보드</option>
-            <option value="etc">기타</option>
-          </select>
-        </label>
+      <label
+        >분류<span class="required">*</span>:
+        <select v-model="detail.equipGroup" name="equipGroup">
+          <option value="">장비를 선택하세요</option>
+          <option value="com">컴퓨터</option>
+          <option value="ms">마우스</option>
+          <option value="msp">마우스패드</option>
+          <option value="kb">키보드</option>
+          <option value="mt">모니터</option>
+          <option value="dk">책상</option>
+          <option value="chr">의자</option>
+          <option value="wb">화이트보드</option>
+          <option value="etc">기타</option>
+        </select>
+      </label>
 
-        <label
-          >사용연한<span class="required">*</span>:
-          <input v-model="detail.equipPurchaseDate" type="date" name="equipPurchaseDate" />
-        </label>
+      <label
+        >사용연한<span class="required">*</span>:
+        <input v-model="detail.equipPurchaseDate" type="date" name="equipPurchaseDate" />
+      </label>
 
-        파일:
-        <input id="fileInput" type="file" name="file" @change="handlerFile" />
-        <label class="img-label" for="fileInput">파일 첨부하기</label>
+      파일:
+      <input id="fileInput" type="file" name="file" @change="handlerFile" />
+      <label class="img-label" for="fileInput">파일 첨부하기</label>
 
-        <div>
-          <label>미리보기</label>
-          <img :src="imageUrl" class="preview-image" />
-        </div>
+      <div>
+        <label>미리보기</label>
+        <img :src="imageUrl" class="preview-image" />
+      </div>
 
-        <div class="button-container">
-          <button type="button" @click="!id ? handlerInsert() : handlerUpdate()">
-            {{ !id ? '저장' : '수정' }}
-          </button>
-          <button v-if="!!id" type="button" @click="handlerDelete">삭제</button>
-          <button type="button" @click="modalState.$patch({ isOpen: false })">나가기</button>
-        </div>
-      </form>
-    </div>
-  </teleport>
+      <div class="button-container">
+        <button type="button" @click="!id ? handlerInsert() : handlerUpdate()">
+          {{ !id ? '저장' : '수정' }}
+        </button>
+        <button v-if="!!id" type="button" @click="handlerDelete">삭제</button>
+        <button type="button" @click="modalState.$patch({ isOpen: false })">나가기</button>
+      </div>
+    </form>
+  </div>
 </template>
 
 <style>
