@@ -3,7 +3,7 @@ import { useModalState } from '@/stores/modalState';
 import axios from 'axios';
 import { onMounted, ref, watch } from 'vue';
 
-const emit = defineEmits(['test-postSuccess']);
+const emit = defineEmits(['testPostSuccess']);
 
 const modalState = useModalState();
 const lectureSelectBoxList = ref([]);
@@ -64,7 +64,7 @@ const registerTest = async () => {
 
     // 성공 시 모달 닫기 및 부모 컴포넌트에 이벤트 전달
     modalState.$patch({ isOpen: false, type: 'test-create' });
-    emit('test-postSuccess');
+    emit('testPostSuccess');
 
     //close modal
   } catch (err) {

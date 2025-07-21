@@ -5,12 +5,14 @@ import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useModalState } from '@/stores/modalState';
 import TestRegister from '../TestModal/TestRegister.vue';
+import TestUpdate from '../TestModal/TestUpdate.vue';
 
 const route = useRoute();
 const testList = ref([]);
 const testCount = ref(0);
 const modalState = useModalState();
-const detailId = ref(0);
+// const detailId = ref(0);
+const selectedTestData = ref(null);
 
 const testSearch = (cPage = 1) => {
   const param = new URLSearchParams(route.query);
@@ -26,9 +28,9 @@ const testSearch = (cPage = 1) => {
   });
 };
 
-const testDetail = (id) => {
-  modalState.$patch({ isOpen: true, type: 'test' });
-  detailId.value = id;
+const testDetail = (selectedLecId) => {
+  selectedTestData.value = testList.value.find((lecture) => lecture.lecId == selectedLecId);
+  modalState.$patch({ isOpen: true, type: 'test-update' });
 };
 
 watch(
@@ -60,7 +62,7 @@ onMounted(() => {
       <tbody>
         <template v-if="testCount > 0">
           <tr v-for="test in testList" :key="test.testId" class="test-table-row">
-            <td class="test-cell cursor-pointer hover:underline" @click="testDetail(test.testId)">
+            <td class="test-cell cursor-pointer hover:underline" @click="testDetail(test.lecId)">
               {{ test.lecName }}
             </td>
             <td class="test-cell">
@@ -86,8 +88,12 @@ onMounted(() => {
   </div>
   <TestRegister
     v-if="modalState.isOpen && modalState.type === 'test-create'"
-    @post-success="testSearch()"
-    @un-mounted-modal="detailId = $event"
+    @test-post-success="testSearch()"
+  />
+  <TestUpdate
+    v-if="modalState.isOpen && modalState.type === 'test-update'"
+    :lectureData="selectedTestData"
+    @test-update-success="testSearch()"
   />
 </template>
 
