@@ -1,6 +1,7 @@
 <script setup>
 import { useModalState } from '@/stores/modalState';
 import axios from 'axios';
+import { ElMessage } from 'element-plus';
 import { onMounted, ref, watch } from 'vue';
 
 const studentsList = ref([]);
@@ -102,7 +103,7 @@ const sendEmail = () => {
     .map((company) => company.companyId);
 
   const selectedStudentIds = selectedStudents.value.map((student) => {
-    student.studnetId;
+    return student.studentId;
   });
 
   console.log(selectedCompanyIds);
@@ -113,9 +114,15 @@ const sendEmail = () => {
     studentIds: selectedStudentIds,
   };
 
-  axios.post('/api/user/send-resume', params).then((res) => {
-    console.log(res);
-  });
+  axios
+    .post('/api/user/send-resume', params)
+    .then(() => {
+      ElMessage.success('이력서 전송 성공');
+    })
+    .catch((err) => {
+      ElMessage.error('이력서 전송 실패');
+      console.log('email send error: ' + err);
+    });
 };
 
 const downloadFile = (student) => {
