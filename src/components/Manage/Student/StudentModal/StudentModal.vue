@@ -38,7 +38,7 @@ const searchDetail = async () => {
     <div class="student-modal-container">
       <div class="flex justify-between items-center bg-[#494c6b] text-white p-3">
         <h2 class="text-lg font-medium">학생 상세</h2>
-        <button class="text-2xl">×</button>
+        <button @click="modalState.$patch({ isOpen: false, type: 'null' })" class="text-2xl">×</button>
       </div>
       <div class="p-4">
         <div class="mb-4">
@@ -91,7 +91,7 @@ const searchDetail = async () => {
                   <td class="student-modal-table-td">{{ lecture.lecId }}</td>
                   <td class="student-modal-table-td">{{ lecture.lectureName }}</td>
                   <td class="student-modal-table-td">{{ new Date(lecture.lectureStartDate).toISOString().split('T')[0]
-                  }}</td>
+                    }}</td>
                   <td class="student-modal-table-td">{{ new Date(lecture.lectureEndDate).toISOString().split('T')[0] }}
                   </td>
                 </tr>
