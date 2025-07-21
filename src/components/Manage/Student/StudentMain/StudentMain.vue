@@ -5,24 +5,49 @@ import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useModalState } from '@/stores/modalState';
 import StudentModal from '../StudentModal/StudentModal.vue';
-
 const route = useRoute();
 const studentList = ref([]);
 const studentCount = ref(0);
 const modalState = useModalState();
 const detailId = ref(0);
 
-const studentSearch = (cPage = 1) => {
+/** ----------------------------------------------- */
+
+const updateStatusYn = async (e, student) => {
+  const studentId = student.studentId;
+  const param = {
+    studentStatus: e.target.value,
+    studentId: studentId
+  };
+  if (confirm('재학 상태를 변경하시겠습니까?')) {
+    try {
+      const res = await axios.post('/api/manage/student-status', param);
+      if (res.data === 'SUCCESS') {
+        alert('재학상태가 변경되었습니다.');
+      } else {
+        alert('재학상태 변경에 실패했습니다.');
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+}
+
+const studentSearch = async (cPage = 1) => {
   const param = new URLSearchParams(route.query);
   console.log(route.query);
   param.append('currentPage', cPage);
   param.append('pageSize', 5);
 
-  axios.post('/api/manage/studentListBody.do', param).then((res) => {
+  try {
+    const res = await axios.post('/api/manage/studentListBody.do', param)
     studentList.value = res.data.list;
     studentCount.value = res.data.count;
-  });
-}
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 
 onMounted(() => {
   studentSearch();
@@ -67,7 +92,7 @@ watch(
               <span>{{ student.studentEmpStatus === 'Y' ? '취업' : '미취업' }}</span>
             </td>
             <td class="student-cell">
-              <select v-model="student.statusYN">
+              <select @change="updateStatusYn($event, student)" v-model="student.statusYN">
                 <option value="W">승인 대기중</option>
                 <option value="Y">재학</option>
                 <option value="N">탈퇴</option>
