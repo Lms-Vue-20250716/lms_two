@@ -105,7 +105,7 @@ const router = createRouter({
             },
             {
               path: 'lecture-manage-list',
-              name: 'manage',
+              name: 'lecture-manage-list',
               component: LectureManage,
             },
             {

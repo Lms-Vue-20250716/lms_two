@@ -29,7 +29,7 @@ onMounted(() => {
 });
 
 const studentDetail = (id) => {
-  modalState.$patch({ isOpen: true })
+  modalState.$patch({ isOpen: true, type: "student" })
   detailId.value = id;
 }
 
@@ -84,8 +84,8 @@ watch(
     </table>
     <PageNavigation :total-items="studentCount" :items-per-page="5" :on-page-change="studentSearch" />
   </div>
-  <StudentModal v-if="modalState.isOpen" :detail-id="detailId" @post-success="studentSearch()"
-    @un-mounted-modal="detailId = $event" />
+  <StudentModal v-if="modalState.isOpen && modalState.type === 'student'" :detail-id="detailId"
+    @post-success="studentSearch()" @un-mounted-modal="detailId = $event" />
 </template>
 
 <style>

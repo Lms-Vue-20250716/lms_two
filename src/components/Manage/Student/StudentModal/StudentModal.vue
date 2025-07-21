@@ -101,7 +101,7 @@ const searchDetail = () => {
           </table>
         </div>
         <div class="flex justify-center mt-4">
-          <button type="button" @click="modalState.$patch({ isOpen: false })"
+          <button type="button" @click="modalState.$patch({ isOpen: false, type: 'null' })"
             class="bg-[#7f8cb6] text-white px-6 py-2 rounded hover:bg-[#6b7aa1] transition-colors">
             닫기
           </button>
