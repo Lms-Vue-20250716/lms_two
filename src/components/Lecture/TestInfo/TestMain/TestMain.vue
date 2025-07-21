@@ -4,6 +4,7 @@ import axios from 'axios';
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useModalState } from '@/stores/modalState';
+import TestRegister from '../TestModal/TestRegister.vue';
 
 const route = useRoute();
 const testList = ref([]);
@@ -60,7 +61,7 @@ onMounted(() => {
         <template v-if="testCount > 0">
           <tr v-for="test in testList" :key="test.testId" class="test-table-row">
             <td class="test-cell cursor-pointer hover:underline" @click="testDetail(test.testId)">
-              {{ test.lecId }}
+              {{ test.lecName }}
             </td>
             <td class="test-cell">
               {{ test.lecInstructorName }}
@@ -83,12 +84,11 @@ onMounted(() => {
     </table>
     <PageNavigation :total-items="testCount" :items-per-page="5" :on-page-change="testSearch" />
   </div>
-  <!-- <TestModal
-    v-if="modalState.isOpen && modalState.type === 'test'"
-    :detail-id
+  <TestRegister
+    v-if="modalState.isOpen && modalState.type === 'test-create'"
     @post-success="testSearch()"
     @un-mounted-modal="detailId = $event"
-  /> -->
+  />
 </template>
 
 <style>

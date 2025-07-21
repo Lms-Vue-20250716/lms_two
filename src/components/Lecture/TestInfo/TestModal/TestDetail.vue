@@ -140,5 +140,5 @@ onUnmounted(() => {
 </template>
 
 <style>
-/* @import './styled.css'; */
+@import './styled.css';
 </style>
