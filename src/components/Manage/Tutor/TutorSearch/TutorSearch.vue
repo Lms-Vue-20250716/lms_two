@@ -29,10 +29,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="student-container">
+  <div class="tutor-container">
     <div class="input-box">
       이름: <input v-model.lazy="searchName" />
-      재학 상태: <select v-model="searchStatusYn">
+      재직 상태: <select v-model="searchStatusYn">
         <option value selected="selected"> 선택 </option>
         <option value="W"> 승인대기중 </option>
         <option value="Y"> 재학 </option>

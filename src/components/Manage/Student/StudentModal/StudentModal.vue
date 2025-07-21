@@ -17,14 +17,18 @@ onUnmounted(() => {
   emit('unMountedModal', 0);
 })
 
-const searchDetail = () => {
+const searchDetail = async () => {
   const param = new URLSearchParams();
   param.append('studentId', id);
 
-  axios.post(`/api/manage/student-detail/${id}`, param).then((res) => {
+  try {
+    const res = await axios.post(`/api/manage/student-detail/${id}`, param);
     detail.value = res.data;
     lectureList.value = res.data.lectureInfo || [];
-  })
+  } catch (error) {
+    console.log(error);
+  }
+
 };
 
 </script>
@@ -34,7 +38,7 @@ const searchDetail = () => {
     <div class="student-modal-container">
       <div class="flex justify-between items-center bg-[#494c6b] text-white p-3">
         <h2 class="text-lg font-medium">학생 상세</h2>
-        <button class="text-2xl">×</button>
+        <button @click="modalState.$patch({ isOpen: false, type: 'null' })" class="text-2xl">×</button>
       </div>
       <div class="p-4">
         <div class="mb-4">
@@ -101,7 +105,7 @@ const searchDetail = () => {
           </table>
         </div>
         <div class="flex justify-center mt-4">
-          <button type="button" @click="modalState.$patch({ isOpen: false })"
+          <button type="button" @click="modalState.$patch({ isOpen: false, type: 'null' })"
             class="bg-[#7f8cb6] text-white px-6 py-2 rounded hover:bg-[#6b7aa1] transition-colors">
             닫기
           </button>
