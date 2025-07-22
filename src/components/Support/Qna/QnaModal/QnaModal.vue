@@ -98,6 +98,7 @@ const fetchDetail = async () => {
 
   const param = new URLSearchParams();
   param.append('qnaId', props.detailId);
+
   const res = await axios.post('/api/support/getQnaDetail.do', param);
 
   if (res.data) {
