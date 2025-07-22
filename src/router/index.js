@@ -18,6 +18,7 @@ import LectureList from '@/views/Lecture/LectureList.vue';
 import LectureManage from '@/views/Lecture/LectureManage.vue';
 import LectureAttendance from '@/views/Lecture/LectureAttendance.vue';
 import Tutor from '@/views/Manage/Tutor.vue';
+import Counsel from '@/views/Manage/Counsel.vue';
 
 
 const router = createRouter({
@@ -97,6 +98,11 @@ const router = createRouter({
               path: 'tutor',
               name: 'tutor',
               component: Tutor,
+            },
+            {
+              path: 'counsel',
+              name: 'counsel',
+              component: Counsel,
             },
           ],
         },
