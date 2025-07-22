@@ -9,7 +9,6 @@ const modalState = useModalState();
 
 const handelerSearch = () => {
   const query = [];
-
   !searchTitle.value || query.push(`title=${searchTitle.value}`);
   !searchPersonnel.value || query.push(`personnel=${searchPersonnel.value}`);
 
