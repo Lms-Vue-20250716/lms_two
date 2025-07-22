@@ -12,8 +12,21 @@ const props = defineProps({
 
 // const { detaiId: id } = defineProps({ detailId: { type: Number, default: 0 } });
 
-// const modalState = useModalState();
-
+const modalState = useModalState();
+// // 클릭한 질문 항목 데이터를 여기에 바인딩
+// const selectedItem = ref(null);
+const selectedLecture = ref('');
+// 강의명 목록을 서버에서 불러오려고 했는데, 뜨는 강의가 없어서, 수동 입력.
+const lecOptions = ref([
+  { value: 2, label: 'React' },
+  { value: 1, label: 'Nodejs' },
+  { value: 3, label: 'Vue' },
+  { value: 4, label: 'Spring' },
+  { value: 5, label: 'Java' },
+  { value: 6, label: 'C#' },
+  { value: 7, label: '요리' },
+  { value: 8, label: '직접추가' },
+]);
 // 참조 객체
 const formRef = ref();
 const detail = ref({
@@ -27,28 +40,64 @@ const detail = ref({
   qnaAnswerDate: '',
 });
 
+// 신규인지 여부 판단
+const isNew = computed(() => props.mode === 'create');
+
 // 신규 모드: 입력값 초기화
 const resetForm = () => {
   detail.value = {
     qnaId: 0,
+    lecId: '',
     lecName: '',
+    loginId: props.loginId,
     qnaTitle: '',
     qnaContent: '',
     qnaAnswer: '',
+    qnaRegDate: '',
+    qnaAnswerDate: '',
   };
+  selectedLecture.value = '';
 };
 
-// 강의명 목록을 서버 또는 하드코딩으로 불러올 수 있음.
-const lecOptions = ref([]);
-const modalState = useModalState();
-// 신규인지 여부 판단
-const isNew = computed(() => props.mode === 'create');
+// const title = ref('');
+// const content = ref('');
+// const lectureId = ref('');
 
-// 상세조회 (mode가 detail일 때만 호출)
+// // 등록
+// const registerQna = async () => {
+//   try {
+//     const payload = {
+//       title: title.value,
+//       content: content.value,
+//       lectureId: lectureId.value,
+//     };
+//     const res = await axios.post('/api/qna/register', payload);
+//     console.log('등록 성공:', res.data);
+//     emit('postSuccess');
+//     emit('unMountedModal');
+//   } catch (err) {
+//     console.error('등록 실패:', err);
+//   }
+// };
+
+const fetchLectureList = async () => {
+  try {
+    const response = await axios.get('/support/getQnaLectureListBody.do');
+    lecOptions.value = response.data.lectureList.map((item) => ({
+      label: item.lecName,
+      value: item.lecId,
+    }));
+  } catch (error) {
+    console.error('강의 목록을 불러오는데 실패했습니다.', error);
+  }
+};
+
+// 상세조회 (수정/답변)
 const fetchDetail = async () => {
   if (props.detailId === 0) return;
   const param = new URLSearchParams();
   param.append('qnaId', props.detailId);
+
   const res = await axios.post('/api/support/getQnaDetail.do', param);
   if (res.data) {
     detail.value = {
@@ -62,6 +111,7 @@ const fetchDetail = async () => {
       qnaRegDate: res.data.qnaRegDate,
       qnaAnswerDate: res.data.qnaAnswerDate || '',
     };
+    selectedLecture.value = res.data.lecId;
   }
 };
 
@@ -76,51 +126,52 @@ const checkTeacherPermission = async () => {
 
 // 등록/수정 처리
 const handleSubmit = async () => {
+  if (isNew.value && !selectedLecture.value) {
+    alert('강의를 선택하세요.');
+    return;
+  }
+
   const formData = new URLSearchParams();
   formData.append('qnaId', detail.value.qnaId);
-  formData.append('lecName', detail.value.lecName); // lecId 대신 lecName 사용 (매퍼 확인 필요)
+  formData.append('lecName', detail.value.lecName);
   formData.append('loginId', props.loginId);
   formData.append('qnaTitle', detail.value.qnaTitle);
   formData.append('qnaContent', detail.value.qnaContent);
+
   if (!isNew.value) {
+    formData.append('lecId', selectedLecture.value);
+  } else {
     formData.append('qnaAnswer', detail.value.qnaAnswer);
   }
 
-  const apiEndpoint = isNew.value ? '/api/support/saveQuestion.do' : '/api/support/updateAnswer.do';
-  const res = await axios.post(apiEndpoint, formData);
+  const api = isNew.value ? '/api/support/saveQuestion.do' : '/api/support/updateAnswer.do';
 
-  if (res.data.result === 'success') {
-    alert('저장되었습니다.');
-    const isTeacher = await checkTeacherPermission();
-    if (isTeacher && !isNew.value) {
-      // 강사이고 상세 모드일 경우 모달 유지
-      return; // 모달을 열린 상태로 유지
+  try {
+    const res = await axios.post(api, formData);
+
+    if (res.data.result === 'success') {
+      alert('저장되었습니다.');
+      const isTeacher = await checkTeacherPermission();
+      if (isTeacher && !isNew.value) return; // 강사이고 상세 모드일 경우 모달 유지 // 모달을 열린 상태로 유지
+      modalState.$patch({ isOpen: false });
+      emit('postSuccess');
+    } else {
+      alert('저장 실패');
     }
-    modalState.$patch({ isOpen: false });
-    emit('postSuccess');
+  } catch (err) {
+    console.error('요청 실패:', err);
+    alert('오류가 발생했습니다.');
   }
 };
 
-// const handleSubmit = () => {
-//   const formData = new FormData(formRef.value);
-//   formData.append('qnaId', props.detailId);
-
-//   axios.post('/api/saveAnswer.do', formData).then((res) => {
-//     if (res.data.result === 'success') {
-//       alert('저장되었습니다.');
-//       modalState.$patch({ isOpen: false });
-//       emit('postSuccess');
-//     }
-//   });
-// };
-
-const handleDelete = () => {
+const handleDelete = async () => {
   if (!confirm('정말 삭제하시겠습니까?')) return;
 
   const param = new URLSearchParams();
   param.append('qnaId', props.detailId);
 
-  axios.post('/api/support/deleteQuestion.do', param).then((res) => {
+  try {
+    const res = await axios.post('/api/support/deleteQuestion.do', param);
     if (res.data.result === 'success') {
       alert('삭제 되었습니다');
       modalState.$patch({ isOpen: false }); //false면 창이 꺼지고 true면 창이 열리는 거잖아? 이건 됐고 그...머였지. 타입? 이름을 개인걸로 지정해야 다른 분이 한거에서 모달창이 연동이 안된대...
@@ -128,7 +179,10 @@ const handleDelete = () => {
     } else {
       alert('삭제 실패');
     }
-  });
+  } catch (err) {
+    console.error('삭제 요청 실패:', err);
+    alert('삭제 중 오류가 발생했습니다.');
+  }
 };
 
 const closeModal = () => {
@@ -136,6 +190,7 @@ const closeModal = () => {
 };
 
 onMounted(() => {
+  fetchLectureList();
   if (!isNew.value) fetchDetail();
 });
 
@@ -153,11 +208,11 @@ onUnmounted(() => {
         <div class="modal-section border-bottom">
           <div class="form-row">
             <label>강의명</label>
-            <select v-model="detail.lecName" name="lecName" required>
+            <select v-model="selectedLecture" :disabled="!isNew" required>
               <option disabled value="">클릭해서 강의 선택</option>
               <template v-if="lecOptions.length > 0">
-                <option v-for="lec in lecOptions" :key="lec.lecId" :value="lec.lecId">
-                  {{ lec.lecName }}
+                <option v-for="opt in lecOptions" :key="opt.value" :value="opt.value">
+                  {{ opt.label }}
                 </option>
               </template>
               <template v-else>
@@ -173,7 +228,7 @@ onUnmounted(() => {
               type="text"
               name="qnaTitle"
               :readonly="!isNew"
-              requir
+              required
             />
           </div>
 
