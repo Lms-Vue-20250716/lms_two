@@ -46,6 +46,7 @@ onMounted(() => {
   companySearch();
 });
 </script>
+
 <template>
   <div class="company-main-container">
     <table class="company-table">

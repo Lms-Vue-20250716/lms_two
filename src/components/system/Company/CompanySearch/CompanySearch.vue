@@ -13,6 +13,7 @@ const handlerSearch = () => {
     alert('시작일이 종료일보다 늦을 수 없습니다.');
     return;
   }
+
   const query = [];
   !searchCompanyName.value || query.push(`companyName=${searchCompanyName.value}`);
   !searchStDate.value || query.push(`searchStDate=${searchStDate.value}`);
