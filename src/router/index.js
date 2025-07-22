@@ -17,6 +17,8 @@ import LectureManage from '@/views/Lecture/LectureManage.vue';
 import LectureAttendance from '@/views/Lecture/LectureAttendance.vue';
 import Tutor from '@/views/Manage/Tutor.vue';
 import Company from '@/views/System/Company.vue';
+import Counsel from '@/views/Manage/Counsel.vue';
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -95,6 +97,11 @@ const router = createRouter({
               path: 'tutor',
               name: 'tutor',
               component: Tutor,
+            },
+            {
+              path: 'counsel',
+              name: 'counsel',
+              component: Counsel,
             },
           ],
         },
