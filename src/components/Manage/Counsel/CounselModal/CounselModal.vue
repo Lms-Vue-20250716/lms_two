@@ -1,11 +1,17 @@
 <script setup>
 import { useModalState } from '@/stores/modalState';
 import axios from 'axios';
-import { onMounted, onUnmounted, ref, computed } from 'vue';
+import { onMounted, onUnmounted, ref, computed, watch } from 'vue';
 
 const modalState = useModalState();
 
-const mode = computed(() => modalState.payload?.mode || 'view');
+const mode = ref('view');
+
+watch(() => modalState, (newState) => {
+  if (newState.payload?.mode) {
+    mode.value = newState.payload.mode;
+  }
+}, { immediate: true, deep: true });
 const detail = ref({});
 const isEditing = computed(() => mode.value === 'create' || mode.value === 'edit');
 const editForm = ref({});
@@ -16,11 +22,7 @@ const { detailId: id, lectureList: lectureList } = defineProps({
   lectureList: { type: Array, default: () => { } },
 });
 
-
-onMounted(() => {
-  console.log('mode.value', mode.value);
-  console.log('isEditing.value', isEditing.value);
-
+onMounted(async () => {
   if (mode.value === 'create') {
     editForm.value = {
       counselTitle: '',
@@ -114,17 +116,17 @@ const close = () => {
   <div class="counsel-modal-overlay">
     <div class="counsel-modal-container">
       <div class="flex justify-between items-center bg-[#494c6b] text-white p-3">
-        <h2 class="text-lg font-medium">{{ mode.value === 'create' ? '상담 등록' : '상담 관리' }}</h2>
+        <h2 class="text-lg font-medium">{{ mode === 'create' ? '상담 등록' : '상담 관리' }} </h2>
         <button type="button" @click="close()" class="text-2xl">×</button>
       </div>
       <div class="p-4">
         <div class="mb-4">
-          <table class="w-full border-collapse table-auto">
+          <table class="w-full border-collapse table-auto" :key="mode">
             <tbody>
               <tr>
                 <th class="counsel-modal-table-th">상담 과목</th>
                 <td class="counsel-modal-table-td">
-                  <select v-if="isEditing && mode.value === 'create'" v-model="editForm.lecId"
+                  <select v-if="mode === 'create' || mode === 'edit'" v-model="editForm.lecId"
                     class="w-full border border-gray-300 rounded p-2">
                     <option value="">과목을 선택하세요</option>
                     <option v-for="lecture in lectureList" :key="lecture.lecId" :value="lecture.lecId">
@@ -137,7 +139,7 @@ const close = () => {
               <tr>
                 <th class="counsel-modal-table-th">상담 학생</th>
                 <td class="counsel-modal-table-td">
-                  <input v-if="isEditing && mode.value === 'create'" v-model="editForm.counselStudentName"
+                  <input v-if="mode === 'create' || mode === 'edit'" v-model="editForm.counselStudentName"
                     class="w-full border border-gray-300 rounded p-2" />
                   <span v-else>{{ detail.counselStudentName }}</span>
                 </td>
