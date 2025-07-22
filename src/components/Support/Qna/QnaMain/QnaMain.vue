@@ -92,6 +92,7 @@ watch(
     v-if="modalState.isOpen"
     :detail-id="detailId"
     :mode="modalMode"
+    :login-id="loginId"
     @post-success="qnaSearch()"
     @un-mounted-modal="detailId = $event"
   />
