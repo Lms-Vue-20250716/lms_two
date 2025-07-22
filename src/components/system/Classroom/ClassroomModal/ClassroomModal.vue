@@ -26,7 +26,7 @@ const handlerInsert = () => {
 //수정
 const handlerUpdate = () => {
   if (!validateForm()) return;
-  const formData = new FormData();
+  const formData = new FormData(formRef.value);
   formData.append('roomId', id);
   axios.post('/api/system/classroomUpdate.do', formData).then((res) => {
     if (res.data.result === 'success') {
