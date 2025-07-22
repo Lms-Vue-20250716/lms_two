@@ -1,8 +1,15 @@
 <script setup>
 import router from '@/router';
+import { useUserInfo } from '@/stores/loginInfoState';
 import { useModalState } from '@/stores/modalState';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
+// --- 로그인 정보 가져오기 ---
+const userInfoStore = useUserInfo();
+// computed를 사용해 user 객체가 null일 때도 에러 없이 안전하게 값을 가져옴
+const userType = computed(() => userInfoStore.user?.userType);
+
+// --- 검색관련
 const searchTag = ref('lecName'); //lecName, lecInstructorName, lecRoomName
 const searchTitle = ref('');
 const searchStDate = ref('');
@@ -55,17 +62,15 @@ onMounted(() => {
       <input v-model="searchStDate" type="date" />
       <input v-model="searchEdDate" type="date" />
       <button @click="handlerSearch">검색</button>
-      <button @click="modalState.$patch({ isOpen: true, type: 'test-create' })">신규</button>
+      <button
+        v-if="userType === 'M'"
+        @click="modalState.$patch({ isOpen: true, type: 'test-create' })"
+      >
+        신규
+      </button>
     </div>
   </div>
 </template>
-
-<!-- style scoped는 해당 컴포넌트에서만 스타일을 적용시키는 방법이다.
-    그러나, scoped는 컴파일 시점에 고유한 속성을 컴포넌트 요소에 추가하는데,
-    외부 css 파일은 이 고유 속성을 알지 못하므로 스타일이 적용안된다.
-
-    scoped을 사용하지 않고, css파일을 import 하거나, <style scoped> 안에 css를 구성해야한다.
--->
 <style>
-/* @import './styled.css'; */
+@import './styled.css';
 </style>

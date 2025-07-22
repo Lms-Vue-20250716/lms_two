@@ -17,11 +17,11 @@ const lecEndDate = ref('');
 const searchSelectBox = async () => {
   try {
     const response = await axios.get('/api/lecture/lectureSelectBoxList.do');
-    console.log('%%%%%%%%%%%%%%%%%%%%%%%%%');
+    // console.log('%%%%%%%%%%%%%%%%%%%%%%%%%');
     lectureSelectBoxList.value = response.data.lecSelectBoxList;
-    console.log(response.data);
-    console.log(lectureSelectBoxList.value);
-    console.log('$$$$$$$$$$$$$$$$$$$$$$$');
+    // console.log(response.data);
+    // console.log(lectureSelectBoxList.value);
+    // console.log('$$$$$$$$$$$$$$$$$$$$$$$');
   } catch (err) {
     console.log(err);
   }
@@ -42,14 +42,31 @@ const registerTest = async () => {
       alert('id가 선택되지 않았습니다!');
       return;
     }
-    if (lecStartDate.value && lecEndDate.value) {
-      const from = new Date(lecStartDate);
-      const to = new Date(lecEndDate);
+    if (!lecStartDate.value || !lecEndDate.value) {
+      alert('시험 시작일과 종료일을 모두 입력해주세요.');
+      return;
+    }
+    const from = new Date(lecStartDate.value);
+    const to = new Date(lecEndDate.value);
+    if (to < from) {
+      alert('종료일이 시작일 보다 더 빠를 수 없습니다!');
+      return;
+    }
 
-      if (to < from) {
-        alert('종료일이 시작일 보다 더 빠를 수 없습니다!');
-        return;
-      }
+    const startHour = from.getHours();
+    const endHour = to.getHours();
+
+    // 시작 시간이 오전 6시 이전인지 확인
+    if (startHour < 6) {
+      alert('시험 시작 시간은 오전 6시 이후로 설정해야 합니다.');
+      return;
+    }
+
+    // 종료 시간이 오전 6시 이전인지 확인
+    // (만약 종료일이 시작일과 다른 날짜일 경우, 종료 시간도 제한하는 것이 맞습니다.)
+    if (endHour < 6) {
+      alert('시험 종료 시간은 오전 6시 이후로 설정해야 합니다.');
+      return;
     }
 
     const param = {
@@ -61,6 +78,8 @@ const registerTest = async () => {
     };
 
     await axios.post('/api/lecture/testInfoSave.do', param);
+
+    alert('시험정보 저장 완료');
 
     // 성공 시 모달 닫기 및 부모 컴포넌트에 이벤트 전달
     modalState.$patch({ isOpen: false, type: 'test-create' });
@@ -97,12 +116,12 @@ onMounted(() => {
 
 <template>
   <Teleport to="body">
-    <form @submit.prevent="registerTest">
-      <div class="modal-container">
+    <div class="modal-overlay">
+      <form @submit.prevent="registerTest" class="test-register-modal">
         <div class="modal-header">
           <h2>시험 등록</h2>
           <button
-            class="close-button"
+            class="close-btn"
             type="button"
             @click="modalState.$patch({ isOpen: false, type: 'test-create' })"
           >
@@ -110,7 +129,7 @@ onMounted(() => {
           </button>
         </div>
 
-        <div class="modal-body">
+        <div class="modal-content">
           <table class="form-table">
             <tbody>
               <tr>
@@ -172,20 +191,161 @@ onMounted(() => {
         </div>
 
         <div class="modal-footer">
-          <button class="btn-save" type="submit">저장</button>
+          <button class="btn btn-primary" type="submit">저장</button>
           <button
-            class="btn-cancel"
+            class="btn btn-secondary"
             type="button"
             @click="modalState.$patch({ isOpen: false, type: 'test-create' })"
           >
             취소
           </button>
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
   </Teleport>
 </template>
 
-<style>
-/* @import './styled.css'; */
+<style scoped>
+/* --- 1. 모달 배경(오버레이) --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* 약간 더 어둡게 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* --- 2. 모달 박스 --- */
+.user-management-modal {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 700px; /* 너비 조절 */
+  border: 1px solid #d1d5db;
+  /* form 태그이므로 display:flex 등을 직접 적용하지 않아도 자식들이 세로로 쌓임 */
+}
+
+/* --- 3. 모달 헤더 --- */
+.modal-header {
+  background-color: #475569; /* 어두운 슬레이트 색상 */
+  color: white;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.75rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: opacity 0.2s;
+}
+
+.close-btn:hover {
+  opacity: 0.8;
+}
+
+/* --- 4. 모달 본문 (콘텐츠) --- */
+.modal-content {
+  padding: 1.5rem;
+  background-color: #f8fafc;
+}
+
+.form-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.form-table td {
+  border: 1px solid #e2e8f0;
+  padding: 0.8rem;
+  vertical-align: middle;
+}
+
+.label-cell {
+  background-color: #f1f5f9;
+  font-weight: 600;
+  color: #334155;
+  width: 120px;
+  text-align: center;
+}
+
+.required-star {
+  color: #ef4444;
+  margin-left: 4px;
+}
+
+/* input, select 공통 스타일 */
+.modal-content input[type='text'],
+.modal-content input[type='datetime-local'],
+.modal-content select {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+.modal-content input:read-only {
+  background-color: #e5e7eb;
+  cursor: not-allowed;
+}
+
+/* --- 5. 모달 푸터 --- */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background-color: #f1f5f9;
+  border-top: 1px solid #e2e8f0;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+/* --- 6. 버튼 공통 스타일 --- */
+.btn {
+  padding: 0.6rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+  color: white;
+}
+.btn-primary:hover {
+  background-color: #2563eb;
+}
+
+.btn-secondary {
+  background-color: #6b7280;
+  color: white;
+}
+.btn-secondary:hover {
+  background-color: #4b5563;
+}
 </style>

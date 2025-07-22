@@ -1,7 +1,8 @@
 <script setup>
+import { useUserInfo } from '@/stores/loginInfoState';
 import { useModalState } from '@/stores/modalState';
 import axios from 'axios';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 const props = defineProps({
   lectureData: {
@@ -11,6 +12,11 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['testUpdateSuccess']);
+
+// --- 로그인 정보 가져오기 ---
+const userInfoStore = useUserInfo();
+// computed를 사용해 user 객체가 null일 때도 에러 없이 안전하게 값을 가져옴
+const userType = computed(() => userInfoStore.user?.userType);
 
 const modalState = useModalState();
 
@@ -65,7 +71,7 @@ watch(
   () => props.lectureData,
   (newData) => {
     if (newData && newData.lecId && newData.testId) {
-      console.log('Props로 전달받은 데이터:', newData);
+      // console.log('Props로 전달받은 데이터:', newData);
 
       testId.value = newData.testId;
       lecId.value = newData.lecId;
@@ -84,20 +90,16 @@ watch(
     deep: true, // 객체 내부의 속성 변경까지 감지
   },
 );
-
-// onMounted(() => {
-//   console.log(props);
-// });
 </script>
 
 <template>
   <Teleport to="body">
-    <form @submit.prevent="updateTest">
-      <div class="modal-container">
+    <div class="modal-overlay">
+      <form @submit.prevent="updateTest" class="test-update-modal">
         <div class="modal-header">
           <h2>시험 상세</h2>
           <button
-            class="close-button"
+            class="close-btn"
             type="button"
             @click="modalState.$patch({ isOpen: false, type: 'test-create' })"
           >
@@ -105,7 +107,7 @@ watch(
           </button>
         </div>
 
-        <div class="modal-body">
+        <div class="modal-content">
           <table class="form-table">
             <tbody>
               <tr>
@@ -138,6 +140,7 @@ watch(
                     type="datetime-local"
                     id="start-datetime"
                     v-model="lecStartDate"
+                    :readonly="userType !== 'M'"
                     name="start-datetime"
                   />
                 </td>
@@ -149,6 +152,7 @@ watch(
                     type="datetime-local"
                     id="end-datetime"
                     v-model="lecEndDate"
+                    :readonly="userType !== 'M'"
                     name="end-datetime"
                   />
                 </td>
@@ -158,20 +162,161 @@ watch(
         </div>
 
         <div class="modal-footer">
-          <button class="btn-save" type="submit">수정</button>
+          <button v-if="userType === 'M'" class="btn btn-primary" type="submit">수정</button>
           <button
-            class="btn-cancel"
+            class="btn btn-secondary"
             type="button"
             @click="modalState.$patch({ isOpen: false, type: 'test-update' })"
           >
             취소
           </button>
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
   </Teleport>
 </template>
 
-<style>
-/* @import './styled.css'; */
+<style scoped>
+/* --- 1. 모달 배경(오버레이) --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* 약간 더 어둡게 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* --- 2. 모달 박스 --- */
+.user-management-modal {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 700px; /* 너비 조절 */
+  border: 1px solid #d1d5db;
+  /* form 태그이므로 display:flex 등을 직접 적용하지 않아도 자식들이 세로로 쌓임 */
+}
+
+/* --- 3. 모달 헤더 --- */
+.modal-header {
+  background-color: #475569; /* 어두운 슬레이트 색상 */
+  color: white;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.75rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: opacity 0.2s;
+}
+
+.close-btn:hover {
+  opacity: 0.8;
+}
+
+/* --- 4. 모달 본문 (콘텐츠) --- */
+.modal-content {
+  padding: 1.5rem;
+  background-color: #f8fafc;
+}
+
+.form-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.form-table td {
+  border: 1px solid #e2e8f0;
+  padding: 0.8rem;
+  vertical-align: middle;
+}
+
+.label-cell {
+  background-color: #f1f5f9;
+  font-weight: 600;
+  color: #334155;
+  width: 120px;
+  text-align: center;
+}
+
+.required-star {
+  color: #ef4444;
+  margin-left: 4px;
+}
+
+/* input, select 공통 스타일 */
+.modal-content input[type='text'],
+.modal-content input[type='datetime-local'],
+.modal-content select {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+.modal-content input:read-only {
+  background-color: #e5e7eb;
+  cursor: not-allowed;
+}
+
+/* --- 5. 모달 푸터 --- */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background-color: #f1f5f9;
+  border-top: 1px solid #e2e8f0;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+/* --- 6. 버튼 공통 스타일 --- */
+.btn {
+  padding: 0.6rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+  color: white;
+}
+.btn-primary:hover {
+  background-color: #2563eb;
+}
+
+.btn-secondary {
+  background-color: #6b7280;
+  color: white;
+}
+.btn-secondary:hover {
+  background-color: #4b5563;
+}
 </style>
