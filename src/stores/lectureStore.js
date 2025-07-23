@@ -26,5 +26,5 @@ export const useLectureStore = defineStore('lecture', () => {
     modalState.$patch({ isOpen: true, type: 'lecture-manage-plan' });
   }
 
-  return { selectedLecture, selectForEdit, prepareForCreate };
+  return { selectedLecture, selectForEdit, prepareForCreate, openLecturePlan };
 });

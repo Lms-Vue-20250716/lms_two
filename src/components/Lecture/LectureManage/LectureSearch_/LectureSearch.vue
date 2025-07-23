@@ -1,10 +1,8 @@
 <script setup>
 import router from '@/router';
 import { useLectureStore } from '@/stores/lectureStore';
-import { useModalState } from '@/stores/modalState';
 import { onMounted, ref } from 'vue';
 
-const modalState = useModalState();
 const lectureStore = useLectureStore();
 
 const searchTag = ref('lecName');
