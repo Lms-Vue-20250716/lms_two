@@ -1,6 +1,8 @@
 <script setup></script>
 
-<template></template>
+<template>
+  <div></div>
+</template>
 
 <style>
 @import './styled.css';
