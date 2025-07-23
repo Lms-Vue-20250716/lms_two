@@ -5,36 +5,29 @@ import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useModalState } from '@/stores/modalState';
 import LecturePlanModal from '../LectureModal_/LecturePlanModal.vue';
+import LectureRegister from '../LectureModal_/LectureRegister.vue';
+import { useLectureStore } from '@/stores/lectureStore';
+
+const lectureStore = useLectureStore();
 
 const route = useRoute();
 const lectureList = ref([]);
 const lectureCount = ref(0);
 const modalState = useModalState();
-const selectedLecture = ref(null);
 
 const lectureSearch = (cPage = 1) => {
   const param = new URLSearchParams(route.query);
   param.append('currentPage', cPage);
   param.append('pageSize', 5);
 
-  console.log(param);
+  // console.log(param);
 
   axios.post('/api/lecture/lectureManageListBody.do', param).then((res) => {
     lectureList.value = res.data.lectureManageList || [];
     lectureCount.value = res.data.lectureManageCnt || 0;
 
-    console.log(res.data);
+    // console.log(res.data);
   });
-};
-
-const lectureDetail = (lecture) => {
-  selectedLecture.value = lecture; // 객체 전체를 ref에 저장합니다.
-  modalState.$patch({ isOpen: true, type: 'lecture-list-detail' });
-};
-
-const openLecturePlan = (lecture) => {
-  selectedLecture.value = lecture; // 객체 전체를 ref에 저장합니다.
-  modalState.$patch({ isOpen: true, type: 'lecture-manage-plan' });
 };
 
 watch(
@@ -66,7 +59,10 @@ onMounted(() => {
       <tbody>
         <template v-if="lectureCount > 0">
           <tr v-for="lecture in lectureList" :key="lecture.lecId" class="lecture-table-row">
-            <td class="lecture-cell cursor-pointer hover:underline" @click="lectureDetail(lecture)">
+            <td
+              class="lecture-cell cursor-pointer hover:underline"
+              @click="lectureStore.selectForEdit(lecture)"
+            >
               {{ lecture.lecName }}
             </td>
             <td class="lecture-cell">{{ lecture.lecInstructorName }}</td>
@@ -80,7 +76,7 @@ onMounted(() => {
             <td class="lecture-cell">{{ lecture.lecRoomName }}</td>
             <td
               class="lecture-cell cursor-pointer hover:underline"
-              @click="openLecturePlan(lecture)"
+              @click="lectureStore.openLecturePlan(lecture)"
             >
               강의계획서 보기
             </td>
@@ -99,9 +95,14 @@ onMounted(() => {
       :on-page-change="lectureSearch"
     />
   </div>
+  <LectureRegister
+    v-if="modalState.isOpen && modalState.type === 'lecture-manage-register'"
+    :lecture-data="lectureStore.selectedLecture"
+    @lecture-manage-register-success="lectureSearch()"
+  />
   <LecturePlanModal
     v-if="modalState.isOpen && modalState.type === 'lecture-manage-plan'"
-    :lecture-data="selectedLecture"
+    :lecture-data="lectureStore.selectedLecture"
     @post-success="lectureSearch()"
   />
 </template>
