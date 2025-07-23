@@ -217,6 +217,8 @@ const validateForm = () => {
         />
       </label>
 
+
+
       <label>
         상세주소* :
         <input v-model="detail.detailAddress" type="text" name="companyDetailAddress" />

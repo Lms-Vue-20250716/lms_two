@@ -1,50 +1,54 @@
 @import 'tailwindcss';
 
-
-.companyModal-overlay {
+.counsel-modal-overlay {
   @apply fixed inset-0 flex items-center justify-center bg-gray-500/50 font-bold backdrop-blur-xs;
 }
-
-.companyModal-container {
-  @apply relative w-[400px] rounded-lg bg-white p-5 opacity-100 shadow-lg;
+/* whitespace-nowrap 자동 줄바꿈 방지 */
+.counsel-modal-container {
+  @apply relative w-auto rounded-lg bg-white p-5 whitespace-nowrap opacity-100 shadow-lg;
 }
 
-.companyModal-form label {
+.counsel-modal-form label {
   @apply mb-4 flex flex-col;
 }
 
-.companyModal-form input[type='text'] {
+.counsel-modal-form input[type='text'] {
   @apply mt-1 rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none;
 }
 
-.companyModal-form input[type='number'] {
-  @apply mt-1 rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none;
+.counsel-modal-form input[type='file'] {
+  @apply hidden;
 }
 
-.companyModal-form input[type='date'] {
-  @apply mt-1 rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none;
-}
-
-.postcode-button {
-  @apply mt-2 inline-block cursor-pointer rounded bg-sky-500 px-4 py-2 text-white shadow transition duration-200 hover:bg-sky-600 hover:shadow-md active:translate-y-0.5 active:bg-sky-700;
-}
-
-.preview-image {
+.counsel-preview-image {
   @apply h-[100px] w-[100px] rounded-md border border-gray-300 object-cover;
 }
 
-.no-image {
+.counsel-no-image {
   @apply flex h-[100px] w-[100px] items-center justify-center rounded-md border border-gray-300 bg-gray-100 text-sm text-gray-500;
 }
 
-.img-label {
+.counsel-img-label {
   @apply mt-2 cursor-pointer rounded bg-gray-300 px-6 py-2 text-gray-900 transition-all duration-200 ease-in-out hover:bg-green-500 hover:text-white active:translate-y-0.5 active:transform active:bg-green-600 active:shadow-inner;
 }
 
-.button-container {
+.counsel-button-container {
   @apply mt-4 space-x-2 text-right;
 }
 
-.button-container button {
+.counsel-button-container button {
   @apply cursor-pointer rounded-md px-4 py-2 transition-colors duration-200 first:bg-blue-900 first:text-white last:bg-gray-300 last:text-gray-700 first:hover:bg-blue-950 last:hover:bg-gray-400;
+}
+
+/* 테이블 관련 */
+.counsel-modal-table {
+  @apply w-full table-auto border-collapse;
+}
+
+.counsel-modal-table-th {
+  @apply border bg-[#c0c2d0] p-2 text-left whitespace-nowrap;
+}
+
+.counsel-modal-table-td {
+  @apply border p-2;
 }

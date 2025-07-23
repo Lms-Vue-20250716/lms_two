@@ -1,6 +1,5 @@
 import Login from '@/views/Auth/Login.vue';
 import DashBoard from '@/views/DashBoard/DashBoard.vue';
-import Student from '@/views/Manage/Student.vue';
 import NotFound from '@/views/NotFound/NotFound.vue';
 import LearningMaterials from '@/views/Support/LearningMaterials.vue';
 import LectureSurvey from '@/views/Support/LectureSurvey.vue';
@@ -17,7 +16,13 @@ import LectureManage from '@/views/Lecture/LectureManage.vue';
 import LectureAttendance from '@/views/Lecture/LectureAttendance.vue';
 import Tutor from '@/views/Manage/Tutor.vue';
 import Company from '@/views/System/Company.vue';
+
 import Commoncode from '@/views/System/Commoncode.vue';
+
+import Counsel from '@/views/Manage/Counsel.vue';
+import LectureTest from '@/views/Lecture/LectureTest.vue';
+import Student from '@/views/Manage/Student.vue';
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -97,6 +102,11 @@ const router = createRouter({
               name: 'tutor',
               component: Tutor,
             },
+            {
+              path: 'counsel',
+              name: 'counsel',
+              component: Counsel,
+            },
           ],
         },
         {
@@ -117,6 +127,11 @@ const router = createRouter({
               path: 'attendance',
               name: 'attendance',
               component: LectureAttendance,
+            },
+            {
+              path: 'test-info',
+              name: 'test-info',
+              component: LectureTest,
             },
           ],
         },

@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 
-.company-container {
+.lecture-container {
   @apply flex w-full flex-col items-end justify-center pt-1 pr-20 text-center font-semibold text-black;
 
   button {
@@ -14,16 +14,12 @@
 
 /* 1170px 이하일 때의 스타일 */
 @media (max-width: 1170px) {
-  .company-container {
+  .lecture-container {
     @apply flex-row items-center gap-4;
 
     button,
     input {
-
-      @apply mt-0; /* 상단 여백 제거 제거*/
-
       @apply mt-0; /* 상단 여백 제거 */
-
     }
 
     input {
