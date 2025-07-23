@@ -24,8 +24,8 @@ const handleSearch = () => {
     return;
   }
   if (searchStDate.value && searchEdDate.value) {
-    const from = new Date(searchStDate);
-    const to = new Date(searchEdDate);
+    const from = new Date(searchStDate.value);
+    const to = new Date(searchEdDate.value);
 
     if (to < from) {
       alert('종료일이 시작일 보다 더 빠를 수 없습니다!');
