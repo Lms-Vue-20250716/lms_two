@@ -16,9 +16,13 @@ import LectureManage from '@/views/Lecture/LectureManage.vue';
 import LectureAttendance from '@/views/Lecture/LectureAttendance.vue';
 import Tutor from '@/views/Manage/Tutor.vue';
 import Company from '@/views/System/Company.vue';
+
+import Commoncode from '@/views/System/Commoncode.vue';
+
 import Counsel from '@/views/Manage/Counsel.vue';
 import LectureTest from '@/views/Lecture/LectureTest.vue';
 import Student from '@/views/Manage/Student.vue';
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -135,6 +139,11 @@ const router = createRouter({
           path: 'system',
           name: 'system',
           children: [
+            {
+              path: 'commoncode',
+              name: 'commoncode',
+              component: Commoncode,
+            },
             {
               path: 'classroom',
               name: 'classroom',
