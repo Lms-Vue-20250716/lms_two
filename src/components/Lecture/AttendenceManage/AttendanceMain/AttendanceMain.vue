@@ -1,4 +1,5 @@
 <script setup>
+import { formatTimestampToDate } from '@/common/common_time';
 import PageNavigation from '@/components/common/PageNavigation.vue';
 import axios from 'axios';
 import { onMounted, ref, watch } from 'vue';
@@ -10,14 +11,37 @@ const attendanceCount = ref(0);
 // const attendState = ref('');
 
 /**
- * [추가] 출석 상태 코드를 한글 텍스트로 변환하는 객체입니다.
- * 템플릿에서 v-if를 여러 번 쓰는 대신, 이 객체를 사용하여 코드를 간결하게 만듭니다.
+ * 출석/퇴실 처리 비즈니스 로직 (서버 기준)
+ *
+ * [출석 처리: /attendanceEnter.do]
+ * - 요청 시점 기준, 서버에서 아래와 같이 상태 결정
+ * - 09:10 이전: 'E' (출석)
+ * - 13:00 이전: 'L' (지각)
+ * - 13:00 이후: 'F' (결석)
+ *
+ * [퇴실 처리: /attendanceOut.do]
+ * - 이전 출석 상태에 따라 최종 상태 결정
+ * - 이전 상태 'E' (출석)
+ * - 13:00 이전 퇴실 -> 'F' (결석)
+ * - 18:00 이전 퇴실 -> 'J' (조퇴)
+ * - 18:00 이후 퇴실 -> 'E' (정상 완료)
+ * - 이전 상태 'L' (지각)
+ * - 13:00 이전 퇴실 -> 'F' (결석)
+ * - 13:00 이후 퇴실 -> 'L' (지각으로 완료)
+ * - 이전 상태 'F', 'J' -> 'F' (결석)
  */
 const attendanceStatusText = {
-  E: '출석',
-  L: '지각',
-  F: '결석',
-  J: '조퇴',
+  E: '출석', //early
+  L: '지각', //late
+  F: '결석', //fail
+  J: '조퇴', //joe-tae instead of 'leave early'
+};
+
+const attendanceStatusClass = {
+  E: 'status-e', // 출석 (완료 시)
+  L: 'status-l', // 지각
+  F: 'status-f', // 결석
+  J: 'status-j', // 조퇴
 };
 
 const attendanceSearch = async (cPage = 1) => {
@@ -29,29 +53,10 @@ const attendanceSearch = async (cPage = 1) => {
     attendanceList.value = res.data.list || [];
     attendanceCount.value = res.data.count || 0;
 
-    console.log(res.data);
-    console.log(attendanceList.value);
-    console.log(attendanceCount.value);
+    // console.log(res.data);
+    // console.log(attendanceList.value);
+    // console.log(attendanceCount.value);
   });
-};
-
-/**
- * 타임스탬프를 'YYYY-MM-DD' 형식의 문자열로 변환하는 함수입니다.
- * @param {number} timestamp - 변환할 타임스탬프 숫자
- * @returns {string} 포맷팅된 날짜 문자열
- */
-const formatDate = (timestamp) => {
-  // 타임스탬프 값이 유효하지 않으면 빈 문자열을 반환합니다.
-  if (!timestamp) return '';
-
-  const date = new Date(timestamp);
-  const year = date.getFullYear();
-  // getMonth()는 0부터 시작하므로 1을 더하고, 10보다 작으면 앞에 '0'을 붙여줍니다.
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  // getDate()가 10보다 작으면 앞에 '0'을 붙여줍니다.
-  const day = String(date.getDate()).padStart(2, '0');
-
-  return `${year}-${month}-${day}`;
 };
 
 /**
@@ -121,35 +126,70 @@ onMounted(() => {
             class="attendance-table-row"
           >
             <td class="attendance-cell">{{ attendance.lecId }}</td>
-            <td class="attendance-cell cursor-pointer hover:underline">
+            <td class="attendance-cell">
               {{ attendance.lecName }}
             </td>
-            <td class="attendance-cell">{{ formatDate(attendance.lecStartDate) }}</td>
-            <td class="attendance-cell">{{ formatDate(attendance.lecEndDate) }}</td>
+            <td class="attendance-cell">{{ formatTimestampToDate(attendance.lecStartDate) }}</td>
+            <td class="attendance-cell">{{ formatTimestampToDate(attendance.lecEndDate) }}</td>
             <td class="attendance-cell">{{ attendance.roomName }}</td>
             <td class="attendance-action-cell">
-              <!-- 1. 아직 출석하지 않은 상태 (attendState가 없는 경우) -->
               <button
-                v-if="!attendance.attendState"
-                class="attendance-button attend"
-                @click="handleAttendanceCheck(attendance.lecId)"
-              >
-                출석
-              </button>
-
-              <!-- 2. 출석은 했지만, 아직 퇴실하지 않은 상태 -->
-              <button
-                v-else-if="attendance.attendState && !attendance.attendEnddate"
+                v-if="
+                  (attendance.attendState === 'E' || attendance.attendState === 'L') &&
+                  !attendance.attendEnddate
+                "
                 class="attendance-button leave"
                 @click="handleAttendanceOut(attendance.lecId)"
               >
                 퇴실
               </button>
 
-              <!-- 3. 출석과 퇴실이 모두 완료된 상태 -->
-              <span v-else>
+              <button
+                v-else-if="!attendance.attendState"
+                class="attendance-button attend"
+                @click="handleAttendanceCheck(attendance.lecId)"
+              >
+                출석
+              </button>
+
+              <button
+                v-else
+                :class="['attendance-button', attendanceStatusClass[attendance.attendState]]"
+              >
+                {{ attendanceStatusText[attendance.attendState] }}
+              </button>
+              <!-- <button
+                v-if="attendance.attendState && attendance.attendEnddate"
+                class="attendance-button leave"
+              >
                 {{ attendanceStatusText[attendance.attendState] || '완료' }}
-              </span>
+              </button>
+
+              <button
+                v-else-if="
+                  (attendance.attendState === 'E' || attendance.attendState === 'L') &&
+                  !attendance.attendEnddate
+                "
+                class="attendance-button leave"
+                @click="handleAttendanceOut(attendance.lecId)"
+              >
+                퇴실
+              </button>
+
+              <button
+                v-else-if="attendance.attendState === 'F' || attendance.attendState === 'J'"
+                class="attendance-button other"
+              >
+                {{ attendanceStatusText[attendance.attendState] }}
+              </button>
+
+              <button
+                v-else
+                class="attendance-button attend"
+                @click="handleAttendanceCheck(attendance.lecId)"
+              >
+                출석
+              </button> -->
             </td>
           </tr>
         </template>

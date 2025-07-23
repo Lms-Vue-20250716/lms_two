@@ -39,19 +39,38 @@
   @apply m-0 h-4/5 w-4/5 cursor-pointer rounded border-none py-2 font-bold text-white;
 }
 
+/* --- 액션 버튼 (클릭 가능) --- */
 .attendance-button.attend {
-  /* Tailwind JIT 컴파일러가 인식할 수 있도록 임의 값을 사용합니다. */
-  @apply bg-[#5367d9];
-}
-
-.attendance-button.attend:hover {
-  @apply hover:bg-[#4556b3];
+  /* 출석 버튼 */
+  @apply bg-blue-600 hover:bg-blue-700;
 }
 
 .attendance-button.leave {
-  @apply bg-[#d95e53];
+  /* 퇴실 버튼 */
+  @apply bg-red-500 hover:bg-red-600;
 }
 
-.attendance-button.leave:hover {
-  @apply hover:bg-[#b84f46];
+/* --- 상태 표시 버튼 (클릭 불가) --- */
+.attendance-button.status-e {
+  /* 정상 출석 완료 */
+  @apply cursor-default bg-green-500;
+  pointer-events: none;
+}
+
+.attendance-button.status-l {
+  /* 지각 */
+  @apply cursor-default bg-orange-500;
+  pointer-events: none;
+}
+
+.attendance-button.status-j {
+  /* 조퇴 */
+  @apply cursor-default bg-sky-500;
+  pointer-events: none;
+}
+
+.attendance-button.status-f {
+  /* 결석 */
+  @apply cursor-default bg-gray-500;
+  pointer-events: none;
 }
