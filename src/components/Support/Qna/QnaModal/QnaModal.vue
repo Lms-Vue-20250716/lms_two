@@ -214,6 +214,11 @@ onUnmounted(() => {
               <template v-if="lecOptions.length > 0">
                 <option v-for="opt in lecOptions" :key="opt.value" :value="opt.value">
                   {{ opt.label }}
+                  =======
+                </option>
+
+                <option v-for="lec in lecOptions" :key="lec.lecId" :value="lec.lecId">
+                  {{ lec.lecName }}
                 </option>
 
                 <option v-for="lec in lecOptions" :key="lec.lecId" :value="lec.lecId">
