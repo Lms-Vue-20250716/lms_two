@@ -4,14 +4,13 @@ import { useModalState } from '@/stores/modalState';
 import axios from 'axios';
 import { computed, ref, watch } from 'vue';
 
+// --- 부모 컴포넌트로 부터 받은 데이터
 const props = defineProps({
   lectureData: {
     type: Object,
     default: () => ({}), // 기본값은 빈 객체
   },
 });
-
-const emit = defineEmits(['postSuccess']);
 
 // --- 로그인 정보 가져오기 ---
 const userInfoStore = useUserInfo();
@@ -24,12 +23,11 @@ const modalState = useModalState();
 const detailProps = ref({});
 
 // --- 서버로부터 받은 데이터
-const isLectureRegistrationAvailable = ref('');
 const lectureDetail = ref({});
 
 // --- 모달에 뿌려질 데이터
 // 1) 강의 상세
-const lecId = ref(''); //강의ID
+const lecId = ref(0); //강의ID
 const lecName = ref(''); //강의
 const lecInstructorName = ref(''); //강사
 const lecRoomName = ref(''); //강의실
@@ -49,15 +47,50 @@ const lecSpecifics = ref(''); //강의 기타사항
 // 3) N주차별 학습 목표
 const lecWeekPlanList = ref([]);
 
-const searchDetail = (lecId) => {
+//lecWeekPlanList가 비어있어도 lecSectionCnt만큼 테이블의 row가 만들어져야 한다.
+const displayWeekPlan = computed(() => {
+  // lecSectionCnt나 lecWeekPlanList가 준비되지 않았으면 빈 배열 반환
+  if (lecSectionCnt.value <= 0) {
+    return [];
+  }
+
+  // lecWeekPlanList를 주차(lecWeekRound) 기준으로 쉽게 찾을 수 있도록 Map으로 변환
+  const planMap = new Map(lecWeekPlanList.value.map((plan) => [plan.lecWeekRound, plan]));
+
+  const mergedList = [];
+  // 1주차부터 lecSectionCnt 만큼 반복
+  for (let i = 1; i <= lecSectionCnt.value; i++) {
+    // 해당 주차의 데이터가 Map에 있는지 확인
+    if (planMap.has(i)) {
+      // 데이터가 있으면 해당 객체를 추가
+      mergedList.push(planMap.get(i));
+    } else {
+      // 데이터가 없으면 v-model이 바인딩될 수 있도록 기본 구조를 가진 빈 객체 추가
+      mergedList.push({
+        lecWeekRound: i,
+        lecWeekGoal: '',
+        lecWeekContent: '',
+        lecWeekPlanId: '',
+      });
+    }
+  }
+
+  return mergedList;
+});
+
+// --- toggle save || update
+const isUpdate = ref(false);
+
+const searchDetail = (lecId, lecInstructorId) => {
   try {
     const param = new URLSearchParams();
     param.append('lecId', lecId);
+    param.append('lecInstructorId', lecInstructorId);
 
-    axios.post('/api/lecture/lectureDetail.do', param).then((res) => {
+    axios.post('/api/lecture/lectureManagePlanDetail.do', param).then((res) => {
       console.log(res.data);
-      isLectureRegistrationAvailable.value = res.data.isLectureRegistrationAvailable;
-      lectureDetail.value = res.data.lectureDetailValue;
+
+      lectureDetail.value = res.data.lectureManagePlanDetailValue;
 
       lecName.value = lectureDetail.value.lecName;
       lecInstructorName.value = lectureDetail.value.lecInstructorName;
@@ -75,6 +108,10 @@ const searchDetail = (lecId) => {
       lecSpecifics.value = lectureDetail.value.lecSpecifics;
 
       lecWeekPlanList.value = lectureDetail.value.lecWeekPlanList;
+
+      if (lecWeekPlanList.value.length > 0) {
+        isUpdate.value = true;
+      }
     });
   } catch (err) {
     console.log(err);
@@ -83,33 +120,49 @@ const searchDetail = (lecId) => {
   }
 };
 
-const courseRegister = async () => {
+const LecturePlanSave = async () => {
   try {
-    const params = new URLSearchParams();
-    params.append('lecId', lecId.value || detailProps.value.lecId);
-    params.append('studentId', loginId.value);
+    //validation check
 
-    const response = await axios.post('/api/lecture/lectureStdRegister.do', params);
+    //전처리
 
-    console.log(response);
+    //param에 담기
+    //? - hidden field?
 
-    const resultData = response.data;
+    // const params = new URLSearchParams();
+    // params.append('lecId', lecId.value || detailProps.value.lecId);
+    // params.append('lecGoal', lecGoal.value);
+    // params.append('lecContent', lecContent.value);
+    // params.append('lecSpecifics', lecSpecifics.value);
+    // params.append('lecManageWeekPlanList', displayWeekPlan.value);
 
-    if (resultData.result === 'success') {
-      alert('신청되었습니다.');
-      modalState.$patch({ isOpen: false, type: 'lecture-list-detail' });
-    } else if (resultData.result === 'loginIdNotExist') {
-      alert('학생정보가 등록되어 있지 않아 수강 신청할 수 없습니다.\n관리자에게 문의하시오.');
-    } else if (resultData.result === 'lecIdAlreadyExist') {
-      alert('이미 수강 신청한 강의입니다.');
-    } else if (resultData.result === 'lecExceedsCapacity') {
-      alert('현재 수강 인원이 모두 마감되었습니다. 다른 강의를 확인해 주세요.');
+    const params = {
+      lecId: lecId.value || detailProps.value.lecId,
+      lecGoal: lecGoal.value,
+      lecContent: lecContent.value,
+      lecSpecifics: lecSpecifics.value,
+      lecManageWeekPlanList: displayWeekPlan.value,
+    };
+
+    //send request
+    if (isUpdate.value) {
+      const response = await axios.post('/api/lecture/lectureManagePlanSave.do', params);
+      if (response.data.result === 'success') {
+        alert('저장되었습니다.');
+      } else if (response.data.result === 'fail') {
+        alert('저장된 내용이 없습니다.');
+      }
     } else {
-      alert('알 수 없는 오류로 수강 신청에 실패했습니다.');
+      const response = await axios.post('/api/lecture/lectureManagePlanSave.do', params);
+      if (response.data.result === 'success') {
+        alert('수정되었습니다.');
+      }
     }
+
+    modalState.$patch({ isOpen: false, type: 'lecture-manage-plan' });
   } catch (err) {
     console.log(err);
-    alert('수강 신청 실패!');
+    alert('오류로 인한 실패!');
     return;
   }
 };
@@ -120,7 +173,7 @@ watch(
     if (newData) {
       // props를 직접 수정하지 않기 위해 객체를 복사하여 사용
       detailProps.value = { ...newData };
-      searchDetail(detailProps.value.lecId);
+      searchDetail(detailProps.value.lecId, detailProps.value.lecInstructorId);
     }
   },
   {
@@ -137,7 +190,7 @@ watch(
           <h2>강의 상세 및 계획서</h2>
           <button
             class="close-btn"
-            @click="modalState.$patch({ isOpen: false, type: 'lecture-list-detail' })"
+            @click="modalState.$patch({ isOpen: false, type: 'lecture-manage-plan' })"
           >
             &times;
           </button>
@@ -154,7 +207,7 @@ watch(
                 </tr>
                 <tr>
                   <th>강사</th>
-                  <td>{{ lecInstructorName }}</td>
+                  <input v-model="lecInstructorName" />
                   <th>강의실<span class="required-star">*</span></th>
                   <td>{{ lecRoomName }}</td>
                 </tr>
@@ -185,23 +238,17 @@ watch(
 
             <div class="plan-item">
               <h4>강의목표<span class="required-star">*</span></h4>
-              <div class="content-box">
-                {{ lecGoal || '아직 입력된 정보가 없습니다.' }}
-              </div>
+              <textarea class="content-box" v-model="lecGoal"> </textarea>
             </div>
 
             <div class="plan-item">
               <h4>강의내용<span class="required-star">*</span></h4>
-              <div class="content-box">
-                {{ lecContent || '아직 입력된 정보가 없습니다.' }}
-              </div>
+              <textarea class="content-box" v-model="lecContent"> </textarea>
             </div>
 
             <div class="plan-item">
               <h4>강의기타사항<span class="required-star">*</span></h4>
-              <div class="content-box">
-                {{ lecSpecifics || '아직 입력된 정보가 없습니다.' }}
-              </div>
+              <textarea class="content-box" v-model="lecSpecifics"> </textarea>
             </div>
 
             <table class="plan-table">
@@ -213,13 +260,13 @@ watch(
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="week in lecWeekPlanList" :key="week.week">
+                <tr v-for="(week, index) in displayWeekPlan" :key="index">
                   <td>{{ week.lecWeekRound }}주차</td>
-                  <td class="align-left">{{ week.lecWeekGoal }}</td>
-                  <td class="align-left">{{ week.lecWeekContent }}</td>
+                  <td><input class="align-left" v-model="week.lecWeekGoal" /></td>
+                  <td><input class="align-left" v-model="week.lecWeekContent" /></td>
                 </tr>
-                <tr v-if="!lecWeekPlanList || lecWeekPlanList.length === 0">
-                  <td colspan="3" class="empty-message">주차별 계획 정보가 없습니다.</td>
+                <tr v-if="!displayWeekPlan || displayWeekPlan.length === 0">
+                  <td colspan="3" class="empty-message">강의 주차 정보가 없습니다.</td>
                 </tr>
               </tbody>
             </table>
@@ -227,12 +274,12 @@ watch(
         </div>
 
         <div class="modal-footer">
-          <button class="btn btn-primary" @click="courseRegister" v-if="userType === 'S'">
-            신청
+          <button class="btn btn-primary" @click="LecturePlanSave">
+            {{ isUpdate ? '수정' : '신청' }}
           </button>
           <button
             class="btn btn-secondary"
-            @click="modalState.$patch({ isOpen: false, type: 'lecture-list-detail' })"
+            @click="modalState.$patch({ isOpen: false, type: 'lecture-manage-plan' })"
           >
             닫기
           </button>
@@ -337,6 +384,11 @@ watch(
   border: 1px solid #e2e8f0;
   padding: 0.8rem;
 }
+.detail-table input {
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  padding: 0.8rem;
+}
 .detail-table th {
   background-color: #f1f5f9;
   font-weight: 600;
@@ -375,6 +427,19 @@ watch(
   white-space: pre-wrap; /* 줄바꿈과 공백을 그대로 표시 */
 }
 
+textarea.content-box {
+  width: 100%;
+  background-color: white;
+  padding: 1rem;
+  min-height: 80px;
+  border: 1px solid #d1d5db;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  white-space: pre-wrap; /* 줄바꿈과 공백을 그대로 표시 */
+}
+
 /* --- 주차별 계획 테이블 --- */
 .plan-table {
   width: 100%;
@@ -386,17 +451,23 @@ watch(
 .plan-table td {
   border: 1px solid #d1d5db;
   padding: 0.8rem;
+  background-color: white;
   text-align: center;
 }
 .plan-table th {
   background-color: #f1f5f9;
   font-weight: 600;
 }
-.plan-table td {
-  background-color: white;
+.plan-table input {
+  padding: 0;
+  width: 100%;
+  border: 1px solid #d1d5db;
+  /* padding: 0.8rem; */
+  text-align: center;
 }
 .plan-table .align-left {
   text-align: left;
+  padding: 0;
 }
 .empty-message {
   padding: 2rem;
