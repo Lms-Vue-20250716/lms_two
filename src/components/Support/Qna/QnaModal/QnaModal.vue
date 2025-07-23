@@ -95,10 +95,11 @@ const fetchLectureList = async () => {
 // 상세조회 (수정/답변)
 const fetchDetail = async () => {
   if (props.detailId === 0) return;
+
   const param = new URLSearchParams();
   param.append('qnaId', props.detailId);
-
   const res = await axios.post('/api/support/getQnaDetail.do', param);
+
   if (res.data) {
     detail.value = {
       qnaId: res.data.qnaId,
@@ -134,7 +135,7 @@ const handleSubmit = async () => {
   const formData = new URLSearchParams();
   formData.append('qnaId', detail.value.qnaId);
   formData.append('lecName', detail.value.lecName);
-  formData.append('loginId', props.loginId);
+  // formData.append('loginId', props.loginId);
   formData.append('qnaTitle', detail.value.qnaTitle);
   formData.append('qnaContent', detail.value.qnaContent);
 
@@ -213,6 +214,11 @@ onUnmounted(() => {
               <template v-if="lecOptions.length > 0">
                 <option v-for="opt in lecOptions" :key="opt.value" :value="opt.value">
                   {{ opt.label }}
+                  =======
+                </option>
+
+                <option v-for="lec in lecOptions" :key="lec.lecId" :value="lec.lecId">
+                  {{ lec.lecName }}
                 </option>
               </template>
               <template v-else>
