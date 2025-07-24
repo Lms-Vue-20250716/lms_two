@@ -13,8 +13,9 @@ const avgResult = ref('');
 const fetchSurveyDetail = async () => {
   try {
     const { lecId, loginId } = props.surveyData;
-    const res = await axios.get('/support/getSurveyDetail.do', { params: { lecId, loginId } });
+    const res = await axios.get('/api/support/getSurveyDetail.do', { params: { lecId, loginId } });
     surveyList.value = res.data.detail || [];
+    console.log('Fetched surveyList:', surveyList.value);
     avgResult.value =
       surveyList.value.reduce((sum, item) => sum + (item.surveyResult || 0), 0) /
         surveyList.value.length || 0;

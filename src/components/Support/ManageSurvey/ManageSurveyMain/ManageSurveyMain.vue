@@ -11,6 +11,20 @@ const currentPage = ref(1);
 const pageSize = ref(10);
 const totalItems = ref(0);
 
+// Enum을 기반으로 avgScore를 텍스트로 변환하는 함수
+const getScoreText = (score) => {
+  const scoreMap = {
+    1: '매우나쁨',
+    2: '나쁨',
+    3: '보통',
+    4: '좋음',
+    5: '매우좋음',
+    null: '평가 없음',
+    undefined: '평가 없음',
+  };
+  return scoreMap[score] || '평가 없음';
+};
+
 const fetchData = async () => {
   if (!selectedTab.value) return; // 아무 것도 선택 안 했을 경우 빠르게 리턴
 
@@ -33,6 +47,9 @@ const fetchData = async () => {
         rate: item.coursesStudentCount
           ? ((item.respondentCount / item.coursesStudentCount) * 100).toFixed(1)
           : '0.0',
+        avgScore: getScoreText(item.avgScore)
+          ? getScoreText(item.avgScore).toString()
+          : '평가 없음',
       }));
       totalItems.value = res.data.resultCnt || 0;
     }
@@ -79,10 +96,10 @@ const openDetailModal = (item) => {
             <th>과목명</th>
             <th v-if="selectedTab === 'completed'">학생 ID</th>
             <th v-if="selectedTab === 'completed'">학생명</th>
-            <th v-if="selectedTab === 'result'">강사명</th>
-            <th v-if="selectedTab === 'result'">평균 점수</th>
-            <th v-if="selectedTab === 'result'">응답 인원</th>
-            <th v-if="selectedTab === 'result'">응답률(%)</th>
+            <th v-if="selectedTab === 'result'">강사이름</th>
+            <th v-if="selectedTab === 'result'">평균</th>
+            <th v-if="selectedTab === 'result'">응답인원</th>
+            <th v-if="selectedTab === 'result'">완료율(%)</th>
             <th>관리</th>
           </tr>
         </thead>
