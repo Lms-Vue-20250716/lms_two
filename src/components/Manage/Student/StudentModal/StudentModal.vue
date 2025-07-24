@@ -34,8 +34,8 @@ const searchDetail = async () => {
 </script>
 
 <template>
-  <div class="student-modal-overlay">
-    <div class="student-modal-container">
+  <div class="student-manage-modal-overlay">
+    <div class="student-manage-modal-container">
       <div class="flex justify-between items-center bg-[#494c6b] text-white p-3">
         <h2 class="text-lg font-medium">학생 상세</h2>
         <button @click="modalState.$patch({ isOpen: false, type: 'null' })" class="text-2xl">×</button>
@@ -46,28 +46,29 @@ const searchDetail = async () => {
           <table class="w-full border-collapse table-auto">
             <tbody>
               <tr>
-                <th class="student-modal-table-th">학생 ID</th>
-                <td class="student-modal-table-td">{{ detail.studentId }}</td>
-                <th class="student-modal-table-th">이름</th>
-                <td class="student-modal-table-td">{{ detail.studentName }}</td>
+                <th class="student-manage-modal-table-th">학생 ID</th>
+                <td class="student-manage-modal-table-td">{{ detail.studentId }}</td>
+                <th class="student-manage-modal-table-th">이름</th>
+                <td class="student-manage-modal-table-td">{{ detail.studentName }}</td>
               </tr>
               <tr>
-                <th class="student-modal-table-th">학번</th>
-                <td class="student-modal-table-td">{{ detail.studentNumber }}</td>
-                <th class="student-modal-table-th">연락처</th>
-                <td class="student-modal-table-td">{{ detail.studentHp }}</td>
+                <th class="student-manage-modal-table-th">학번</th>
+                <td class="student-manage-modal-table-td">{{ detail.studentNumber }}</td>
+                <th class="student-manage-modal-table-th">연락처</th>
+                <td class="student-manage-modal-table-td">{{ detail.studentHp }}</td>
               </tr>
               <tr>
-                <th class="student-modal-table-th">이메일</th>
-                <td class="student-modal-table-td break-all">{{ detail.studentEmail }}</td>
-                <th class="student-modal-table-th">생일</th>
-                <td class="student-modal-table-td">{{ detail.studentBirthday }}</td>
+                <th class="student-manage-modal-table-th">이메일</th>
+                <td class="student-manage-modal-table-td break-all">{{ detail.studentEmail }}</td>
+                <th class="student-manage-modal-table-th">생일</th>
+                <td class="student-manage-modal-table-td">{{ detail.studentBirthday }}</td>
               </tr>
               <tr>
-                <th class="student-modal-table-th">취업 상태</th>
-                <td class="student-modal-table-td">{{ detail.studentEmpStatus === 'Y' ? '취업' : '미취업' }}</td>
-                <th class="student-modal-table-th">재학 상태</th>
-                <td class="student-modal-table-td">{{ detail.statusYn === 'W' ? '승인 대기중' : detail.statusYn === 'Y' ?
+                <th class="student-manage-modal-table-th">취업 상태</th>
+                <td class="student-manage-modal-table-td">{{ detail.studentEmpStatus === 'Y' ? '취업' : '미취업' }}</td>
+                <th class="student-manage-modal-table-th">재학 상태</th>
+                <td class="student-manage-modal-table-td">{{ detail.statusYn === 'W' ? '승인 대기중' : detail.statusYn ===
+                  'Y' ?
                   '재학' : '탈퇴' }}
                 </td>
               </tr>
@@ -76,29 +77,31 @@ const searchDetail = async () => {
         </div>
         <div>
           <h3 class="font-medium mb-2">강의 목록</h3>
-          <table class="student-modal-table">
+          <table class="student-manage-modal-table">
             <thead>
               <tr>
-                <th class="student-modal-table-th">강의 번호</th>
-                <th class="student-modal-table-th">강의명</th>
-                <th class="student-modal-table-th">개강 일자</th>
-                <th class="student-modal-table-th">종강 일자</th>
+                <th class="student-manage-modal-table-th">강의 번호</th>
+                <th class="student-manage-modal-table-th">강의명</th>
+                <th class="student-manage-modal-table-th">개강 일자</th>
+                <th class="student-manage-modal-table-th">종강 일자</th>
               </tr>
             </thead>
             <tbody>
               <template v-if="lectureList.length > 0">
                 <tr v-for="lecture in lectureList" :key="lecture.lecId">
-                  <td class="student-modal-table-td">{{ lecture.lecId }}</td>
-                  <td class="student-modal-table-td">{{ lecture.lectureName }}</td>
-                  <td class="student-modal-table-td">{{ new Date(lecture.lectureStartDate).toISOString().split('T')[0]
+                  <td class="student-manage-modal-table-td">{{ lecture.lecId }}</td>
+                  <td class="student-manage-modal-table-td">{{ lecture.lectureName }}</td>
+                  <td class="student-manage-modal-table-td">{{ new
+                    Date(lecture.lectureStartDate).toISOString().split('T')[0]
                     }}</td>
-                  <td class="student-modal-table-td">{{ new Date(lecture.lectureEndDate).toISOString().split('T')[0] }}
+                  <td class="student-manage-modal-table-td">{{ new
+                    Date(lecture.lectureEndDate).toISOString().split('T')[0] }}
                   </td>
                 </tr>
               </template>
               <template v-else>
                 <tr>
-                  <td colspan="4" class="student-modal-table-td text-center">수강 강의 목록이 없습니다.</td>
+                  <td colspan="4" class="student-manage-modal-table-td text-center">수강 강의 목록이 없습니다.</td>
                 </tr>
               </template>
             </tbody>
