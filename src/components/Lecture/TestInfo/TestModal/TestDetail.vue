@@ -13,6 +13,8 @@ const props = defineProps({
   },
 });
 
+const isLoading = ref(true);
+
 // --- 로그인 정보 가져오기 ---
 const userInfoStore = useUserInfo();
 // computed를 사용해 user 객체가 null일 때도 에러 없이 안전하게 값을 가져옴
@@ -46,6 +48,7 @@ const isUpdateMode = ref(false);
 const isEditing = ref([]); // 각 문제의 수정 상태를 담을 배열
 
 const searchTestDetail = async () => {
+  isLoading.value = true;
   try {
     const param = {
       testId: testId.value,
@@ -120,6 +123,8 @@ const searchTestDetail = async () => {
     }
   } catch (err) {
     console.log(err);
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -381,7 +386,10 @@ watch(
 <template>
   <Teleport to="body">
     <div class="modal-overlay">
-      <form @submit.prevent="saveQuestionList" class="test-detail-modal">
+      <form
+        @submit.prevent="saveQuestionList"
+        :class="['test-detail-modal', { 'is-loading': isLoading }]"
+      >
         <div v-if="userType === 'M'">
           <div class="form-header">
             <h2>문제 등록</h2>
@@ -466,7 +474,7 @@ watch(
                 <th scope="col">내용</th>
                 <th scope="col">배점</th>
                 <th scope="col">정답</th>
-                <th scope="col">삭제</th>
+                <th scope="col">{{ userType === 'M' ? '삭제' : '비고' }}</th>
               </tr>
             </thead>
             <tbody id="questionListBody">
@@ -474,14 +482,16 @@ watch(
 
               <template v-for="(question, index) in addedQuestions" :key="question.id">
                 <tr>
-                  <button
-                    type="button"
-                    style="text-align: center"
-                    @click="toggleEdit(index)"
-                    class="link-button"
-                  >
-                    {{ index + 1 }}
-                  </button>
+                  <td>
+                    <button
+                      type="button"
+                      style="text-align: center"
+                      @click="toggleEdit(index)"
+                      class="link-button"
+                    >
+                      {{ index + 1 }}
+                    </button>
+                  </td>
                   <td>{{ question.content }}</td>
                   <td style="text-align: center">{{ question.points }}</td>
                   <td style="text-align: center">{{ question.answer }}번</td>
@@ -591,6 +601,10 @@ watch(
   flex-direction: column; */
   max-height: 90vh;
   overflow-y: auto;
+}
+
+.test-detail-modal.is-loading {
+  visibility: hidden;
 }
 
 /* --- 헤더 --- */
