@@ -11,7 +11,7 @@ const handlerSearch = () => {
   const query = [];
 
   // 1. searchTitle의 값이 있을 경우, 쿼리라는 array에 담아둠
-  searchTitle.value && query.push(`searchTitle=${searchTitle.value}`);
+  searchTitle.value && query.push(`studentName=${searchTitle.value}`);
   searchStDate.value && query.push(`searchStDate=${searchStDate.value}`);
   searchEdDate.value && query.push(`searchEdDate=${searchEdDate.value}`);
 
