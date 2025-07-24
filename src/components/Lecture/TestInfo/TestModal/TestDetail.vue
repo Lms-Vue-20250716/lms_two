@@ -474,7 +474,7 @@ watch(
                 <th scope="col">내용</th>
                 <th scope="col">배점</th>
                 <th scope="col">정답</th>
-                <th scope="col">삭제</th>
+                <th scope="col">{{ userType === 'M' ? '삭제' : '비고' }}</th>
               </tr>
             </thead>
             <tbody id="questionListBody">
