@@ -76,13 +76,14 @@ watch(
 <template>
 
   <div class="recruit-main-container">
-    <div class="w-full text-right mb-4">
-      <button @click="newRecruit()" type="button"
-        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors text-center">
-        신규
-      </button>
-    </div>
-    <table class="recruit-table">
+    <div class="w-full max-w-6xl">
+      <div class="text-right mb-4">
+        <button @click="newRecruit()" type="button"
+          class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
+          신규
+        </button>
+      </div>
+      <table class="recruit-table">
       <thead class="recruit-table-header">
         <tr>
           <th>번호</th>
@@ -125,8 +126,9 @@ watch(
           </tr>
         </template>
       </tbody>
-    </table>
-    <PageNavigation :total-items="recruitCnt" :items-per-page="5" :on-page-change="detailSearch" />
+      </table>
+      <PageNavigation :total-items="recruitCnt" :items-per-page="5" :on-page-change="detailSearch" />
+    </div>
   </div>
   <RecruitModal v-if="modalState.isOpen && modalState.type === 'recruit'" :detail-id="detailId" :login-id="loginId"
     @post-success="detailSearch(); emit('refreshMain')" @un-mounted-modal="detailId = $event" />
