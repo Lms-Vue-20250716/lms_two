@@ -1,10 +1,10 @@
 @import 'tailwindcss';
 
-.student-manage-manage-modal-overlay {
+.student-manage-modal-overlay {
   @apply fixed inset-0 flex items-center justify-center bg-gray-500/50 font-bold backdrop-blur-xs;
 }
 /* whitespace-nowrap 자동 줄바꿈 방지 */
-.student-manage-manage-modal-container {
+.student-manage-modal-container {
   @apply relative w-auto rounded-lg bg-white p-5 whitespace-nowrap opacity-100 shadow-lg;
 }
 
