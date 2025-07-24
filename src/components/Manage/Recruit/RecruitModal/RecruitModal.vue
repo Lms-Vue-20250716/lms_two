@@ -37,6 +37,10 @@ const close = () => {
 
 const edit = async () => {
   // 유효성 검사
+  if (!detail.value.empName || detail.value.empName.trim() === '') {
+    alert('기업명을 입력해주세요.');
+    return;
+  }
   if (!detail.value.empJoinDate) {
     alert('올바른 입사일을 선택해주세요.');
     return;

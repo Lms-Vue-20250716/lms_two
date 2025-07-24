@@ -74,6 +74,27 @@ const startEdit = () => {
 };
 
 const saveEdit = async () => {
+  // 유효성 검사
+  if (!editForm.value.lecId) {
+    alert('상담 과목을 선택해주세요.');
+    return;
+  }
+  
+  if (!editForm.value.counselStudentName || editForm.value.counselStudentName.trim() === '') {
+    alert('상담 학생명을 입력해주세요.');
+    return;
+  }
+  
+  if (!editForm.value.counselTitle || editForm.value.counselTitle.trim() === '') {
+    alert('상담 제목을 입력해주세요.');
+    return;
+  }
+  
+  if (!editForm.value.counselContent || editForm.value.counselContent.trim() === '') {
+    alert('상담 내용을 입력해주세요.');
+    return;
+  }
+
   const param = new URLSearchParams();
 
   if (mode.value !== 'create') {
