@@ -97,7 +97,7 @@ onMounted(() => {
             <span v-if="equip.remainPeroid >= 0">{{ equip.remainPeroid }}일</span>
             <span
               v-else
-              class="equipment-cell cursor-pointer text-red-600 underline"
+              class="equipment-cell cursor-pointer !font-bold !text-red-600 underline"
               @click="deleteEquip(equip.equipId)"
               >장비 삭제</span
             >
