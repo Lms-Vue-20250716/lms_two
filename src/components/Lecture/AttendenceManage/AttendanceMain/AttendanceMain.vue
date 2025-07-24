@@ -67,7 +67,9 @@ const handleAttendanceCheck = async (lecId) => {
     try {
       const params = new URLSearchParams({ lecId });
       await axios.post('/api/lecture/attendanceEnter.do', params).then((res) => {
-        if (res.result === 'success') {
+        console.log('#############################');
+        console.log(res);
+        if (res.data.result === 'success') {
           alert('출석 처리되었습니다.');
           attendanceSearch(); // 목록 새로고침
         } else {
