@@ -25,49 +25,67 @@ const getScoreText = (score) => {
   return scoreMap[score] || '평가 없음';
 };
 
+// paginatedList: completed는 서버 페이지 데이터 그대로, result는 클라이언트 slice 처리
+const paginatedList = computed(() => {
+  if (selectedTab.value === 'completed') {
+    // 서버가 페이징된 데이터 줌 → 그대로 사용
+    return dataList.value;
+  } else {
+    // 서버가 전체 데이터 줌 → 클라이언트에서 slice로 페이징 처리
+    const start = (currentPage.value - 1) * pageSize.value;
+    const end = start + pageSize.value;
+    return dataList.value.slice(start, end);
+  }
+});
+
 const fetchData = async () => {
-  if (!selectedTab.value) return; // 아무 것도 선택 안 했을 경우 빠르게 리턴
+  if (!selectedTab.value) return;
 
   try {
     const params = {
       currentPage: currentPage.value,
       pageSize: pageSize.value,
     };
+
     if (selectedTab.value === 'completed') {
       const res = await axios.get('/api/support/getCompletedList.do', { params });
-      console.log('Completed 응답:', res.data);
       dataList.value = res.data.resultList || [];
-      totalItems.value = res.data.resultCnt || 0;
+      totalItems.value = res.data.resultCnt || dataList.value.length;
     } else {
       const res = await axios.get('/api/support/getResultList.do', { params });
-      console.log('Result 응답:', res.data);
       const fixedRes = res.data.fixedRes || [];
-      dataList.value = res.data.fixedRes.map((item) => ({
+
+      dataList.value = fixedRes.map((item) => ({
         ...item,
-        rate: item.coursesStudentCount
-          ? ((item.respondentCount / item.coursesStudentCount) * 100).toFixed(1)
-          : '0.0',
-        avgScore: getScoreText(item.avgScore)
-          ? getScoreText(item.avgScore).toString()
-          : '평가 없음',
+        rate:
+          Number(item.coursesStudentCount) > 0
+            ? Math.round((item.respondentCount / item.coursesStudentCount) * 100)
+            : 0,
+        avgScore: getScoreText(item.avgScore),
       }));
-      totalItems.value = res.data.resultCnt || 0;
+      totalItems.value = res.data.resultCnt || dataList.value.length;
     }
   } catch (error) {
     console.error('데이터 조회 실패:', error);
   }
 };
 
+const totalPages = computed(() => Math.ceil(totalItems.value / pageSize.value));
+
 const changePage = (page) => {
-  if (page > 0 && page <= totalPages.value) {
+  if (page > 0 && page <= totalPages.value && page !== currentPage.value) {
     currentPage.value = page;
-    fetchData();
+    // fetchData() 호출 제거! watch가 담당
   }
 };
 
-const totalPages = computed(() => Math.ceil(totalItems.value / pageSize.value));
+// 탭 변경 시 currentPage 초기화
+watch(selectedTab, () => {
+  currentPage.value = 1;
+});
 
-watch(() => [selectedTab.value, currentPage.value], fetchData, { immediate: true });
+// selectedTab, currentPage 변경 시 fetchData 호출
+watch([selectedTab, currentPage], fetchData, { immediate: true });
 
 const openDetailModal = (item) => {
   selectedSurveyItem.value = item;
@@ -80,7 +98,7 @@ const openDetailModal = (item) => {
     <div class="survey-manage-header">
       <div class="view-selector-wrapper">
         <label>관리 항목 <span class="required">*</span></label>
-        <select v-model="selectedTab" @change="fetchData" class="view-selector">
+        <select v-model="selectedTab" class="view-selector">
           <option disabled value="" hidden>클릭해서 항목 선택</option>
           <option value="completed">설문 완료 목록 조회</option>
           <option value="result">설문 결과 조회</option>
@@ -100,18 +118,17 @@ const openDetailModal = (item) => {
             <th v-if="selectedTab === 'result'">평균</th>
             <th v-if="selectedTab === 'result'">응답인원</th>
             <th v-if="selectedTab === 'result'">완료율(%)</th>
-            <th>관리</th>
+            <th v-if="selectedTab === 'completed'">관리</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="dataList.length === 0">
-            <td colspan="5" class="no-data">조회된 설문이 없습니다.</td>
+            <td colspan="9" class="no-data">조회된 설문이 없습니다.</td>
           </tr>
-          <tr v-for="(item, index) in dataList" :key="item.lecId + '-' + (item.loginId || index)">
-            =======
-          </tr>
-
-          <tr v-for="(item, index) in dataList" :key="item.lecId + '-' + item.loginId">
+          <tr
+            v-for="(item, index) in paginatedList"
+            :key="item.lecId + '-' + (item.loginId || index)"
+          >
             <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
             <td>{{ item.lecName }}</td>
             <td v-if="selectedTab === 'completed'">{{ item.loginId }}</td>
@@ -119,8 +136,13 @@ const openDetailModal = (item) => {
             <td v-if="selectedTab === 'result'">{{ item.lecInstructorName }}</td>
             <td v-if="selectedTab === 'result'">{{ item.avgScore }}</td>
             <td v-if="selectedTab === 'result'">{{ item.respondentCount }}</td>
-            <td v-if="selectedTab === 'result'">{{ item.rate }}</td>
-            <td>
+            <td v-if="selectedTab === 'result'">
+              {{ item.rate }}%
+              <div v-if="Number(item.rate) > 0" class="progress-bar-container">
+                <div class="progress-bar" :style="{ width: Number(item.rate) + '%' }"></div>
+              </div>
+            </td>
+            <td v-if="selectedTab === 'completed'">
               <button
                 v-if="selectedTab === 'completed'"
                 @click="openDetailModal(item)"
@@ -132,21 +154,31 @@ const openDetailModal = (item) => {
           </tr>
         </tbody>
       </table>
+
       <div class="pagination" v-if="totalItems > pageSize">
         <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1">이전</button>
-        <span>{{ currentPage }} / {{ totalPages }}</span>
+
+        <button
+          v-for="page in totalPages"
+          :key="page"
+          :class="{ active: page === currentPage }"
+          @click="changePage(page)"
+        >
+          {{ page }}
+        </button>
+
         <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages">
           다음
         </button>
       </div>
-    </div>
 
-    <ManageSurveyModal
-      v-if="isModalOpen"
-      :mode="'detail'"
-      :survey-data="selectedSurveyItem"
-      @close="isModalOpen = false"
-    />
+      <ManageSurveyModal
+        v-if="isModalOpen"
+        mode="detail"
+        :survey-data="selectedSurveyItem"
+        @close="isModalOpen = false"
+      />
+    </div>
   </div>
 </template>
 
@@ -157,8 +189,6 @@ const openDetailModal = (item) => {
 .survey-manage-container {
   padding: 20px;
 }
-
-/* ... (기존 스타일 생략) ... */
 
 .view-selector-wrapper {
   display: flex;
@@ -194,5 +224,21 @@ const openDetailModal = (item) => {
 
 .view-selector:invalid {
   color: #666;
+}
+
+.progress-bar-container {
+  border: 1px solid red; /* 디버깅용 */
+  width: 100%;
+  height: 10px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: #4caf50;
+  border-radius: 5px;
+  transition: width 0.3s ease;
 }
 </style>
