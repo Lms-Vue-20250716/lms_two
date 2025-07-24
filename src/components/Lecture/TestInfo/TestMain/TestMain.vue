@@ -18,44 +18,181 @@ const userType = computed(() => userInfoStore.user?.userType);
 // --- router
 const route = useRoute();
 
+// -- modal state 관리
+const modalState = useModalState();
+const selectedTestData = ref(null);
+
 // --- 게시판
 const testList = ref([]);
 const testCount = ref(0);
 
-// -- modal
-const modalState = useModalState();
-const selectedTestData = ref(null);
+/**
+ * API에서 받아온 testList를 화면에 표시하기 좋게 가공합니다.
+ * 각 시험 항목에 'testStatus'와 'resultStatus' 객체를 추가합니다.
+ */
+const processedTestList = computed(() => {
+  if (!testList.value) return [];
+  return testList.value.map((test) => ({
+    ...test,
+    // 학생(S)인 경우에만 상태 계산, 그 외에는 null 할당
+    testStatus: userType.value === 'S' ? getTestStatus(test) : null,
+    resultStatus: userType.value === 'S' ? getResultStatus(test) : null,
+  }));
+});
+
+/**
+ * 시험 응시 상태에 따른 텍스트와 액션을 반환합니다.
+ * @param {object} test - 시험 정보 객체
+ */
+const getTestStatus = (test) => {
+  const { testAvailable, submitYn, testId, lecId, lecStudentId } = test;
+  // 현재 날짜를 'YYYY-MM-DD HH:MM:SS' 형식의 문자열로 가져옵니다.
+  const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' }))
+    .toISOString()
+    .slice(0, 19)
+    .replace('T', ' ');
+  const isTestAvailable =
+    test.testAvailable && now >= test.testBeginDate && now <= test.testEndDate;
+
+  if (isTestAvailable) {
+    if (submitYn === 'N') {
+      return {
+        text: '시험응시',
+        class: 'text-blue-600 font-bold cursor-pointer hover:underline',
+        action: () => testTakeModal(testId, lecId, lecStudentId),
+      };
+    } else {
+      // submitYn === 'Y'
+      return {
+        text: '시험응시완료',
+        class: 'text-gray-500 cursor-pointer hover:underline',
+        action: () => testTakeModal(testId, lecId, lecStudentId), // 완료 후 재응시 또는 검토
+      };
+    }
+  } else {
+    // 시험 기간이 아닐 때
+    if (submitYn === 'Y') {
+      return { text: '시험응시 종료', class: 'text-gray-400', action: null };
+    } else {
+      // submitYn === 'N'
+      return { text: '시험미응시', class: 'text-red-500', action: null };
+    }
+  }
+};
+
+/**
+ * 시험 결과 상태에 따른 텍스트와 액션을 반환합니다.
+ * @param {object} test - 시험 정보 객체
+ */
+const getResultStatus = (test) => {
+  const { testAvailable, scoreYn, testId, lecId, lecStudentId } = test;
+  const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' }))
+    .toISOString()
+    .slice(0, 19)
+    .replace('T', ' ');
+  const isTestAvailable =
+    test.testAvailable && now >= test.testBeginDate && now <= test.testEndDate;
+
+  if (isTestAvailable) {
+    if (scoreYn === 'N') {
+      return { text: '시험응시예정', class: 'text-gray-400', action: null };
+    } else {
+      // scoreYn === 'Y'
+      return {
+        text: '시험응시결과',
+        class: 'text-blue-600 font-bold cursor-pointer hover:underline',
+        action: () => testResultModal(testId, lecId, lecStudentId),
+      };
+    }
+  } else {
+    // 시험 기간 종료
+    if (scoreYn === 'Y') {
+      return {
+        text: '시험종료',
+        class: 'text-gray-500 cursor-pointer hover:underline',
+        action: () => testResultModal(testId, lecId, lecStudentId),
+      };
+    } else {
+      // scoreYn === 'N'
+      return { text: '시험미응시', class: 'text-red-500', action: null };
+    }
+  }
+};
 
 const testSearch = (cPage = 1) => {
   const param = new URLSearchParams(route.query);
   param.append('currentPage', cPage);
   param.append('pageSize', 5);
 
-  axios.post('/api/lecture/testInfoListBody.do', param).then((res) => {
-    const originalList = res.data.list;
-    testCount.value = res.data.count;
+  if (userType.value === 'S') {
+    axios.post('/api/lecture/testListBody.do', param).then((res) => {
+      console.log('@@@@@@@@@@@@@@@@@@@@@@@@');
+      console.log(res);
 
-    // console.log('&&&&&&&&&&&&&&&&&&&');
-    // console.log(res.data);
+      testList.value = res.data.list;
+      testCount.value = res.data.count;
+    });
+  } else if (userType.value === 'T') {
+    axios.post('/api/lecture/testInfoListBody.do', param).then((res) => {
+      const originalList = res.data.list;
+      testCount.value = res.data.count;
 
-    //강사인 경우, 해당 강사의 강의 리스트만 보여줍니다.
-    if (userType.value === 'T') {
-      //testList에서  sessionScope.loginId == list.lecInstructorId 인 element만 testList에 넣는다.
-      // loginId.value가 유효한지 확인하는 것이 안전합니다.
+      // console.log('&&&&&&&&&&&&&&&&&&&');
+      // console.log(res.data);
+
       if (loginId.value) {
         testList.value = originalList.filter((test) => test.lecInstructorId === loginId.value);
       } else {
         // loginId가 아직 로드되지 않은 경우, 빈 목록을 표시하여 오류를 방지합니다.
         testList.value = [];
       }
-    } else {
-      //강사가 아닌 경우(admin, "M" 권한), 모든 강의 리스트를 보여줍니다.
-      testList.value = originalList;
-    }
+    });
+  } else if (userType.value === 'M') {
+    axios.post('/api/lecture/testInfoListBody.do', param).then((res) => {
+      testList.value = res.data.list;
+      testCount.value = res.data.count;
+    });
+  } else {
+    alert('권한이 없습니다!');
+    return;
+  }
+};
 
-    // console.log(testList.value);
-    // console.log(testCount.value);
-  });
+const testTakeModal = (testId, lecId, studentId) => {
+  console.log(`시험 응시: testId=${testId}, lecId=${lecId}, studentId=${studentId}`);
+  alert(`시험을 시작합니다.`);
+
+  try {
+    let params = {
+      testId: testId,
+      lecId: lecId,
+      studentId: studentId,
+    };
+    const response = axios.post('/api/lecture/testQuestionNOptionInfoDetail.do', params);
+    console.log(response);
+
+    //if success, open modal && pass down props
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const testResultModal = (testId, lecId, studentId) => {
+  console.log(`시험 결과 보기: testId=${testId}, lecId=${lecId}, studentId=${studentId}`);
+  alert(`시험 결과를 확인합니다.`);
+
+  try {
+    let params = {
+      testId: testId,
+      lecId: lecId,
+      studentId: studentId,
+    };
+    const response = axios.post('/api/lecture/testTakeSubmitResultDetail.do', params);
+    console.log(response);
+    //if success, open modal && pass down props
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 const testDetail = (selectedLecId) => {
@@ -104,13 +241,13 @@ onMounted(() => {
           <th>강의실</th>
           <th>시험 시작일</th>
           <th>시험 종료일</th>
-          <th>시험 등록일</th>
-          <th>시험문제보기</th>
+          <th>{{ userType === 'S' ? '시험응시' : '시험 등록일' }}</th>
+          <th>{{ userType === 'S' ? '시험응시결과' : '시험문제보기' }}</th>
         </tr>
       </thead>
       <tbody>
         <template v-if="testCount > 0">
-          <tr v-for="test in testList" :key="test.testId" class="test-table-row">
+          <tr v-for="test in processedTestList" :key="test.testId" class="test-table-row">
             <td class="test-cell cursor-pointer hover:underline" @click="testDetail(test.lecId)">
               {{ test.lecName }}
             </td>
@@ -122,13 +259,38 @@ onMounted(() => {
             </td>
             <td class="test-cell">{{ test.testBeginDate.substr(0, 19) }}</td>
             <td class="test-cell">{{ test.testEndDate.substr(0, 19) }}</td>
-            <td class="test-cell">{{ test.testRegDate.substr(0, 10) }}</td>
-            <td
-              class="test-cell cursor-pointer hover:underline"
-              @click="testProblemsDetail(test.lecId)"
-            >
-              시험문제보기
-            </td>
+
+            <!-- 학생(S) 뷰 -->
+            <template v-if="userType === 'S'">
+              <td class="test-cell">
+                <!-- testStatus.action이 있을 때만 클릭 이벤트와 스타일 적용 -->
+                <span
+                  :class="test.testStatus.class"
+                  @click="test.testStatus.action && test.testStatus.action()"
+                >
+                  {{ test.testStatus.text }}
+                </span>
+              </td>
+              <td class="test-cell">
+                <span
+                  :class="test.resultStatus.class"
+                  @click="test.resultStatus.action && test.resultStatus.action()"
+                >
+                  {{ test.resultStatus.text }}
+                </span>
+              </td>
+            </template>
+
+            <!-- 강사(T) 또는 관리자(M) 뷰 -->
+            <template v-else>
+              <td class="test-cell">{{ test.testRegDate.substr(0, 10) }}</td>
+              <td
+                class="test-cell cursor-pointer hover:underline"
+                @click="testProblemsDetail(test.lecId)"
+              >
+                시험문제보기
+              </td>
+            </template>
           </tr>
         </template>
         <template v-else>
