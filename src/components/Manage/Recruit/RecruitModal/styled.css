@@ -1,54 +1,54 @@
 @import 'tailwindcss';
 
-.student-manage-manage-modal-overlay {
-  @apply fixed inset-0 flex items-center justify-center bg-gray-500/50 font-bold backdrop-blur-xs;
+.recruit-modal-overlay {
+  @apply fixed inset-0 flex items-center justify-center bg-gray-500/50 font-bold backdrop-blur-xs z-50;
 }
 /* whitespace-nowrap 자동 줄바꿈 방지 */
-.student-manage-manage-modal-container {
+.recruit-modal-container {
   @apply relative w-auto rounded-lg bg-white p-5 whitespace-nowrap opacity-100 shadow-lg;
 }
 
-.student-manage-modal-form label {
+.recruit-modal-form label {
   @apply mb-4 flex flex-col;
 }
 
-.student-manage-modal-form input[type='text'] {
+.recruit-modal-form input[type='text'] {
   @apply mt-1 rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none;
 }
 
-.student-manage-modal-form input[type='file'] {
+.recruit-modal-form input[type='file'] {
   @apply hidden;
 }
 
-.student-manage-preview-image {
+.recruit-preview-image {
   @apply h-[100px] w-[100px] rounded-md border border-gray-300 object-cover;
 }
 
-.student-manage-no-image {
+.recruit-no-image {
   @apply flex h-[100px] w-[100px] items-center justify-center rounded-md border border-gray-300 bg-gray-100 text-sm text-gray-500;
 }
 
-.student-manage-img-label {
+.recruit-img-label {
   @apply mt-2 cursor-pointer rounded bg-gray-300 px-6 py-2 text-gray-900 transition-all duration-200 ease-in-out hover:bg-green-500 hover:text-white active:translate-y-0.5 active:transform active:bg-green-600 active:shadow-inner;
 }
 
-.student-manage-button-container {
+.recruit-button-container {
   @apply mt-4 space-x-2 text-right;
 }
 
-.student-manage-button-container button {
+.recruit-button-container button {
   @apply cursor-pointer rounded-md px-4 py-2 transition-colors duration-200 first:bg-blue-900 first:text-white last:bg-gray-300 last:text-gray-700 first:hover:bg-blue-950 last:hover:bg-gray-400;
 }
 
 /* 테이블 관련 */
-.student-manage-modal-table {
+.recruit-modal-table {
   @apply w-full table-auto border-collapse;
 }
 
-.student-manage-modal-table-th {
+.recruit-modal-table-th {
   @apply border bg-[#c0c2d0] p-2 text-left whitespace-nowrap;
 }
 
-.student-manage-modal-table-td {
+.recruit-modal-table-td {
   @apply border p-2;
 }

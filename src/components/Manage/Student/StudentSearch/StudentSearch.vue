@@ -10,6 +10,17 @@ const regEdDate = ref('');
 
 // 검색 버튼을 클릭할 때, 검색 데이터가 QueryParam에 들어가도록 하는 함수
 const handlerSearch = () => {
+  // 가입 기간 날짜 검증
+  if (regStDate.value && regEdDate.value) {
+    const startDate = new Date(regStDate.value);
+    const endDate = new Date(regEdDate.value);
+
+    if (startDate > endDate) {
+      alert('가입 기간의 시작일이 종료일보다 늦습니다. 날짜를 다시 확인해주세요.');
+      return;
+    }
+  }
+
   const query = [];
 
   // 1. searchTitle의 값이 있을 경우, 쿼리라는 array에 담아둠
@@ -29,7 +40,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="student-container">
+  <div class="student-manage-container">
     <div class="input-box">
       이름: <input v-model.lazy="searchName" />
       재학 상태: <select v-model="searchStatusYn">

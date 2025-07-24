@@ -1,26 +1,20 @@
 <script setup>
 import router from '@/router';
-import { useModalState } from '@/stores/modalState';
 import { onMounted, ref } from 'vue';
 
-const modalState = useModalState();
 const searchTitle = ref('');
 const searchStDate = ref('');
 const searchEdDate = ref('');
 
-const register = () => {
-  modalState.$patch({ isOpen: true, type: 'counsel', payload: { mode: 'create' } });
-}
-
 // 검색 버튼을 클릭할 때, 검색 데이터가 QueryParam에 들어가도록 하는 함수
 const handlerSearch = () => {
-  // 기간 날짜 검증
+  // 입사일자 날짜 검증
   if (searchStDate.value && searchEdDate.value) {
     const startDate = new Date(searchStDate.value);
     const endDate = new Date(searchEdDate.value);
     
     if (startDate > endDate) {
-      alert('기간의 시작일이 종료일보다 늦습니다. 날짜를 다시 확인해주세요.');
+      alert('입사일자의 시작일이 종료일보다 늦습니다. 날짜를 다시 확인해주세요.');
       return;
     }
   }
@@ -28,7 +22,7 @@ const handlerSearch = () => {
   const query = [];
 
   // 1. searchTitle의 값이 있을 경우, 쿼리라는 array에 담아둠
-  searchTitle.value && query.push(`searchTitle=${searchTitle.value}`);
+  searchTitle.value && query.push(`studentName=${searchTitle.value}`);
   searchStDate.value && query.push(`searchStDate=${searchStDate.value}`);
   searchEdDate.value && query.push(`searchEdDate=${searchEdDate.value}`);
 
@@ -43,13 +37,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="counsel-container">
+  <div class="recruit-container">
     <div class="input-box">
-      상담 제목: <input v-model.lazy="searchTitle" />
-      기간: <input v-model="searchStDate" type="date" />
+      학생명: <input v-model.lazy="searchTitle" />
+      입사일자: <input v-model="searchStDate" type="date" />
       ~ <input v-model="searchEdDate" type="date" />
       <button @click="handlerSearch()">검색</button>
-      <button @click="register()">신규</button>
     </div>
   </div>
 </template>

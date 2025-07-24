@@ -35,7 +35,6 @@ const updateStatusYn = async (e, student) => {
 
 const studentSearch = async (cPage = 1) => {
   const param = new URLSearchParams(route.query);
-  console.log(route.query);
   param.append('currentPage', cPage);
   param.append('pageSize', 5);
 
@@ -68,9 +67,9 @@ watch(
 </script>
 
 <template>
-  <div class="student-main-container">
-    <table class="student-table">
-      <thead class="student-table-header">
+  <div class="student-manage-main-container">
+    <table class="student-manage-table">
+      <thead class="student-manage-table-header">
         <tr>
           <th>학번</th>
           <th>이름</th>
@@ -82,16 +81,16 @@ watch(
       </thead>
       <tbody>
         <template v-if="studentCount > 0">
-          <tr v-for="student in studentList" :key="student.studentId" class="student-table-row">
-            <td class="student-cell">{{ student.studentNumber }}</td>
-            <td class="student-cell cursor-pointer hover:underline" @click="studentDetail(student.studentId)">{{
+          <tr v-for="student in studentList" :key="student.studentId" class="student-manage-table-row">
+            <td class="student-manage-cell">{{ student.studentNumber }}</td>
+            <td class="student-manage-cell cursor-pointer hover:underline" @click="studentDetail(student.studentId)">{{
               student.studentName }}</td>
-            <td class="student-cell">{{ student.studentHp }}</td>
-            <td class="student-cell">{{ student.studentRegDate.substr(0, 10) }}</td>
-            <td class="student-cell">
+            <td class="student-manage-cell">{{ student.studentHp }}</td>
+            <td class="student-manage-cell">{{ student.studentRegDate.substr(0, 10) }}</td>
+            <td class="student-manage-cell">
               <span>{{ student.studentEmpStatus === 'Y' ? '취업' : '미취업' }}</span>
             </td>
-            <td class="student-cell">
+            <td class="student-manage-cell">
               <select @change="updateStatusYn($event, student)" v-model="student.statusYN">
                 <option value="W">승인 대기중</option>
                 <option value="Y">재학</option>
@@ -102,7 +101,7 @@ watch(
         </template>
         <template v-else>
           <tr>
-            <td colspan="6" class="student-empty-row">일치하는 학생이 없습니다.</td>
+            <td colspan="6" class="student-manage-empty-row">일치하는 학생이 없습니다.</td>
           </tr>
         </template>
       </tbody>
