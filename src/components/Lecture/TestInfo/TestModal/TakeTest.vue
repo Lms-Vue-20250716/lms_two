@@ -11,9 +11,14 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  // 'take' (시험 응시) 또는 'result' (결과 보기) 모드를 결정합니다.
+  mode: {
+    type: String,
+    default: 'take', // 기본값은 시험 응시 모드
+  },
 });
 
-const emit = defineEmits(['testTakeSuccess']);
+const emit = defineEmits(['test-submit-success']);
 
 // --- 모달 정보
 const modalState = useModalState();
@@ -30,6 +35,10 @@ const submittedAnswers = ref([]); // 서버에서 받은, 이미 제출된 답�
 const studentAnswers = ref({}); // 학생이 선택한 답변 (v-model과 연결)
 const openQuestionIds = ref({}); // 아코디언 UI를 위한 열린 질문 ID 목록
 
+// --- 시험 결과 전용 상태 ---
+const correctAnswers = ref({}); // { questionId: correctOptionId } 형태
+const testResultInfo = ref(null); // 시험 점수, 제출일 등
+
 // --- Computed Properties ---
 
 // 시험이 이미 제출되었는지 여부를 반환합니다.
@@ -44,19 +53,33 @@ const processedQuestions = computed(() => {
         ...q,
         // 전체 보기 목록에서 현재 질문에 해당하는 보기만 필터링합니다.
         options: allOptions.value.filter((opt) => opt.questionId === q.questionId),
+        // 결과 보기 모드일 때, 각 질문의 정답 ID를 추가합니다.
+        correctOptionId: props.mode === 'result' ? correctAnswers.value[q.questionId] : null,
       };
     })
     .sort((a, b) => a.questionNumber - b.questionNumber); // 문제 번호 순으로 정렬
 });
 
+// 시험 결과 요약 정보를 계산합니다.
+const resultSummary = computed(() => {
+  if (props.mode !== 'result' || !testResultInfo.value || questions.value.length === 0) {
+    return null;
+  }
+  const totalQuestions = questions.value.length;
+  const totalPossibleScore = questions.value.reduce((sum, q) => sum + (q.questionScore || 0), 0);
+
+  return {
+    scoreText: `${testResultInfo.value.testScore || 0} / ${totalPossibleScore}점`,
+    countText: `${testResultInfo.value.correctAnswerCount || 0} / ${totalQuestions}문제`,
+    totalCountText: `${totalQuestions}문제`,
+    submitDate: testResultInfo.value.testResultRegDate
+      ? formatDateTime(testResultInfo.value.testResultRegDate, 'YYYY-MM-DD HH:mm:ss')
+      : '정보 없음',
+  };
+});
+
 // --- API 호출: 시험 문제 및 보기 정보 조회 ---
 const fetchTestDetails = async () => {
-  isLoading.value = true;
-
-  // 상태 초기화
-  openQuestionIds.value = {};
-  studentAnswers.value = {};
-
   const params = new URLSearchParams();
   params.append('testId', props.testTakeProps.testId);
   params.append('lecId', props.testTakeProps.lecId);
@@ -71,26 +94,6 @@ const fetchTestDetails = async () => {
     allOptions.value = response.data.testQuestionOptionInfoDetail || [];
     submittedAnswers.value = response.data.testSubmitOptionDetail || [];
 
-    if (!response.data || !response.data.testQuestionInfoDetail) {
-      alert('시험 문제를 불러오는 데 실패했습니다.');
-      questions.value = [];
-      allOptions.value = [];
-      submittedAnswers.value = [];
-      modalState.$patch({ isOpen: false, type: 'test-take' });
-      return;
-    }
-
-    if (questions.value.length === 0 && allOptions.value.length === 0) {
-      alert('문제가 아직 출제되지 않았습니다.');
-      modalState.$patch({ isOpen: false, type: 'test-take' });
-      return;
-    }
-
-    // 모든 질문을 열린 상태로 초기화
-    questions.value.forEach((q) => {
-      openQuestionIds.value[q.questionId] = true;
-    });
-
     // 이미 제출된 답변이 있다면, studentAnswers 모델을 채워 라디오 버튼을 check 상태로 만듭니다.
     if (isSubmitted.value) {
       submittedAnswers.value.forEach((ans) => {
@@ -100,6 +103,40 @@ const fetchTestDetails = async () => {
   } catch (error) {
     console.error('시험 상세 정보 조회 중 오류 발생:', error);
     alert('오류가 발생했습니다. 다시 시도해주세요.');
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// --- API 호출: 시험 문제 및 보기 정보 조회 ---
+const fetchTestResultDetails = async () => {
+  isLoading.value = true;
+
+  const params = new URLSearchParams();
+  params.append('testId', props.testTakeProps.testId);
+  params.append('lecId', props.testTakeProps.lecId);
+  params.append('studentId', props.testTakeProps.studentId);
+
+  try {
+    const response = await axios.post('/api/lecture/testTakeSubmitResultDetail.do', params);
+
+    questions.value = response.data.testQuestionInfoDetail || [];
+    allOptions.value = response.data.testQuestionOptionInfoDetail || [];
+    testResultInfo.value = response.data.testResultInfoValue || {};
+
+    const submitted = response.data.testSubmitOptionDetailValue || [];
+    submitted.forEach((ans) => {
+      studentAnswers.value[ans.questionId] = ans.optionId;
+    });
+
+    const correct = response.data.testQuestionAnswerInfoDetail || [];
+    const correctMap = {};
+    correct.forEach((ans) => {
+      correctMap[ans.questionId] = ans.correctOptionId;
+    });
+    correctAnswers.value = correctMap;
+  } catch (err) {
+    console.log(err);
   } finally {
     isLoading.value = false;
   }
@@ -161,11 +198,11 @@ const submitTest = async () => {
     if (response.data.result === 'success') {
       alert('시험이 성공적으로 제출되었습니다.');
       modalState.$patch({ isOpen: false, type: 'test-take' });
-      emit('testTakeSuccess');
+      emit('test-submit-success');
     } else if (response.data.result === 'isExist') {
       alert('이미 제출된 시험입니다.');
       modalState.$patch({ isOpen: false, type: 'test-take' });
-      emit('testTakeSuccess');
+      emit('test-submit-success');
     } else {
       alert('제출에 실패했습니다. 다시 시도해 주세요.');
     }
@@ -175,8 +212,49 @@ const submitTest = async () => {
   }
 };
 
-// props가 변경될 때마다 데이터를 다시 불러옵니다.
-watch(() => props.testTakeProps, fetchTestDetails, { immediate: true, deep: true });
+watch(
+  () => props.testTakeProps,
+  async () => {
+    if (!props.testTakeProps) return;
+    isLoading.value = true;
+
+    // 상태 초기화
+    questions.value = [];
+    allOptions.value = [];
+    submittedAnswers.value = [];
+    studentAnswers.value = {};
+    openQuestionIds.value = {};
+    testResultInfo.value = null;
+    correctAnswers.value = {};
+
+    try {
+      // mode에 따라 다른 API 호출
+      if (props.mode === 'result') {
+        await fetchTestResultDetails();
+      } else {
+        await fetchTestDetails();
+      }
+
+      if (questions.value.length === 0) {
+        alert('문제가 출제되지 않았거나 시험 정보를 불러올 수 없습니다.');
+        modalState.$patch({ isOpen: false, type: 'test-take' });
+        return;
+      }
+
+      // 모든 질문을 열린 상태로 초기화
+      questions.value.forEach((q) => {
+        openQuestionIds.value[q.questionId] = true;
+      });
+    } catch (error) {
+      console.error('데이터 로딩 중 오류 발생:', error);
+      alert('오류가 발생했습니다. 다시 시도해주세요.');
+      modalState.$patch({ isOpen: false, type: 'test-take' });
+    } finally {
+      isLoading.value = false;
+    }
+  },
+  { immediate: true, deep: true },
+);
 </script>
 
 <template>
@@ -187,7 +265,9 @@ watch(() => props.testTakeProps, fetchTestDetails, { immediate: true, deep: true
     >
       <!-- Modal Header -->
       <header class="modal-header">
-        <h2 class="modal-title">시험 응시 : {{ testTakeProps.lecName }}</h2>
+        <h2 class="modal-title">
+          {{ mode === 'result' ? '시험 결과' : '시험 응시' }} : {{ testTakeProps.lecName }}
+        </h2>
         <button @click="modalState.$patch({ isOpen: false, type: 'test-take' })" class="close-btn">
           &times;
         </button>
@@ -201,38 +281,77 @@ watch(() => props.testTakeProps, fetchTestDetails, { immediate: true, deep: true
         <div v-else-if="processedQuestions.length === 0" class="empty-message">
           <p>출제된 문제가 없습니다.</p>
         </div>
-        <div v-else class="question-list">
-          <!-- 각 질문을 v-for로 렌더링 -->
-          <div v-for="q in processedQuestions" :key="q.questionId" class="question-item">
-            <!-- 질문 제목 (클릭 시 보기 토글) -->
-            <div @click="toggleQuestion(q.questionId)" class="question-header">
-              <h3 class="font-semibold">Q{{ q.questionNumber }}. {{ q.questionContent }}</h3>
-              <span class="toggle-icon">{{ openQuestionIds[q.questionId] ? '▲' : '▼' }}</span>
-            </div>
+        <div v-else>
+          <!-- 시험 결과 요약 테이블 (결과 보기 모드에서만 표시) -->
+          <div v-if="mode === 'result' && resultSummary" class="result-summary-table">
+            <table>
+              <tbody>
+                <tr>
+                  <th>채점 점수</th>
+                  <td>{{ resultSummary.scoreText }}</td>
+                </tr>
+                <tr>
+                  <th>맞은 문제 수</th>
+                  <td>{{ resultSummary.countText }}</td>
+                </tr>
+                <tr>
+                  <th>시험 제출일</th>
+                  <td>{{ resultSummary.submitDate }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-            <!-- 보기 목록 (v-if로 토글) -->
-            <div v-if="openQuestionIds[q.questionId]" class="question-body">
-              <div class="options-list">
-                <div v-for="opt in q.options" :key="opt.optionId" class="option-item">
-                  <label
-                    :for="`q${q.questionId}_opt${opt.optionId}`"
-                    class="option-label"
-                    :class="{
-                      'submitted-answer':
-                        isSubmitted && studentAnswers[q.questionId] === opt.optionId,
-                    }"
+          <div class="question-list">
+            <div v-for="q in processedQuestions" :key="q.questionId" class="question-item">
+              <div @click="toggleQuestion(q.questionId)" class="question-header">
+                <h3 class="font-semibold">
+                  Q{{ q.questionNumber }}. {{ q.questionContent }}
+                  <span v-if="mode === 'result'" class="text-sm text-gray-500">
+                    ({{ q.questionScore }}점)</span
                   >
-                    <input
-                      type="radio"
-                      :id="`q${q.questionId}_opt${opt.optionId}`"
-                      :name="`question_${q.questionId}`"
-                      :value="opt.optionId"
-                      v-model="studentAnswers[q.questionId]"
-                      :disabled="isSubmitted"
-                      class="form-radio"
-                    />
-                    <span>보기{{ opt.optionNumber }}. {{ opt.optionContent }}</span>
-                  </label>
+                </h3>
+                <span class="toggle-icon">{{ openQuestionIds[q.questionId] ? '▲' : '▼' }}</span>
+              </div>
+
+              <div v-if="openQuestionIds[q.questionId]" class="question-body">
+                <div class="options-list">
+                  <div v-for="opt in q.options" :key="opt.optionId" class="option-item">
+                    <label
+                      :for="`q${q.questionId}_opt${opt.optionId}`"
+                      class="option-label"
+                      :class="{
+                        'correct-answer':
+                          mode === 'result' &&
+                          studentAnswers[q.questionId] === opt.optionId &&
+                          opt.optionId === q.correctOptionId,
+                        'incorrect-answer':
+                          mode === 'result' &&
+                          studentAnswers[q.questionId] === opt.optionId &&
+                          opt.optionId !== q.correctOptionId,
+                        'correct-option':
+                          mode === 'result' &&
+                          opt.optionId === q.correctOptionId &&
+                          studentAnswers[q.questionId] !== opt.optionId,
+                      }"
+                    >
+                      <input
+                        type="radio"
+                        :id="`q${q.questionId}_opt${opt.optionId}`"
+                        :name="`question_${q.questionId}`"
+                        :value="opt.optionId"
+                        v-model="studentAnswers[q.questionId]"
+                        :disabled="isSubmitted || mode === 'result'"
+                        class="form-radio"
+                      />
+                      <span>보기{{ opt.optionNumber }}. {{ opt.optionContent }}</span>
+                      <span
+                        v-if="mode === 'result' && opt.optionId === q.correctOptionId"
+                        class="answer-tag"
+                        >(정답)</span
+                      >
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
@@ -243,7 +362,9 @@ watch(() => props.testTakeProps, fetchTestDetails, { immediate: true, deep: true
       <!-- Modal Footer -->
       <footer class="modal-footer">
         <!-- 시험 미제출 시에만 제출 버튼 표시 -->
-        <button v-if="!isSubmitted" @click="submitTest" class="btn-primary">답안 제출</button>
+        <button v-if="mode === 'take' && !isSubmitted" @click="submitTest" class="btn-primary">
+          답안 제출
+        </button>
         <button
           @click="modalState.$patch({ isOpen: false, type: 'test-take' })"
           class="btn-secondary"
@@ -286,14 +407,6 @@ watch(() => props.testTakeProps, fetchTestDetails, { immediate: true, deep: true
   visibility: hidden;
 }
 
-/* .modal-overlay {
-  @apply fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50;
-}
-
-.test-take-modal {
-  @apply bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col;
-} */
-
 /* --- 헤더 --- */
 .modal-header {
   @apply flex flex-shrink-0 items-center justify-between rounded-t-lg border-b bg-slate-700 p-4 text-white;
@@ -317,38 +430,46 @@ watch(() => props.testTakeProps, fetchTestDetails, { immediate: true, deep: true
   @apply p-8 text-center text-gray-500;
 }
 
+/* --- 결과 요약 테이블 --- */
+.result-summary-table {
+  @apply mb-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm;
+}
+.result-summary-table table {
+  @apply w-full;
+}
+.result-summary-table th {
+  @apply w-1/3 p-2 text-left font-semibold text-gray-600;
+}
+.result-summary-table td {
+  @apply p-2 text-gray-800;
+}
+
+/* --- 질문 목록 --- */
 .question-list {
   @apply space-y-4;
 }
-
 .question-item {
   @apply rounded-md border border-gray-300 bg-white shadow-sm;
 }
-
 .question-header {
   @apply flex cursor-pointer items-center justify-between rounded-t-md p-4 hover:bg-gray-100;
 }
-
 .toggle-icon {
   @apply text-gray-500;
 }
-
 .question-body {
   @apply border-t border-gray-200 p-4;
 }
-
 .options-list {
   @apply space-y-2;
 }
-
 .option-item {
   @apply rounded;
 }
 
 .option-label {
-  @apply flex cursor-pointer items-center space-x-3 rounded-md p-2 hover:bg-blue-50;
+  @apply flex cursor-pointer items-center space-x-3 rounded-md p-2 transition-colors hover:bg-blue-50;
 }
-
 .form-radio {
   @apply h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500;
 }
@@ -356,15 +477,42 @@ watch(() => props.testTakeProps, fetchTestDetails, { immediate: true, deep: true
   @apply cursor-not-allowed bg-gray-200;
 }
 
-/* --- 푸터 --- */
-.modal-footer {
-  @apply flex flex-shrink-0 justify-end space-x-2 rounded-b-lg border-t bg-slate-100 p-4;
+/* --- 정답/오답 스타일 --- */
+.answer-tag {
+  @apply ml-auto text-sm font-bold;
 }
 
+/* 학생이 선택한 답이 '정답'일 경우 */
+.correct-answer {
+  @apply border-green-300 bg-green-100;
+}
+.correct-answer .answer-tag {
+  @apply text-green-700;
+}
+
+/* 학생이 선택한 답이 '오답'일 경우 */
+.incorrect-answer {
+  @apply border-2 border-red-500 bg-red-100;
+}
+.incorrect-answer .answer-tag {
+  @apply text-red-700;
+}
+
+/* 학생이 선택하지 않은 '정답' 보기 */
+.correct-option {
+  @apply border-2 border-green-500;
+}
+.correct-option .answer-tag {
+  @apply text-green-700;
+}
+
+/* --- 푸터 --- */
+.modal-footer {
+  @apply flex flex-shrink-0 justify-end space-x-2 rounded-b-lg bg-slate-100 p-4;
+}
 .btn-primary {
   @apply rounded-md bg-blue-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-blue-700;
 }
-
 .btn-secondary {
   @apply rounded-md bg-gray-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-gray-700;
 }

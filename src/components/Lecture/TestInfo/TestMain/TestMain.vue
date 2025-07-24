@@ -28,6 +28,7 @@ const testList = ref([]);
 const testCount = ref(0);
 
 // --- test-take modal을 위한 props
+const testMode = ref('take'); // 'take' 또는 'result' 값을 가짐
 const testTakeProps = ref({});
 
 /**
@@ -89,7 +90,7 @@ const getTestStatus = (test) => {
  * @param {object} test - 시험 정보 객체
  */
 const getResultStatus = (test) => {
-  const { scoreYn, testId, lecId, lecStudentId } = test;
+  const { scoreYn, testId, lecId, lecStudentId, lecName } = test;
   const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' }))
     .toISOString()
     .slice(0, 19)
@@ -105,7 +106,7 @@ const getResultStatus = (test) => {
       return {
         text: '시험응시결과',
         class: 'text-blue-600 font-bold cursor-pointer hover:underline',
-        action: () => testResultModal(testId, lecId, lecStudentId),
+        action: () => testResultModal(testId, lecId, lecStudentId, lecName),
       };
     }
   } else {
@@ -114,7 +115,7 @@ const getResultStatus = (test) => {
       return {
         text: '시험종료',
         class: 'text-gray-500 cursor-pointer hover:underline',
-        action: () => testResultModal(testId, lecId, lecStudentId),
+        action: () => testResultModal(testId, lecId, lecStudentId, lecName),
       };
     } else {
       // scoreYn === 'N'
@@ -164,6 +165,7 @@ const testSearch = async (cPage = 1) => {
 
 const testTakeModal = async (testId, lecId, studentId, lecName) => {
   console.log(`시험 응시: testId=${testId}, lecId=${lecId}, studentId=${studentId}`);
+  testMode.value = 'take';
   testTakeProps.value = {
     testId: testId,
     lecId: lecId,
@@ -173,22 +175,17 @@ const testTakeModal = async (testId, lecId, studentId, lecName) => {
   modalState.$patch({ isOpen: true, type: 'test-take' });
 };
 
-const testResultModal = async (testId, lecId, studentId) => {
+const testResultModal = async (testId, lecId, studentId, lecName) => {
   console.log(`시험 결과 보기: testId=${testId}, lecId=${lecId}, studentId=${studentId}`);
-  alert(`시험 결과를 확인합니다.`);
+  testMode.value = 'result';
+  testTakeProps.value = {
+    testId: testId,
+    lecId: lecId,
+    studentId: studentId,
+    lecName: lecName,
+  };
 
-  try {
-    let params = {
-      testId: testId,
-      lecId: lecId,
-      studentId: studentId,
-    };
-    const response = await axios.post('/api/lecture/testTakeSubmitResultDetail.do', params);
-    console.log(response.data);
-    //if success, open modal && pass down props
-  } catch (err) {
-    console.log(err);
-  }
+  modalState.$patch({ isOpen: true, type: 'test-take' });
 };
 
 const testDetail = (selectedLecId) => {
@@ -315,7 +312,8 @@ onMounted(() => {
   <TakeTest
     v-if="modalState.isOpen && modalState.type === 'test-take'"
     :testTakeProps="testTakeProps"
-    @test-take-success="testSearch()"
+    :mode="testMode"
+    @test-submit-success="testSearch()"
   />
 </template>
 
