@@ -220,6 +220,10 @@ onUnmounted(() => {
                 <option v-for="lec in lecOptions" :key="lec.lecId" :value="lec.lecId">
                   {{ lec.lecName }}
                 </option>
+
+                <option v-for="lec in lecOptions" :key="lec.lecId" :value="lec.lecId">
+                  {{ lec.lecName }}
+                </option>
               </template>
               <template v-else>
                 <option disabled>수강중인 강의가 없습니다.</option>

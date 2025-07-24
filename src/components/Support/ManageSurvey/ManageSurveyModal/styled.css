@@ -1,11 +1,43 @@
 @import 'tailwindcss';
 
+/* 기존 modal-overlay */
 .modal-overlay {
-  @apply fixed inset-0 flex items-center justify-center bg-gray-500/50 font-bold backdrop-blur-xs;
+  @apply fixed inset-0 z-50 flex items-center justify-center bg-black/40 font-bold backdrop-blur-xs;
 }
 
-.modal-container {
-  @apply relative w-[400px] rounded-lg bg-white p-5 opacity-100 shadow-lg;
+/* 기존 modal-box */
+.modal-box {
+  @apply w-[600px] rounded-md bg-white shadow-lg;
+}
+
+/* 기존 modal-header */
+.modal-header {
+  @apply flex items-center justify-between rounded-t-md bg-[#1c2b5e] px-4 py-3 text-white;
+}
+
+/* 기존 close-btn */
+.close-btn {
+  @apply cursor-pointer border-0 bg-transparent text-lg text-white;
+}
+
+/* survey table */
+.survey-table {
+  @apply mt-4 mb-4 w-full border-collapse;
+}
+
+.survey-table th,
+.survey-table td {
+  @apply border border-gray-300 px-3 py-2 text-left;
+}
+
+/* 기존 modal-footer */
+.modal-footer {
+  @apply p-4 text-center;
+}
+
+/* 기존 close-btn-lg */
+.close-btn-lg {
+  @apply cursor-pointer rounded border-0 bg-gray-300 px-6 py-2;
 }
 
 .modal-form label {
