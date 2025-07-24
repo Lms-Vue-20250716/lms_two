@@ -474,14 +474,16 @@ watch(
 
               <template v-for="(question, index) in addedQuestions" :key="question.id">
                 <tr>
-                  <button
-                    type="button"
-                    style="text-align: center"
-                    @click="toggleEdit(index)"
-                    class="link-button"
-                  >
-                    {{ index + 1 }}
-                  </button>
+                  <td>
+                    <button
+                      type="button"
+                      style="text-align: center"
+                      @click="toggleEdit(index)"
+                      class="link-button"
+                    >
+                      {{ index + 1 }}
+                    </button>
+                  </td>
                   <td>{{ question.content }}</td>
                   <td style="text-align: center">{{ question.points }}</td>
                   <td style="text-align: center">{{ question.answer }}번</td>

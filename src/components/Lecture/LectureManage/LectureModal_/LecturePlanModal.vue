@@ -207,7 +207,9 @@ watch(
                 </tr>
                 <tr>
                   <th>강사</th>
-                  <input v-model="lecInstructorName" />
+                  <td>
+                    <input v-model="lecInstructorName" />
+                  </td>
                   <th>강의실<span class="required-star">*</span></th>
                   <td>{{ lecRoomName }}</td>
                 </tr>
