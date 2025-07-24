@@ -18,10 +18,7 @@ import Tutor from '@/views/Manage/Tutor.vue';
 import Company from '@/views/System/Company.vue';
 import Counsel from '@/views/Manage/Counsel.vue';
 import Recruit from '@/views/Manage/Recruit.vue';
-
 import Commoncode from '@/views/System/Commoncode.vue';
-
-import Counsel from '@/views/Manage/Counsel.vue';
 import LectureTest from '@/views/Lecture/LectureTest.vue';
 import Student from '@/views/Manage/Student.vue';
 
