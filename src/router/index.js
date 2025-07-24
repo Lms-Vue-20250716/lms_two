@@ -23,7 +23,6 @@ import Counsel from '@/views/Manage/Counsel.vue';
 import LectureTest from '@/views/Lecture/LectureTest.vue';
 import Student from '@/views/Manage/Student.vue';
 
-
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [

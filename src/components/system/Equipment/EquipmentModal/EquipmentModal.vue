@@ -167,14 +167,13 @@ onUnmounted(() => {
   <div class="equipModal-overlay">
     <form ref="formRef" class="equipModal-form equipModal-container">
       <h2 class="mb-4 text-center text-xl font-bold">장비 관리</h2>
-
       <label
-        >시리얼넘버<span class="required">*</span>:
+        ><span>시리얼넘버<span class="required">*</span></span>
         <input v-model="detail.equipSerial" type="text" name="equipSerial" />
       </label>
 
       <label
-        >강의실<span class="required">*</span>:
+        ><span>강의실<span class="required">*</span></span>
         <select v-if="roomList.length > 0" v-model.number="detail.roomId" name="roomId">
           <option disabled value="">강의실 선택</option>
           <option v-for="room in roomList" :key="room.roomId" :value="Number(room.roomId)">
@@ -184,22 +183,22 @@ onUnmounted(() => {
       </label>
 
       <label
-        >장비명<span class="required">*</span>:
+        ><span>장비명<span class="required">*</span></span>
         <input v-model="detail.equipName" type="text" name="equipName" />
       </label>
 
       <label
-        >수량<span class="required">*</span>:
+        ><span>수량<span class="required">*</span></span>
         <input v-model="detail.equipQuantity" type="number" min="0" name="equipQuantity" />
       </label>
 
       <label
-        >구매일자<span class="required">*</span>:
+        ><span>구매일자<span class="required">*</span></span>
         <input v-model="detail.equipPerioduseDate" type="date" name="equipPerioduseDate" />
       </label>
 
       <label
-        >분류<span class="required">*</span>:
+        ><span>분류<span class="required">*</span></span>
         <select v-model="detail.equipGroup" name="equipGroup">
           <option value="">장비를 선택하세요</option>
           <option value="com">컴퓨터</option>
@@ -215,11 +214,11 @@ onUnmounted(() => {
       </label>
 
       <label
-        >사용연한<span class="required">*</span>:
+        ><span>사용연한<span class="required">*</span></span>
         <input v-model="detail.equipPurchaseDate" type="date" name="equipPurchaseDate" />
       </label>
 
-      파일:
+      <span>파일</span>
       <input id="fileInput" type="file" name="file" @change="handlerFile" />
       <label class="img-label" for="fileInput">파일 첨부하기</label>
 

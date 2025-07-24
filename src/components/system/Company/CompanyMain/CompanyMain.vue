@@ -65,7 +65,7 @@ onMounted(() => {
           <tr v-for="company in companyList" :key="company.companyId" class="company-table-row">
             <td class="company-cell">{{ company.companyId }}</td>
             <td
-              class="company-cell cursor-pointer hover:underline"
+              class="company-cell cursor-pointer !font-bold hover:underline"
               @click="companyDetail(company.companyId)"
             >
               {{ company.companyName }}

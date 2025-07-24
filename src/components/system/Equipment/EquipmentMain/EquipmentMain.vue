@@ -57,8 +57,6 @@ watch(
 onMounted(() => {
   EquipmentSearch();
 });
-
-
 </script>
 
 <template>
@@ -88,7 +86,7 @@ onMounted(() => {
           <td class="equipment-cell">{{ equip.equipSerial }}</td>
           <td class="equipment-cell">{{ equip.equipGroup }}</td>
           <td
-            class="equipment-cell cursor-pointer text-blue-600 underline"
+            class="equipment-cell cursor-pointer !font-bold text-blue-600 hover:underline"
             @click="equipmentDetail(equip.equipId)"
           >
             {{ equip.equipName }}
@@ -99,7 +97,7 @@ onMounted(() => {
             <span v-if="equip.remainPeroid >= 0">{{ equip.remainPeroid }}일</span>
             <span
               v-else
-              class="equipment-cell cursor-pointer text-red-600 underline"
+              class="equipment-cell cursor-pointer !font-bold !text-red-600 underline"
               @click="deleteEquip(equip.equipId)"
               >장비 삭제</span
             >

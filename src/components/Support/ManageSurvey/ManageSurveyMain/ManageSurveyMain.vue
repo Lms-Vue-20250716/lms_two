@@ -108,6 +108,10 @@ const openDetailModal = (item) => {
             <td colspan="5" class="no-data">조회된 설문이 없습니다.</td>
           </tr>
           <tr v-for="(item, index) in dataList" :key="item.lecId + '-' + (item.loginId || index)">
+            =======
+          </tr>
+
+          <tr v-for="(item, index) in dataList" :key="item.lecId + '-' + item.loginId">
             <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
             <td>{{ item.lecName }}</td>
             <td v-if="selectedTab === 'completed'">{{ item.loginId }}</td>

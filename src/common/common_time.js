@@ -35,6 +35,25 @@ export const formatDateTime = (date, format = 'YYYY-MM-DD HH:mm:ss') => {
   }
 };
 
+/**
+ * 타임스탬프를 'YYYY-MM-DD' 형식의 문자열로 변환하는 함수입니다.
+ * @param {number} timestamp - 변환할 타임스탬프 숫자
+ * @returns {string} 포맷팅된 날짜 문자열
+ */
+export const formatTimestampToDate = (timestamp) => {
+  // 타임스탬프 값이 유효하지 않으면 빈 문자열을 반환합니다.
+  if (!timestamp) return '';
+
+  const date = new Date(timestamp);
+  const year = date.getFullYear();
+  // getMonth()는 0부터 시작하므로 1을 더하고, 10보다 작으면 앞에 '0'을 붙여줍니다.
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  // getDate()가 10보다 작으면 앞에 '0'을 붙여줍니다.
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+};
+
 /** 주말인지 확인하는 함수 (토: 6, 일: 0) */
 export const isWeekend = (date) => {
   const day = new Date(date).getDay();
