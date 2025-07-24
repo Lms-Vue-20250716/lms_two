@@ -37,7 +37,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="counsel-container">
+  <div class="recruit-container">
     <div class="input-box">
       학생명: <input v-model.lazy="searchTitle" />
       입사일자: <input v-model="searchStDate" type="date" />
