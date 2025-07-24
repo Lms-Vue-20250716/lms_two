@@ -8,6 +8,7 @@ import TestRegister from '../TestModal/TestRegister.vue';
 import TestUpdate from '../TestModal/TestUpdate.vue';
 import TestDetail from '../TestModal/TestDetail.vue';
 import { useUserInfo } from '@/stores/loginInfoState';
+import TakeTest from '../TestModal/TakeTest.vue';
 
 // --- 로그인 정보 가져오기 ---
 const userInfoStore = useUserInfo();
@@ -25,6 +26,9 @@ const selectedTestData = ref(null);
 // --- 게시판
 const testList = ref([]);
 const testCount = ref(0);
+
+// --- test-take modal을 위한 props
+const testTakeProps = ref({});
 
 /**
  * API에서 받아온 testList를 화면에 표시하기 좋게 가공합니다.
@@ -45,7 +49,7 @@ const processedTestList = computed(() => {
  * @param {object} test - 시험 정보 객체
  */
 const getTestStatus = (test) => {
-  const { testAvailable, submitYn, testId, lecId, lecStudentId } = test;
+  const { submitYn, testId, lecId, lecStudentId, lecName } = test;
   // 현재 날짜를 'YYYY-MM-DD HH:MM:SS' 형식의 문자열로 가져옵니다.
   const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' }))
     .toISOString()
@@ -59,14 +63,14 @@ const getTestStatus = (test) => {
       return {
         text: '시험응시',
         class: 'text-blue-600 font-bold cursor-pointer hover:underline',
-        action: () => testTakeModal(testId, lecId, lecStudentId),
+        action: () => testTakeModal(testId, lecId, lecStudentId, lecName),
       };
     } else {
       // submitYn === 'Y'
       return {
         text: '시험응시완료',
-        class: 'text-gray-500 cursor-pointer hover:underline',
-        action: () => testTakeModal(testId, lecId, lecStudentId), // 완료 후 재응시 또는 검토
+        class: 'text-blue-900 cursor-pointer hover:underline',
+        action: () => testTakeModal(testId, lecId, lecStudentId, lecName), // 완료 후 재응시 또는 검토
       };
     }
   } else {
@@ -85,7 +89,7 @@ const getTestStatus = (test) => {
  * @param {object} test - 시험 정보 객체
  */
 const getResultStatus = (test) => {
-  const { testAvailable, scoreYn, testId, lecId, lecStudentId } = test;
+  const { scoreYn, testId, lecId, lecStudentId } = test;
   const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul' }))
     .toISOString()
     .slice(0, 19)
@@ -119,14 +123,14 @@ const getResultStatus = (test) => {
   }
 };
 
-const testSearch = (cPage = 1) => {
+const testSearch = async (cPage = 1) => {
   const param = new URLSearchParams(route.query);
   param.append('currentPage', cPage);
   param.append('pageSize', 5);
 
   if (userType.value === 'S') {
     axios.post('/api/lecture/testListBody.do', param).then((res) => {
-      console.log('@@@@@@@@@@@@@@@@@@@@@@@@');
+      console.log('#################################');
       console.log(res);
 
       testList.value = res.data.list;
@@ -158,26 +162,18 @@ const testSearch = (cPage = 1) => {
   }
 };
 
-const testTakeModal = (testId, lecId, studentId) => {
+const testTakeModal = async (testId, lecId, studentId, lecName) => {
   console.log(`시험 응시: testId=${testId}, lecId=${lecId}, studentId=${studentId}`);
-  alert(`시험을 시작합니다.`);
-
-  try {
-    let params = {
-      testId: testId,
-      lecId: lecId,
-      studentId: studentId,
-    };
-    const response = axios.post('/api/lecture/testQuestionNOptionInfoDetail.do', params);
-    console.log(response);
-
-    //if success, open modal && pass down props
-  } catch (err) {
-    console.log(err);
-  }
+  testTakeProps.value = {
+    testId: testId,
+    lecId: lecId,
+    studentId: studentId,
+    lecName: lecName,
+  };
+  modalState.$patch({ isOpen: true, type: 'test-take' });
 };
 
-const testResultModal = (testId, lecId, studentId) => {
+const testResultModal = async (testId, lecId, studentId) => {
   console.log(`시험 결과 보기: testId=${testId}, lecId=${lecId}, studentId=${studentId}`);
   alert(`시험 결과를 확인합니다.`);
 
@@ -187,8 +183,8 @@ const testResultModal = (testId, lecId, studentId) => {
       lecId: lecId,
       studentId: studentId,
     };
-    const response = axios.post('/api/lecture/testTakeSubmitResultDetail.do', params);
-    console.log(response);
+    const response = await axios.post('/api/lecture/testTakeSubmitResultDetail.do', params);
+    console.log(response.data);
     //if success, open modal && pass down props
   } catch (err) {
     console.log(err);
@@ -315,6 +311,11 @@ onMounted(() => {
     v-if="modalState.isOpen && modalState.type === 'test-detail'"
     :lectureData="selectedTestData"
     @test-update-success="testSearch()"
+  />
+  <TakeTest
+    v-if="modalState.isOpen && modalState.type === 'test-take'"
+    :testTakeProps="testTakeProps"
+    @test-take-success="testSearch()"
   />
 </template>
 
