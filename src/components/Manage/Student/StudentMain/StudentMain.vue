@@ -35,7 +35,6 @@ const updateStatusYn = async (e, student) => {
 
 const studentSearch = async (cPage = 1) => {
   const param = new URLSearchParams(route.query);
-  console.log(route.query);
   param.append('currentPage', cPage);
   param.append('pageSize', 5);
 

@@ -15,7 +15,6 @@ const showDetail = ref(false);
 
 const recruitSearch = async (cPage = 1) => {
   const param = new URLSearchParams(route.query);
-  console.log(route.query);
   param.append('currentPage', cPage);
   param.append('pageSize', 5);
 
@@ -86,7 +85,7 @@ watch(
     </table>
     <PageNavigation :total-items="recruitCnt" :items-per-page="5" :on-page-change="recruitSearch" />
   </div>
-  <RecruitDetail v-if="showDetail" :login-id="loginId" />
+  <RecruitDetail v-if="showDetail" :login-id="loginId" @refresh-main="recruitSearch()" />
 </template>
 
 <style>
