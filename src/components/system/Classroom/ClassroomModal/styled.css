@@ -1,26 +1,26 @@
 @import 'tailwindcss';
 
-.modal-overlay {
+.classmodal-overlay {
   @apply fixed inset-0 flex items-center justify-center bg-gray-500/50 font-bold backdrop-blur-xs;
 }
 
-.modal-container {
+.classmodal-container {
   @apply relative w-[400px] rounded-lg bg-white p-5 opacity-100 shadow-lg;
 }
 
-.modal-form label {
-  @apply mb-4 flex flex-col;
+.classmodal-form label {
+  @apply grid grid-cols-[130px_1fr] items-center gap-2;
 }
 
-.modal-form input[type='text'] {
+.classmodal-form input[type='text'] {
   @apply mt-1 rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none;
 }
 
-.modal-form input[type='number'] {
+.classmodal-form input[type='number'] {
   @apply mt-1 rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none;
 }
 
-.modal-form input[type='file'] {
+.classmodal-form input[type='file'] {
   @apply hidden;
 }
 
@@ -42,4 +42,9 @@
 
 .button-container button {
   @apply cursor-pointer rounded-md px-4 py-2 transition-colors duration-200 first:bg-blue-900 first:text-white last:bg-gray-300 last:text-gray-700 first:hover:bg-blue-950 last:hover:bg-gray-400;
+}
+
+.required {
+  color: red;
+  margin-left: 4px;
 }

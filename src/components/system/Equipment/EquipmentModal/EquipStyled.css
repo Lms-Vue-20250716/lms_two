@@ -1,30 +1,31 @@
 @import 'tailwindcss';
 
 .equipModal-overlay {
-  @apply fixed inset-0 flex items-center justify-center bg-gray-500/50 font-bold backdrop-blur-xs;
+  @apply fixed inset-0 flex items-center justify-center bg-black/40;
 }
 
 .equipModal-container {
-  @apply relative w-[500px] rounded-lg bg-white p-6 opacity-100 shadow-lg;
+  @apply relative w-[400px] rounded-lg bg-white p-6 opacity-100 shadow-lg;
 }
 
 .equipModal-form {
   @apply space-y-3;
 }
 
+/* label을 1행 2열 그리드로 구성 */
 .equipModal-form label {
-  @apply flex items-center gap-4;
+  @apply grid grid-cols-[130px_1fr] items-center gap-2;
 }
 
 .equipModal-form label > span {
-  @apply w-28 font-semibold text-gray-800;
+  @apply font-semibold text-gray-800;
 }
 
 .equipModal-form input[type='text'],
 .equipModal-form input[type='number'],
 .equipModal-form input[type='date'],
 .equipModal-form select {
-  @apply flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none;
+  @apply w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none;
 }
 
 .equipModal-form input[type='file'] {

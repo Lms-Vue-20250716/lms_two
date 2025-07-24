@@ -182,10 +182,16 @@ const validateForm = () => {
 <template>
   <div class="companyModal-overlay">
     <form ref="formRef" class="companyModal-form companyModal-container">
-      <label>회사명* :<input v-model="detail.companyName" type="text" name="companyName" /></label>
-      <label>대표명* :<input v-model="detail.companyCeo" type="text" name="companyCeo" /></label>
       <label
-        >휴대전화* :
+        ><span>회사명<span class="required">*</span></span
+        ><input v-model="detail.companyName" type="text" name="companyName"
+      /></label>
+      <label
+        ><span>대표명<span class="required">*</span></span
+        ><input v-model="detail.companyCeo" type="text" name="companyCeo"
+      /></label>
+      <label
+        ><span>휴대전화<span class="required">*</span></span>
         <input
           v-model="detail.companyHp"
           name="companyHp"
@@ -195,19 +201,23 @@ const validateForm = () => {
           @input="formatPhone"
       /></label>
       <label>
-        우편번호* :
-        <button type="button" class="postcode-button" @click="execDaumPostcode">주소 검색</button>
-        <input
-          v-model="detail.companyLoc"
-          type="text"
-          name="companyLoc"
-          readonly
-          placeholder="주소검색"
-        />
+        <span>우편번호<span class="required">*</span></span>
+        <div class="flex gap-2">
+          <input
+            v-model="detail.companyLoc"
+            type="text"
+            name="companyLoc"
+            placeholder="주소검색"
+            readonly
+            class="input-postcode"
+          />
+          <button type="button" class="postcode-button" @click="execDaumPostcode">주소 검색</button>
+        </div>
       </label>
+
       <input v-model="detail.detailName" type="hidden" name="detailName" />
       <label>
-        기본주소* :
+        <span>기본주소<span class="required">*</span></span>
         <input
           v-model="detail.zipcode"
           type="text"
@@ -216,15 +226,12 @@ const validateForm = () => {
           readonly
         />
       </label>
-
-
-
       <label>
-        상세주소* :
+        <span>상세주소<span class="required">*</span></span>
         <input v-model="detail.detailAddress" type="text" name="companyDetailAddress" />
       </label>
       <label>
-        이메일* :
+        <span>이메일<span class="required">*</span></span>
         <input
           v-model="detail.companyEmail"
           name="companyEmail"
@@ -237,7 +244,8 @@ const validateForm = () => {
         이메일 형식이 올바르지 않습니다.
       </p>
       <label
-        >가입일자* :<input v-model="detail.companyRegDate" type="date" name="companyRegDate"
+        ><span>가입일자<span class="required">*</span></span
+        ><input v-model="detail.companyRegDate" type="date" name="companyRegDate"
       /></label>
       <div class="button-container">
         <button type="button" @click="!id ? handlerInsert() : handlerUpdate()">
