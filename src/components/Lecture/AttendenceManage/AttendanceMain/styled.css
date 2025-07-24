@@ -40,14 +40,14 @@
 }
 
 /* --- 액션 버튼 (클릭 가능) --- */
+/* 출석 버튼 */
 .attendance-button.attend {
-  /* 출석 버튼 */
-  @apply bg-blue-600 hover:bg-blue-700;
+  @apply bg-blue-600 hover:bg-blue-900;
 }
 
-.attendance-button.leave {
-  /* 퇴실 버튼 */
-  @apply bg-red-500 hover:bg-red-600;
+/* 퇴실 버튼 */
+.attendance-button.leave-attendance {
+  @apply bg-red-700;
 }
 
 /* --- 상태 표시 버튼 (클릭 불가) --- */

@@ -53,9 +53,9 @@ const attendanceSearch = async (cPage = 1) => {
     attendanceList.value = res.data.list || [];
     attendanceCount.value = res.data.count || 0;
 
-    // console.log(res.data);
-    // console.log(attendanceList.value);
-    // console.log(attendanceCount.value);
+    console.log(res.data);
+    console.log(attendanceList.value);
+    console.log(attendanceCount.value);
   });
 };
 
@@ -66,9 +66,14 @@ const handleAttendanceCheck = async (lecId) => {
   if (window.confirm('출석 처리 하시겠습니까?')) {
     try {
       const params = new URLSearchParams({ lecId });
-      await axios.post('/api/lecture/attendanceEnter.do', params);
-      alert('출석 처리되었습니다.');
-      attendanceSearch(); // 목록 새로고침
+      await axios.post('/api/lecture/attendanceEnter.do', params).then((res) => {
+        if (res.result === 'success') {
+          alert('출석 처리되었습니다.');
+          attendanceSearch(); // 목록 새로고침
+        } else {
+          alert('날짜를 확인해주세요.');
+        }
+      });
     } catch (error) {
       console.error('출석 처리 중 오류 발생:', error);
       alert('오류가 발생했습니다.');
@@ -138,7 +143,7 @@ onMounted(() => {
                   (attendance.attendState === 'E' || attendance.attendState === 'L') &&
                   !attendance.attendEnddate
                 "
-                class="attendance-button leave"
+                class="attendance-button leave-attendance"
                 @click="handleAttendanceOut(attendance.lecId)"
               >
                 퇴실
