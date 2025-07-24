@@ -5,6 +5,7 @@ import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useModalState } from '@/stores/modalState';
 import RecruitModal from '../RecruitModal/RecruitModal.vue';
+import NewRecruit from '../RecruitModal/NewRecruit.vue';
 
 const props = defineProps({
   loginId: String
@@ -15,12 +16,12 @@ const recruitList = ref([]);
 const recruitCnt = ref(0);
 const modalState = useModalState();
 const detailId = ref(0);
+const emit = defineEmits(['refreshMain']);
 
 /** ----------------------------------------------- */
 
-const recruitSearch = async (cPage = 1) => {
+const detailSearch = async (cPage = 1) => {
   const param = new URLSearchParams(route.query);
-  console.log(route.query);
   param.append('currentPage', cPage);
   param.append('pageSize', 5);
   param.append('loginID', props.loginId);
@@ -34,6 +35,26 @@ const recruitSearch = async (cPage = 1) => {
   }
 };
 
+const retireGoGo = async (studentId) => {
+  const param = new URLSearchParams(route.query);
+  param.append('loginID', studentId);
+
+  try {
+    const res = await axios.post('/api/manage/RetireStudent.do', param)
+    if (res.data.result === 'success') {
+      alert('퇴직되었습니다.');
+      detailSearch();
+      emit('refreshMain');
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const newRecruit = () => {
+  modalState.$patch({ isOpen: true, type: "newRecruit" })
+}
+
 const recruitDetail = (empId) => {
   modalState.$patch({ isOpen: true, type: "recruit" })
   detailId.value = empId;
@@ -44,7 +65,7 @@ watch(
   () => props.loginId,
   (newLoginId) => {
     if (newLoginId) {
-      recruitSearch();
+      detailSearch();
     }
   },
   { immediate: true }
@@ -53,7 +74,14 @@ watch(
 </script>
 
 <template>
+
   <div class="recruit-main-container">
+    <div class="w-full text-right mb-4">
+      <button @click="newRecruit()" type="button"
+        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors text-center">
+        신규
+      </button>
+    </div>
     <table class="recruit-table">
       <thead class="recruit-table-header">
         <tr>
@@ -80,7 +108,14 @@ watch(
             </td>
             <td class="recruit-cell">{{ recruit.empName }}</td>
             <td class="recruit-cell">
-              <span>{{ recruit.studentsEmpStatus === 'Y' ? '취업' : '퇴직' }}</span>
+              <span>{{ recruit.empRetireDate ? '퇴직' : '취업' }}</span>
+            </td>
+            <td class="recruit-cell">
+              <button type="button" @click="retireGoGo(recruit.loginID)"
+                class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 transition-colors"
+                :disabled="recruit.empRetireDate" :class="{ 'opacity-50 cursor-not-allowed': recruit.empRetireDate }">
+                퇴직
+              </button>
             </td>
           </tr>
         </template>
@@ -91,10 +126,12 @@ watch(
         </template>
       </tbody>
     </table>
-    <PageNavigation :total-items="recruitCnt" :items-per-page="5" :on-page-change="recruitSearch" />
+    <PageNavigation :total-items="recruitCnt" :items-per-page="5" :on-page-change="detailSearch" />
   </div>
   <RecruitModal v-if="modalState.isOpen && modalState.type === 'recruit'" :detail-id="detailId" :login-id="loginId"
-    @post-success="recruitSearch()" @un-mounted-modal="detailId = $event" />
+    @post-success="detailSearch(); emit('refreshMain')" @un-mounted-modal="detailId = $event" />
+  <NewRecruit v-if="modalState.isOpen && modalState.type === 'newRecruit'" :login-id="loginId"
+    @post-success="detailSearch(); emit('refreshMain')" @un-mounted-modal="detailId = $event" />
 </template>
 
 <style>

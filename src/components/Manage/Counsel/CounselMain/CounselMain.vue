@@ -16,7 +16,6 @@ const detailId = ref(0);
 
 const counselSearch = async (cPage = 1) => {
   const param = new URLSearchParams(route.query);
-  console.log(route.query);
   param.append('currentPage', cPage);
   param.append('pageSize', 5);
 
