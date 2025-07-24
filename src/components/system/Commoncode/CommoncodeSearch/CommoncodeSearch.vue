@@ -19,7 +19,6 @@ const handelerSearch = () => {
 
 onMounted(() => {
   window.location.search && router.replace(window.location.pathname);
-  console.log(window.location.pathname);
 });
 </script>
 <template>

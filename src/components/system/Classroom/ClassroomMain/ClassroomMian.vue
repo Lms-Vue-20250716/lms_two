@@ -63,7 +63,7 @@ onMounted(() => {
           >
             <td class="classroom-cell">{{ classroom.roomId }}</td>
             <td
-              class="classroom-cell cursor-pointer hover:underline"
+              class="classroom-cell cursor-pointer font-bold hover:underline"
               @click="classroomDetail(classroom.roomId)"
             >
               {{ classroom.roomName }}

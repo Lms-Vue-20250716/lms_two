@@ -4,7 +4,7 @@ import { useModalState } from '@/stores/modalState';
 import axios from 'axios';
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import CommoncodeMadal from '../CommoncodeMdal/CommoncodeMadal.vue';
+import CommoncodeModal from '../CommoncodeModal/CommoncodeModal.vue';
 
 const route = useRoute();
 const commonList = ref([]);
@@ -67,7 +67,7 @@ onMounted(() => {
               {{ common.detailCode }}
             </td>
             <td
-              class="commoncode-cell cursor-pointer hover:underline"
+              class="commoncode-cell cursor-pointer font-bold hover:underline"
               @click="commonDetail(common.detailCode)"
             >
               {{ common.detailName }}
@@ -84,7 +84,7 @@ onMounted(() => {
     </table>
     <PageNavigation :total-items="commonCnt" :items-per-page="5" :on-page-change="commonSearch" />
   </div>
-  <CommoncodeMadal
+  <CommoncodeModal
     v-if="modalState.isOpen"
     :detail-id
     @post-success="commonSearch()"

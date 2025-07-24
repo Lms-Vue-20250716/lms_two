@@ -84,19 +84,19 @@ onUnmounted(() => {
 });
 </script>
 <template>
-  <div class="modal-overlay">
-    <form ref="formRef" class="modal-form modal-container">
-      <label>강의실 이름 :<input v-model="detail.roomName" type="text" name="roomName" /> </label>
+  <div class="classmodal-overlay">
+    <form ref="formRef" class="classmodal-form classmodal-container">
+      <h2 class="mb-4 text-center text-xl font-bold">강의실 정보</h2>
       <label
-        >강의실 정원 :<input
-          v-model="detail.roomPersonnel"
-          type="number"
-          step="10"
-          min="0"
-          name="roomPersonnel"
+        ><span>강의실 이름<span class="required">*</span></span
+        ><input v-model="detail.roomName" type="text" name="roomName" />
+      </label>
+      <label
+        >강의실 정원
+        <input v-model="detail.roomPersonnel" type="number" step="10" min="0" name="roomPersonnel"
       /></label>
-      <label>강의실 사이즈 :<input v-model="detail.roomSize" type="text" name="roomSize" /></label>
-      <label>비고 :<input v-model="detail.roomRemark" type="text" name="roomRemark" /></label>
+      <label>강의실 사이즈 <input v-model="detail.roomSize" type="text" name="roomSize" /></label>
+      <label>비고 <input v-model="detail.roomRemark" type="text" name="roomRemark" /></label>
       <div class="button-container">
         <button type="button" @click="!id ? handlerInsert() : handlerUpdate()">
           {{ !id ? '저장' : '수정' }}

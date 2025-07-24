@@ -56,15 +56,19 @@ onUnmounted(() => {
   <div class="commoncodeModal-overlay">
     <form ref="formRef" class="commoncodeModal-form commoncodeModal-container">
       <h2 class="mb-4 text-center text-xl font-bold">공통 코드</h2>
-      <label>대분류: <input :value="detail.useYn" type="text" name="useYn" readonly /></label>
+      <label>대분류 <input :value="detail.useYn" type="text" name="useYn" readonly /></label>
       <label
-        >그룹코드: <input :value="detail.groupName" type="text" name="groupName" readonly
+        >그룹코드 <input :value="detail.groupName" type="text" name="groupName" readonly
       /></label>
       <label
-        >시리얼코드*: <input v-model="detail.detailCode" type="text" name="detailCode"
+        ><span>시리얼코드<span class="required">*</span></span>
+        <input v-model="detail.detailCode" type="text" name="detailCode"
       /></label>
-      <label>상세명*: <input v-model="detail.detailName" type="text" name="detailName" /></label>
-      <label>번호: <input :value="detail.regId" type="text" name="regId" readonly /></label>
+      <label
+        ><span>상세명<span class="required">*</span></span>
+        <input v-model="detail.detailName" type="text" name="detailName"
+      /></label>
+      <label>번호 <input :value="detail.regId" type="text" name="regId" readonly /></label>
       <div class="button-container">
         <button type="button" @click="handlerUpdate()">수정</button>
         <button type="button" @click="modalState.$patch({ isOpen: false })">취소</button>

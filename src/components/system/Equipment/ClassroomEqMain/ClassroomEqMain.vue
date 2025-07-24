@@ -63,7 +63,7 @@ const selectRoom = (roomId) => {
           >
             <td class="equipment-cell">{{ classroom.roomId }}</td>
             <td
-              class="equipment-cell cursor-pointer hover:underline"
+              class="equipment-cell cursor-pointer !font-bold hover:underline"
               @click="selectRoom(classroom.roomId)"
             >
               {{ classroom.roomName }}
