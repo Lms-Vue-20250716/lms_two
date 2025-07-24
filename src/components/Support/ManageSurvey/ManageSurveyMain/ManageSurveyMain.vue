@@ -1,42 +1,54 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, watch } from 'vue';
 import axios from 'axios';
 import ManageSurveyModal from '../ManageSurveyModal/ManageSurveyModal.vue';
 
-const selectedView = ref('completed'); // 'completed' | 'result'
-
-const completedList = ref([]);
-const resultList = ref([]);
+const selectedTab = ref('');
+const dataList = ref([]);
 const isModalOpen = ref(false);
 const selectedSurveyItem = ref(null);
+const currentPage = ref(1);
+const pageSize = ref(10);
+const totalItems = ref(0);
 
-// API 호출
 const fetchData = async () => {
+  if (!selectedTab.value) return; // 아무 것도 선택 안 했을 경우 빠르게 리턴
+
   try {
-    if (selectedView.value === 'completed') {
-      const res = await axios.get('/support/getCompletedPageList.do');
-      completedList.value = res.data.completedList || [];
+    const params = {
+      currentPage: currentPage.value,
+      pageSize: pageSize.value,
+    };
+    if (selectedTab.value === 'completed') {
+      const res = await axios.get('/support/getCompletedPageList.do', { params });
+      dataList.value = res.data.resultList || [];
+      totalItems.value = res.data.resultCnt || 0;
     } else {
-      const res = await axios.get('/support/getResultListReact.do');
-      const raw = res.data.resultList || [];
-      // 응답률 계산
-      resultList.value = raw.map((item) => ({
+      const res = await axios.get('/support/getResultListReact.do', { params });
+      dataList.value = res.data.fixedRes.map((item) => ({
         ...item,
         rate: item.coursesStudentCount
           ? ((item.respondentCount / item.coursesStudentCount) * 100).toFixed(1)
           : '0.0',
       }));
+      totalItems.value = res.data.resultCnt || 0;
     }
   } catch (error) {
     console.error('데이터 조회 실패:', error);
   }
 };
 
-onMounted(() => {
-  fetchData();
-});
+const changePage = (page) => {
+  if (page > 0 && page <= totalPages.value) {
+    currentPage.value = page;
+    fetchData();
+  }
+};
 
-// 모달 열기
+const totalPages = computed(() => Math.ceil(totalItems.value / pageSize.value));
+
+watch(() => [selectedTab.value, currentPage.value], fetchData, { immediate: true });
+
 const openDetailModal = (item) => {
   selectedSurveyItem.value = item;
   isModalOpen.value = true;
@@ -46,79 +58,117 @@ const openDetailModal = (item) => {
 <template>
   <div class="survey-manage-container">
     <div class="survey-manage-header">
-      <h2>설문조사 관리</h2>
-
-      <!-- 유형 선택 드롭다운 -->
-      <select v-model="selectedView" @change="fetchData" class="view-selector">
-        <option value="completed">설문 완료 목록 조회</option>
-        <option value="result">설문 결과 조회</option>
-      </select>
+      <div class="view-selector-wrapper">
+        <label>관리 항목 <span class="required">*</span></label>
+        <select v-model="selectedTab" @change="fetchData" class="view-selector">
+          <option disabled value="" hidden>클릭해서 항목 선택</option>
+          <option value="completed">설문 완료 목록 조회</option>
+          <option value="result">설문 결과 조회</option>
+        </select>
+      </div>
     </div>
 
-    <!-- 목록 테이블: completed -->
-    <table v-if="selectedView === 'completed'" class="survey-table">
-      <thead>
-        <tr>
-          <th>No.</th>
-          <th>과목명</th>
-          <th>학생 ID</th>
-          <th>학생명</th>
-          <th>관리</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-if="completedList.length === 0">
-          <td colspan="5" class="no-data">조회된 설문이 없습니다.</td>
-        </tr>
-        <tr v-for="(item, index) in completedList" :key="item.lecId + '-' + item.loginId">
-          <td>{{ index + 1 }}</td>
-          <td>{{ item.lecName }}</td>
-          <td>{{ item.loginId }}</td>
-          <td>{{ item.stName }}</td>
-          <td>
-            <button @click="openDetailModal(item)" class="btn-detail">상세보기</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="survey-table-wrapper" v-if="selectedTab && selectedTab !== 'null'">
+      <table class="survey-table">
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>과목명</th>
+            <th v-if="selectedTab === 'completed'">학생 ID</th>
+            <th v-if="selectedTab === 'completed'">학생명</th>
+            <th v-if="selectedTab === 'result'">강사명</th>
+            <th v-if="selectedTab === 'result'">평균 점수</th>
+            <th v-if="selectedTab === 'result'">응답 인원</th>
+            <th v-if="selectedTab === 'result'">응답률(%)</th>
+            <th>관리</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="dataList.length === 0">
+            <td colspan="5" class="no-data">조회된 설문이 없습니다.</td>
+          </tr>
+          <tr v-for="(item, index) in dataList" :key="item.lecId + '-' + item.loginId">
+            <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
+            <td>{{ item.lecName }}</td>
+            <td v-if="selectedTab === 'completed'">{{ item.loginId }}</td>
+            <td v-if="selectedTab === 'completed'">{{ item.stName }}</td>
+            <td v-if="selectedTab === 'result'">{{ item.lecInstructorName }}</td>
+            <td v-if="selectedTab === 'result'">{{ item.avgScore }}</td>
+            <td v-if="selectedTab === 'result'">{{ item.respondentCount }}</td>
+            <td v-if="selectedTab === 'result'">{{ item.rate }}</td>
+            <td>
+              <button
+                v-if="selectedTab === 'completed'"
+                @click="openDetailModal(item)"
+                class="btn-detail"
+              >
+                상세보기
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="pagination" v-if="totalItems > pageSize">
+        <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1">이전</button>
+        <span>{{ currentPage }} / {{ totalPages }}</span>
+        <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages">
+          다음
+        </button>
+      </div>
+    </div>
 
-    <!-- 목록 테이블: result -->
-    <table v-else class="survey-table">
-      <thead>
-        <tr>
-          <th>No.</th>
-          <th>과목명</th>
-          <th>강사명</th>
-          <th>평균 점수</th>
-          <th>응답 인원</th>
-          <th>응답률(%)</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-if="resultList.length === 0">
-          <td colspan="6" class="no-data">조회된 설문 결과가 없습니다.</td>
-        </tr>
-        <tr v-for="(item, index) in resultList" :key="item.lecId">
-          <td>{{ index + 1 }}</td>
-          <td>{{ item.lecName }}</td>
-          <td>{{ item.lecInstructorName }}</td>
-          <td>{{ item.avgScore }}</td>
-          <td>{{ item.respondentCount }}</td>
-          <td>{{ item.rate }}</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- 모달 -->
     <ManageSurveyModal
       v-if="isModalOpen"
       :mode="'detail'"
-      :surveyData="selectedSurveyItem"
+      :survey-data="selectedSurveyItem"
       @close="isModalOpen = false"
     />
   </div>
 </template>
 
-<style>
+<style scoped>
 @import './styled.css';
+
+/* 기존 스타일 유지 */
+.survey-manage-container {
+  padding: 20px;
+}
+
+/* ... (기존 스타일 생략) ... */
+
+.view-selector-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
+.view-selector-wrapper label {
+  font-weight: bold;
+  color: #333;
+  font-size: 14px;
+}
+
+.view-selector-wrapper .required {
+  color: red;
+}
+
+.view-selector {
+  padding: 5px;
+  color: #666;
+  border: none;
+  background: transparent;
+  outline: none;
+}
+
+.view-selector option {
+  color: #000;
+}
+
+.view-selector:invalid {
+  color: #666;
+}
 </style>
