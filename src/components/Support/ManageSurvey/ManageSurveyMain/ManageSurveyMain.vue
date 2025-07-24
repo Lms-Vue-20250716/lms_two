@@ -20,11 +20,14 @@ const fetchData = async () => {
       pageSize: pageSize.value,
     };
     if (selectedTab.value === 'completed') {
-      const res = await axios.get('/support/getCompletedPageList.do', { params });
+      const res = await axios.get('/api/support/getCompletedList.do', { params });
+      console.log('Completed 응답:', res.data);
       dataList.value = res.data.resultList || [];
       totalItems.value = res.data.resultCnt || 0;
     } else {
-      const res = await axios.get('/support/getResultListReact.do', { params });
+      const res = await axios.get('/api/support/getResultList.do', { params });
+      console.log('Result 응답:', res.data);
+      const fixedRes = res.data.fixedRes || [];
       dataList.value = res.data.fixedRes.map((item) => ({
         ...item,
         rate: item.coursesStudentCount
@@ -87,7 +90,7 @@ const openDetailModal = (item) => {
           <tr v-if="dataList.length === 0">
             <td colspan="5" class="no-data">조회된 설문이 없습니다.</td>
           </tr>
-          <tr v-for="(item, index) in dataList" :key="item.lecId + '-' + item.loginId">
+          <tr v-for="(item, index) in dataList" :key="item.lecId + '-' + (item.loginId || index)">
             <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
             <td>{{ item.lecName }}</td>
             <td v-if="selectedTab === 'completed'">{{ item.loginId }}</td>
