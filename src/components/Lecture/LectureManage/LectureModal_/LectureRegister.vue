@@ -16,7 +16,7 @@ const props = defineProps({
 const isEditMode = ref(false);
 const lecId = ref();
 
-const emit = defineEmits(['lectureManageRegisterSuccess']);
+const emit = defineEmits(['lectureManageRegisterClose']);
 
 const modalState = useModalState();
 
@@ -230,8 +230,7 @@ const handleSave = async () => {
     //step5. 후처리
     alert('강의 저장 성공!');
 
-    //부모에게 save 성공했다 보내기
-    emit('lecture-manage-register-success'); // 부모에게 성공 이벤트를 보냅니다.
+    emit('lecture-manage-register-close');
 
     //close modal
     modalState.$patch({ isOpen: false, type: 'lecture-manage-save' });
@@ -239,6 +238,11 @@ const handleSave = async () => {
     console.log(err);
     alert('강의 저장에 실패했습니다!');
   }
+};
+
+const closeModal = () => {
+  emit('lecture-manage-register-close');
+  modalState.$patch({ isOpen: false, type: 'lecture-manage-register' });
 };
 
 // 1. 드롭다운 선택 시, ID에 맞는 이름으로 insName을 업데이트하는 watcher
@@ -399,13 +403,7 @@ watch(lecEndDate, (newEnd) => {
       <form @submit.prevent="handleSave" class="test-register-modal">
         <div class="modal-header">
           <h2>{{ isEditMode ? '강의 상세' : '시험 등록' }}</h2>
-          <button
-            class="close-btn"
-            type="button"
-            @click="modalState.$patch({ isOpen: false, type: 'lecture-manage-register' })"
-          >
-            &times;
-          </button>
+          <button class="close-btn" type="button" @click="closeModal()">&times;</button>
         </div>
 
         <div class="modal-content">
@@ -513,13 +511,7 @@ watch(lecEndDate, (newEnd) => {
 
         <div class="modal-footer">
           <button class="btn btn-primary" type="submit">{{ isEditMode ? '수정' : '저장' }}</button>
-          <button
-            class="btn btn-secondary"
-            type="button"
-            @click="modalState.$patch({ isOpen: false, type: 'lecture-manage-register' })"
-          >
-            취소
-          </button>
+          <button class="btn btn-secondary" type="button" @click="closeModal()">취소</button>
         </div>
       </form>
     </div>

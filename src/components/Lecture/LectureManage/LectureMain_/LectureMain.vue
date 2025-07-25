@@ -6,14 +6,13 @@ import { useRoute } from 'vue-router';
 import { useModalState } from '@/stores/modalState';
 import LecturePlanModal from '../LectureModal_/LecturePlanModal.vue';
 import LectureRegister from '../LectureModal_/LectureRegister.vue';
-import { useLectureStore } from '@/stores/lectureStore';
-
-const lectureStore = useLectureStore();
 
 const route = useRoute();
 const lectureList = ref([]);
 const lectureCount = ref(0);
 const modalState = useModalState();
+
+const selectedLecture = ref(null);
 
 const lectureSearch = (cPage = 1) => {
   const param = new URLSearchParams(route.query);
@@ -28,6 +27,21 @@ const lectureSearch = (cPage = 1) => {
 
     // console.log(res.data);
   });
+};
+
+const selectForEdit = (lecture) => {
+  selectedLecture.value = lecture;
+  modalState.$patch({ isOpen: true, type: 'lecture-manage-register' });
+};
+
+const openLecturePlan = (lecture) => {
+  selectedLecture.value = lecture;
+  modalState.$patch({ isOpen: true, type: 'lecture-manage-plan' });
+};
+
+const closeLectureRegisterModal = () => {
+  selectedLecture.value = null;
+  lectureSearch();
 };
 
 watch(
@@ -59,10 +73,7 @@ onMounted(() => {
       <tbody>
         <template v-if="lectureCount > 0">
           <tr v-for="lecture in lectureList" :key="lecture.lecId" class="lecture-table-row">
-            <td
-              class="lecture-cell cursor-pointer hover:underline"
-              @click="lectureStore.selectForEdit(lecture)"
-            >
+            <td class="lecture-cell cursor-pointer hover:underline" @click="selectForEdit(lecture)">
               {{ lecture.lecName }}
             </td>
             <td class="lecture-cell">{{ lecture.lecInstructorName }}</td>
@@ -76,7 +87,7 @@ onMounted(() => {
             <td class="lecture-cell">{{ lecture.lecRoomName }}</td>
             <td
               class="lecture-cell cursor-pointer hover:underline"
-              @click="lectureStore.openLecturePlan(lecture)"
+              @click="openLecturePlan(lecture)"
             >
               강의계획서 보기
             </td>
@@ -97,12 +108,12 @@ onMounted(() => {
   </div>
   <LectureRegister
     v-if="modalState.isOpen && modalState.type === 'lecture-manage-register'"
-    :lecture-data="lectureStore.selectedLecture"
-    @lecture-manage-register-success="lectureSearch()"
+    :lecture-data="selectedLecture"
+    @lecture-manage-register-close="closeLectureRegisterModal()"
   />
   <LecturePlanModal
     v-if="modalState.isOpen && modalState.type === 'lecture-manage-plan'"
-    :lecture-data="lectureStore.selectedLecture"
+    :lecture-data="selectedLecture"
     @post-success="lectureSearch()"
   />
 </template>

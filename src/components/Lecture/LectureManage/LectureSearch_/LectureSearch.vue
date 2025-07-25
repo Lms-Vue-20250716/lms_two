@@ -1,9 +1,9 @@
 <script setup>
 import router from '@/router';
-import { useLectureStore } from '@/stores/lectureStore';
+import { useModalState } from '@/stores/modalState';
 import { onMounted, ref } from 'vue';
 
-const lectureStore = useLectureStore();
+const modalState = useModalState();
 
 const searchTag = ref('lecName');
 const searchTitle = ref('');
@@ -56,7 +56,9 @@ onMounted(() => {
       <input v-model="searchStDate" type="date" />
       <input v-model="searchEdDate" type="date" />
       <button @click="handlerSearch">검색</button>
-      <button @click="lectureStore.prepareForCreate()">신규</button>
+      <button @click="modalState.$patch({ isOpen: true, type: 'lecture-manage-register' })">
+        신규
+      </button>
     </div>
   </div>
 </template>
