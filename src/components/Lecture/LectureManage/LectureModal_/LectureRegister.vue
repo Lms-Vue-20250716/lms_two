@@ -305,7 +305,7 @@ watch(lecStartDate, (newStart) => {
     return;
   }
 
-  // 2. 종료일이 시작일보다 빠르면 자동 조정
+  // 2. 종료일이 시작일보다 빠르면 종료일을 시작인 다음날로 자동 조정 (주말건너뛰고)
   if (lecEndDate.value && newStart > lecEndDate.value) {
     alert('강의 종료일은 시작일보다 빠를 수 없습니다. 날짜를 조정합니다.');
     let nextDay = new Date(newStart);
@@ -318,6 +318,28 @@ watch(lecStartDate, (newStart) => {
     requestAnimationFrame(() => {
       isUpdating = false;
     }); // 다음 프레임에서 플래그 해제
+  }
+
+  const end = lecEndDate.value;
+  // 3. 최대 강의 기간(200일) 체크 및 시작일 자동 조정
+  if (end && lecDaysCnt.value > 200) {
+    alert('강의 기간은 최대 200일까지만 설정할 수 있습니다. 시작일을 조정합니다.');
+    let adjustedStart = new Date(end);
+    let count = 0;
+    // 종료일로부터 거꾸로 200 영업일을 계산합니다.
+    while (count < 200) {
+      if (!isWeekend(adjustedStart)) {
+        count++;
+      }
+      if (count < 200) {
+        adjustedStart.setDate(adjustedStart.getDate() - 1);
+      }
+    }
+    isUpdating = true;
+    lecStartDate.value = formatDateTime(adjustedStart, 'YYYY-MM-DD');
+    requestAnimationFrame(() => {
+      isUpdating = false;
+    });
   }
 });
 
