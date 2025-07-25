@@ -130,6 +130,7 @@ const handleSubmit = async () => {
   formData.append('qnaContent', detail.value.qnaContent);
 
   if (!isNew.value) {
+    formData.append('lecId', selectedLecture.value);
     formData.append('qnaAnswer', detail.value.qnaAnswer);
   }
 
