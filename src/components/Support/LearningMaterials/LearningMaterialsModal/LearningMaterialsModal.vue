@@ -44,19 +44,6 @@ const handlerDelete = () => {
   }
 };
 
-// 수정 로직 (추가)
-const handlerUpdate = () => {
-  const formData = new FormData(formRef.value);
-  axios.post('/api/support/updateMtr.do', formData).then((res) => {
-    // update API 경로 확인 필요
-    if (res.data.result === 'success') {
-      alert('수정 되었습니다.');
-      modalState.$patch({ isOpen: false });
-      emit('postSuccess');
-    }
-  });
-};
-
 // 제목 클릭시 모달창 조회
 const searchDetail = () => {
   const param = new URLSearchParams();
@@ -93,11 +80,9 @@ watch(isDeleting, (newVal) => {
         <label>
           내용:<input v-model="detail.materiContent" type="text" name="materiContent" />
         </label>
-
         파일:
         <input id="fileInput" type="file" name="file" @change="handlerFile" />
         <label class="img-label" htmlFor="fileInput"> 파일 첨부하기 </label>
-
         <div @click="downloadFile">
           <div>
             <label>미리보기</label>
