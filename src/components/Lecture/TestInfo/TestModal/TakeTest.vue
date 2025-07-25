@@ -453,7 +453,7 @@ watch(
   @apply w-1/3 p-2 text-left font-semibold text-gray-600;
 }
 .result-summary-table td {
-  @apply flex justify-end p-2 text-gray-800;
+  @apply text-grey-800 flex justify-end p-2;
 }
 
 /* --- 질문 목록 --- */
