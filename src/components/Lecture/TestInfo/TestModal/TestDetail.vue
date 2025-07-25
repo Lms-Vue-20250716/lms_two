@@ -386,230 +386,226 @@ watch(
 <template>
   <Teleport to="body">
     <div class="modal-overlay">
-      <form
-        @submit.prevent="saveQuestionList"
-        :class="['test-detail-modal', { 'is-loading': isLoading }]"
-      >
-        <div v-if="userType === 'M'">
-          <div class="form-header">
-            <h2>문제 등록</h2>
-            <button
-              class="close-btn"
-              type="button"
-              @click="modalState.$patch({ isOpen: false, type: 'test-detail' })"
-            >
-              &times;
-            </button>
-          </div>
-
-          <div class="form-body">
-            <table class="form-table">
-              <tbody>
-                <tr>
-                  <td class="label-cell"><label for="max-questions">최대 문제 수</label></td>
-                  <td>
-                    <input
-                      type="number"
-                      v-model.number="totalQuestionQuantity"
-                      :readonly="testQuestionInfoDetail.length > 0"
-                    />
-                  </td>
-                  <td class="label-cell"><label for="total-score">총 만점</label></td>
-                  <td><input type="number" v-model.number="totalPoints" /></td>
-                </tr>
-                <tr>
-                  <td class="label-cell"><label for="points">배점</label></td>
-                  <td>
-                    <input v-model.number="newPoints" type="number" id="points" placeholder="" />
-                  </td>
-                  <td class="label-cell"><label for="correct-answer">정답 보기</label></td>
-                  <td>
-                    <select v-model.number="newCorrectAnswer" id="correct-answer">
-                      <option value="1">1번</option>
-                      <option value="2">2번</option>
-                      <option value="3">3번</option>
-                      <option value="4">4번</option>
-                      <option value="5">5번</option>
-                    </select>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="label-cell"><label for="question-content">문제 내용</label></td>
-                  <td colspan="3">
-                    <input v-model="newQuestionContent" type="text" id="question-content" />
-                  </td>
-                </tr>
-
-                <tr v-for="(option, index) in newOptions" :key="index">
-                  <td class="label-cell">
-                    <label :for="'option' + (index + 1)">보기 {{ index + 1 }}</label>
-                  </td>
-                  <td colspan="3">
-                    <input v-model="newOptions[index]" type="text" :id="'option' + (index + 1)" />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <!-- <div class="form-footer"> -->
-            <button class="btn-add" type="button" @click="addQuestionToList">문제 추가</button>
-            <!-- </div> -->
-          </div>
-        </div>
-
-        <div>
-          <h3 id="questionListTitle" class="form-header">
-            {{ userType === 'M' ? '문제 추가 목록' : '문제 목록' }}
-          </h3>
-          <table class="list-table">
-            <colgroup>
-              <col width="10%" />
-              <col width="50%" />
-              <col width="15%" />
-              <col width="15%" />
-              <col width="10%" />
-            </colgroup>
-            <thead>
-              <tr>
-                <th scope="col">번호</th>
-                <th scope="col">내용</th>
-                <th scope="col">배점</th>
-                <th scope="col">정답</th>
-                <th scope="col">{{ userType === 'M' ? '삭제' : '비고' }}</th>
-              </tr>
-            </thead>
-            <tbody id="questionListBody">
-              <tr v-if="addedQuestions.length === 0"></tr>
-
-              <template v-for="(question, index) in addedQuestions" :key="question.id">
-                <tr>
-                  <td>
-                    <button
-                      type="button"
-                      style="text-align: center"
-                      @click="toggleEdit(index)"
-                      class="link-button"
-                    >
-                      {{ index + 1 }}
-                    </button>
-                  </td>
-                  <td>{{ question.content }}</td>
-                  <td style="text-align: center">{{ question.points }}</td>
-                  <td style="text-align: center">{{ question.answer }}번</td>
-                  <td style="text-align: center">
-                    <button
-                      v-if="userType === 'M'"
-                      @click="removeQuestion(index)"
-                      style="color: red; background: none; border: none; cursor: pointer"
-                    >
-                      삭제
-                    </button>
-                  </td>
-                </tr>
-
-                <tr v-if="isEditing[index]">
-                  <td colspan="5" class="edit-form-cell">
-                    <div class="edit-form-content">
-                      <label :for="'edit-content-' + index">문제 내용</label>
-                      <input
-                        type="text"
-                        :id="'edit-content-' + index"
-                        v-model="question.content"
-                        :readonly="userType === 'T'"
-                      />
-
-                      <label :for="'edit-points-' + index">배점</label>
+      <div :class="['test-detail-modal', { 'is-loading': isLoading }]">
+        <header class="modal-header">
+          <h2>시험 상세</h2>
+          <button
+            class="close-btn"
+            type="button"
+            @click="modalState.$patch({ isOpen: false, type: 'test-detail' })"
+          >
+            &times;
+          </button>
+        </header>
+        <main class="modal-content">
+          <form id="myForm" @submit.prevent="saveQuestionList">
+            <section class="section" v-if="userType === 'M'">
+              <h3 class="section-header">문제등록</h3>
+              <table class="detail-table">
+                <tbody>
+                  <tr>
+                    <td class="label-cell"><label for="max-questions">최대 문제 수</label></td>
+                    <td>
                       <input
                         type="number"
-                        :id="'edit-points-' + index"
-                        v-model.number="question.points"
-                        :readonly="userType === 'T'"
+                        v-model.number="totalQuestionQuantity"
+                        :readonly="testQuestionInfoDetail.length > 0"
                       />
-
-                      <div v-for="(option, optIndex) in question.options" :key="optIndex">
-                        <label :for="'edit-option-' + index + '-' + optIndex"
-                          >보기 {{ optIndex + 1 }}</label
-                        >
-                        <input
-                          type="text"
-                          :id="'edit-option-' + index + '-' + optIndex"
-                          v-model="question.options[optIndex]"
-                          :readonly="userType === 'T'"
-                        />
-                      </div>
-
-                      <label :for="'edit-answer-' + index">정답</label>
-                      <select
-                        :id="'edit-answer-' + index"
-                        v-model.number="question.answer"
-                        :disabled="userType === 'T'"
-                      >
-                        <option v-for="n in 5" :key="n" :value="n">{{ n }}번</option>
+                    </td>
+                    <td class="label-cell"><label for="total-score">총 만점</label></td>
+                    <td><input type="number" v-model.number="totalPoints" /></td>
+                  </tr>
+                  <tr>
+                    <td class="label-cell"><label for="points">배점</label></td>
+                    <td>
+                      <input v-model.number="newPoints" type="number" id="points" placeholder="" />
+                    </td>
+                    <td class="label-cell"><label for="correct-answer">정답 보기</label></td>
+                    <td>
+                      <select v-model.number="newCorrectAnswer" id="correct-answer">
+                        <option value="1">1번</option>
+                        <option value="2">2번</option>
+                        <option value="3">3번</option>
+                        <option value="4">4번</option>
+                        <option value="5">5번</option>
                       </select>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="label-cell"><label for="question-content">문제 내용</label></td>
+                    <td colspan="3">
+                      <input v-model="newQuestionContent" type="text" id="question-content" />
+                    </td>
+                  </tr>
 
-                      <button
-                        type="button"
-                        class="btn-update"
-                        v-if="userType === 'M'"
-                        @click="updateQuestion(index)"
-                      >
-                        수정 완료
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </template>
-            </tbody>
-          </table>
-        </div>
+                  <tr v-for="(option, index) in newOptions" :key="index">
+                    <td class="label-cell">
+                      <label :for="'option' + (index + 1)">보기 {{ index + 1 }}</label>
+                    </td>
+                    <td colspan="3">
+                      <input v-model="newOptions[index]" type="text" :id="'option' + (index + 1)" />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <button class="btn btn-primary" type="button" @click="addQuestionToList">
+                문제 추가
+              </button>
+            </section>
 
-        <button type="submit" v-if="userType === 'M'" class="btn-primary">
-          {{ isUpdateMode ? '수정' : '저장' }}
-        </button>
-        <button
-          type="button"
-          @click="modalState.$patch({ isOpen: false, type: 'test-detail' })"
-          class="btn-secondary"
-        >
-          취소
-        </button>
-      </form>
+            <section class="section">
+              <h3 class="section-header" id="questionListTitle">
+                {{ userType === 'M' ? '문제 추가 목록' : '문제 목록' }}
+              </h3>
+              <table class="plan-table">
+                <colgroup>
+                  <col width="10%" />
+                  <col width="50%" />
+                  <col width="15%" />
+                  <col width="15%" />
+                  <col width="10%" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th scope="col">번호</th>
+                    <th scope="col">내용</th>
+                    <th scope="col">배점</th>
+                    <th scope="col">정답</th>
+                    <th scope="col">{{ userType === 'M' ? '삭제' : '비고' }}</th>
+                  </tr>
+                </thead>
+                <tbody id="questionListBody">
+                  <tr v-if="addedQuestions.length === 0"></tr>
+
+                  <template v-for="(question, index) in addedQuestions" :key="question.id">
+                    <tr>
+                      <td>
+                        <button
+                          type="button"
+                          style="text-align: center"
+                          @click="toggleEdit(index)"
+                          class="link-button"
+                        >
+                          {{ index + 1 }}
+                        </button>
+                      </td>
+                      <td>{{ question.content }}</td>
+                      <td style="text-align: center">{{ question.points }}</td>
+                      <td style="text-align: center">{{ question.answer }}번</td>
+                      <td style="text-align: center">
+                        <button
+                          v-if="userType === 'M'"
+                          @click="removeQuestion(index)"
+                          style="color: red; background: none; border: none; cursor: pointer"
+                        >
+                          삭제
+                        </button>
+                      </td>
+                    </tr>
+
+                    <tr v-if="isEditing[index]">
+                      <td colspan="5" class="edit-form-cell">
+                        <div class="edit-form-content">
+                          <label :for="'edit-content-' + index">문제 내용</label>
+                          <input
+                            type="text"
+                            :id="'edit-content-' + index"
+                            v-model="question.content"
+                            :readonly="userType === 'T'"
+                          />
+
+                          <label :for="'edit-points-' + index">배점</label>
+                          <input
+                            type="number"
+                            :id="'edit-points-' + index"
+                            v-model.number="question.points"
+                            :readonly="userType === 'T'"
+                          />
+
+                          <div v-for="(option, optIndex) in question.options" :key="optIndex">
+                            <label :for="'edit-option-' + index + '-' + optIndex"
+                              >보기 {{ optIndex + 1 }}</label
+                            >
+                            <input
+                              type="text"
+                              :id="'edit-option-' + index + '-' + optIndex"
+                              v-model="question.options[optIndex]"
+                              :readonly="userType === 'T'"
+                            />
+                          </div>
+
+                          <label :for="'edit-answer-' + index">정답</label>
+                          <select
+                            :id="'edit-answer-' + index"
+                            v-model.number="question.answer"
+                            :disabled="userType === 'T'"
+                          >
+                            <option v-for="n in 5" :key="n" :value="n">{{ n }}번</option>
+                          </select>
+
+                          <button
+                            type="button"
+                            class="btn btn-update"
+                            v-if="userType === 'M'"
+                            @click="updateQuestion(index)"
+                          >
+                            수정 완료
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </section>
+          </form>
+        </main>
+        <footer class="modal-footer">
+          <button form="myForm" type="submit" v-if="userType === 'M'" class="btn btn-primary">
+            {{ isUpdateMode ? '수정' : '저장' }}
+          </button>
+          <button
+            type="button"
+            @click="modalState.$patch({ isOpen: false, type: 'test-detail' })"
+            class="btn btn-secondary"
+          >
+            취소
+          </button>
+        </footer>
+      </div>
     </div>
   </Teleport>
 </template>
 <style scoped>
-/* --- 모달 기본 레이아웃 --- */
+body {
+  margin: 0;
+}
+/* --- 헤더, 콘텐츠, 푸터 공통 --- */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  background-color: grey;
 }
-
 .test-detail-modal {
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
   background: white;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  width: 90%;
-  max-width: 900px;
-  /* display: flex; 
-  flex-direction: column; */
-  max-height: 90vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
-
 .test-detail-modal.is-loading {
   visibility: hidden;
 }
-
-/* --- 헤더 --- */
-.form-header {
-  /* 기존 클래스 이름 활용 */
+.modal-header {
   background-color: #475569;
   color: white;
   padding: 1rem 1.5rem;
@@ -618,231 +614,29 @@ watch(
   align-items: center;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
-  flex-shrink: 0; /* 높이가 줄어들지 않도록 설정 */
 }
-
-.form-header h2 {
+.modal-header h2 {
   margin: 0;
   font-size: 1.1rem;
   font-weight: 600;
 }
-
 .close-btn {
   background: none;
   border: none;
   color: white;
   font-size: 1.75rem;
   cursor: pointer;
-  line-height: 1;
 }
-
-/* --- 콘텐츠 영역 --- */
+.modal-header,
+.modal-footer {
+  flex-shrink: 0; /* 크기가 줄어들지 않도록 수정 */
+}
 .modal-content {
-  padding: 1.5rem;
+  flex-grow: 1; /* 남은 공간을 모두 차지하도록 수정 */
+  overflow-y: scroll;
   background-color: #f8fafc;
-  overflow-y: auto; /* 내용이 길어지면 스크롤 생성 */
+  padding: 1.5rem;
 }
-
-.section {
-  margin-bottom: 2rem;
-}
-.section:last-child {
-  margin-bottom: 0;
-}
-.section-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #0d6deb;
-}
-
-/* --- 상단 문제 등록 테이블 --- */
-.form-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.form-table td {
-  border: 1px solid #7e7d7d;
-  background-color: white;
-  padding: 0.8rem;
-  vertical-align: middle;
-}
-td.label-cell {
-  background-color: #919194;
-  font-weight: 600;
-  width: 120px;
-  text-align: center;
-}
-.form-table input,
-.form-table select {
-  width: 100%;
-  padding: 0.6rem;
-  background-color: white;
-  border: 1px solid #686868;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  box-sizing: border-box;
-}
-
-.form-footer {
-  text-align: right;
-  margin-top: 1rem;
-}
-.btn-add {
-  background-color: #45c9ce;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.25rem;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-.btn-add:hover {
-  background-color: #059669;
-}
-
-/* --- 하단 문제 목록 테이블 --- */
-.list-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-  text-align: center;
-  background-color: white;
-  border: 1px solid #e2e8f0;
-}
-.list-table th {
-  background-color: #e2e8f0;
-  padding: 0.75rem;
-  font-weight: 600;
-  border-bottom: 2px solid #cbd5e1;
-}
-.list-table td {
-  padding: 0.75rem;
-  border-bottom: 1px solid #e2e8f0;
-}
-.list-table tbody tr:last-child td {
-  border-bottom: none;
-}
-.list-table tbody tr:hover {
-  background-color: #f1f5f9;
-}
-.list-table .content-cell {
-  text-align: left;
-}
-.empty-message {
-  padding: 2rem;
-  color: #9ca3af;
-}
-
-/* --- 1. 수정 폼을 감싸는 테이블 셀 --- */
-.edit-form-cell {
-  background-color: #f0f3f8; /* 살짝 다른 배경색으로 구분 */
-  padding: 1.5rem 2rem;
-  /* border-bottom: 2px solid #cbd5e1; */
-}
-
-/* --- 2. 수정 폼 콘텐츠 영역 --- */
-.edit-form-content {
-  max-width: 600px; /* 폼의 최대 너비 제한 */
-  margin: 0 auto; /* 중앙 정렬 */
-}
-
-/* --- 3. 라벨 스타일 --- */
-.edit-form-content label {
-  display: block;
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #475569;
-  margin-top: 1.2rem; /* 각 항목간의 세로 간격 */
-  margin-bottom: 0.5rem;
-}
-.edit-form-content label:first-child {
-  margin-top: 0;
-}
-
-/* --- 4. input, select 공통 스타일 --- */
-.edit-form-content input[type='text'],
-.edit-form-content input[type='number'],
-.edit-form-content select {
-  width: 100%;
-  padding: 0.7rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 1rem;
-  box-sizing: border-box;
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s; /* 부드러운 전환 효과 */
-}
-
-/* --- 5. 포커스 및 읽기 전용/비활성화 스타일 --- */
-.edit-form-content input:focus,
-.edit-form-content select:focus {
-  outline: none;
-  border-color: #3b82f6; /* 포커스 시 파란색 테두리 */
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); /* 은은한 그림자 효과 */
-}
-
-.edit-form-content input:read-only,
-.edit-form-content select:disabled {
-  background-color: #e5e7eb;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-/* --- 6. 수정 완료 버튼 --- */
-.btn-update {
-  display: block; /* 오른쪽 정렬을 위해 블록 요소로 변경 */
-  margin-left: auto; /* 자동 마진으로 오른쪽 끝으로 밀어냄 */
-  margin-top: 1.5rem;
-  background-color: #059669; /* 녹색 계열 버튼 */
-  color: white;
-  border: none;
-  padding: 0.6rem 1.5rem;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.btn-update:hover {
-  background-color: #047857;
-}
-
-/* .edit-form-cell {
-  padding: 0;
-}
-.edit-form-content {
-  background-color: rgb(199, 199, 199);
-  padding: 0;
-}
-
-.edit-form-content input {
-  background-color: white;
-  border-color: #919194;
-} */
-
-.link-button {
-  background: none;
-  border: none;
-  color: #3b82f6;
-  text-decoration: underline;
-  cursor: pointer;
-  font-size: inherit;
-}
-.delete-btn {
-  background-color: #ef4444;
-  color: white;
-  border: none;
-  padding: 4px 10px;
-  border-radius: 3px;
-  font-size: 11px;
-  cursor: pointer;
-}
-
-/* --- 하단 버튼 영역 --- */
 .modal-footer {
   display: flex;
   justify-content: flex-end;
@@ -852,7 +646,97 @@ td.label-cell {
   border-top: 1px solid #e2e8f0;
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
-  flex-shrink: 0;
+}
+
+/* --- 섹션 스타일 --- */
+.section {
+  margin-bottom: 2rem;
+}
+.section-header {
+  background-color: #e2e8f0;
+  color: #334155;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+}
+
+/* --- 테이블 공통 스타일 --- */
+.detail-table,
+.plan-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+.detail-table th,
+.detail-table td,
+.plan-table th,
+.plan-table td {
+  border: 1px solid #e2e8f0;
+  padding: 0.8rem;
+  text-align: center;
+  vertical-align: middle;
+}
+.detail-table th,
+.plan-table th {
+  background-color: #f1f5f9;
+  font-weight: 600;
+}
+.detail-table td,
+.plan-table td {
+  background-color: white;
+}
+.detail-table th {
+  width: 120px;
+}
+
+/* --- 입력 필드 스타일 --- */
+.detail-table input,
+.plan-table input,
+.content-box {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  box-sizing: border-box; /* 패딩과 테두리를 너비에 포함 */
+}
+select {
+  width: 100%;
+  padding: 0.6rem;
+  background-color: white;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+.plan-item {
+  margin-top: 1.5rem;
+}
+.plan-item h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  background-color: #e2e8f0;
+  color: #334155;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  border: 1px solid #d1d5db;
+  border-bottom: none;
+  margin: 0;
+}
+.content-box {
+  min-height: 80px;
+  border-top: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* --- 버튼 및 기타 --- */
+.required-star {
+  color: #ef4444;
+  margin-left: 4px;
 }
 .btn {
   padding: 0.6rem 1.25rem;
@@ -861,16 +745,11 @@ td.label-cell {
   font-weight: 600;
   cursor: pointer;
   border: none;
+  transition: background-color 0.2s;
 }
 .btn-primary {
   background-color: #3b82f6;
   color: white;
-  border: none;
-  padding: 0.6rem 1.25rem;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
 }
 .btn-primary:hover {
   background-color: #2563eb;
@@ -878,12 +757,6 @@ td.label-cell {
 .btn-secondary {
   background-color: #6b7280;
   color: white;
-  border: none;
-  padding: 0.6rem 1.25rem;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
 }
 .btn-secondary:hover {
   background-color: #4b5563;
