@@ -125,6 +125,7 @@ const handleSubmit = async () => {
   const formData = new URLSearchParams();
   formData.append('qnaId', detail.value.qnaId);
   formData.append('lecId', selectedLecture.value); // lecId 사용
+  formData.append('lecName', detail.value.lecName);
   formData.append('qnaTitle', detail.value.qnaTitle);
   formData.append('qnaContent', detail.value.qnaContent);
 
