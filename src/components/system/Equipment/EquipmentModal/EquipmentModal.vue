@@ -63,11 +63,14 @@ const searchDetail = async () => {
 
 // 등록
 const handlerInsert = async () => {
+  if (!validateDateForm()) return;
   if (!validateEquipForm()) return;
+
   const formData = new FormData(formRef.value);
   if (props.roomId) {
     formData.set('Fileclassroom', String(props.roomId));
   }
+
   const res = await axios.post('/api/system/equipFileSave.do', formData);
   if (res.data.result === 'success') {
     alert('저장 되었습니다.');
@@ -109,6 +112,18 @@ const handlerDelete = async () => {
     modalState.$patch({ isOpen: false });
     emit('postSuccess');
   }
+};
+
+// 유효성 테스트
+const validateDateForm = () => {
+  const start = new Date(detail.value.equipPurchaseDate).getTime();
+  const end = new Date(detail.value.equipPerioduseDate).getTime();
+
+  if (start > end) {
+    alert('시작일이 종료일보다 늦을 수 없습니다.');
+    return false;
+  }
+  return true;
 };
 
 const validateEquipForm = () => {
@@ -194,7 +209,7 @@ onUnmounted(() => {
 
       <label
         ><span>구매일자<span class="required">*</span></span>
-        <input v-model="detail.equipPerioduseDate" type="date" name="equipPerioduseDate" />
+        <input v-model="detail.equipPurchaseDate" type="date" name="equipPurchaseDate" />
       </label>
 
       <label
@@ -215,7 +230,7 @@ onUnmounted(() => {
 
       <label
         ><span>사용연한<span class="required">*</span></span>
-        <input v-model="detail.equipPurchaseDate" type="date" name="equipPurchaseDate" />
+        <input v-model="detail.equipPerioduseDate" type="date" name="equipPerioduseDate" />
       </label>
 
       <span>파일</span>
