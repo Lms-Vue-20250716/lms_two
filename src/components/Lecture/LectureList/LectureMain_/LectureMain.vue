@@ -1,20 +1,21 @@
 <script setup>
-import PageNavigation from '@/components/common/PageNavigation.vue';
 import axios from 'axios';
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useModalState } from '@/stores/modalState';
 import LectureDetailModal from '../LectureModal_/LectureDetailModal.vue';
+import PageNavigation2 from '@/components/common/PageNavigation2.vue';
 
 const route = useRoute();
 const lectureList = ref([]);
 const lectureCount = ref(0);
+const currentPage = ref(1);
 const modalState = useModalState();
 const selectedLecture = ref(null);
 
-const lectureSearch = (cPage = 1) => {
+const lectureSearch = (pageToGo = 1) => {
   const param = new URLSearchParams(route.query);
-  param.append('currentPage', cPage);
+  param.append('currentPage', pageToGo);
   param.append('pageSize', 5);
 
   console.log(param);
@@ -27,6 +28,16 @@ const lectureSearch = (cPage = 1) => {
   });
 };
 
+const paginationStateChanged = (page) => {
+  currentPage.value = page;
+  lectureSearch(page);
+};
+
+const ModalSubmitSuccess = (page = 1) => {
+  currentPage.value = page;
+  lectureSearch(page);
+};
+
 const lectureDetail = (lecture) => {
   selectedLecture.value = lecture; // 객체 전체를 ref에 저장합니다.
   modalState.$patch({ isOpen: true, type: 'lecture-list-detail' });
@@ -35,12 +46,12 @@ const lectureDetail = (lecture) => {
 watch(
   () => route.query,
   () => {
-    lectureSearch();
+    lectureSearch(1);
   },
 );
 
 onMounted(() => {
-  lectureSearch();
+  lectureSearch(1);
 });
 </script>
 
@@ -83,16 +94,17 @@ onMounted(() => {
         </template>
       </tbody>
     </table>
-    <PageNavigation
+    <PageNavigation2
       :total-items="lectureCount"
       :items-per-page="5"
-      :on-page-change="lectureSearch"
+      :on-page-change="paginationStateChanged"
+      :current-page="currentPage"
     />
   </div>
   <LectureDetailModal
     v-if="modalState.isOpen && modalState.type === 'lecture-list-detail'"
     :lecture-data="selectedLecture"
-    @post-success="lectureSearch()"
+    @lecture-list-register-submit-success="ModalSubmitSuccess()"
   />
 </template>
 

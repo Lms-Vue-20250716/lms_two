@@ -82,9 +82,9 @@ const registerTest = async () => {
     alert('시험정보 저장 완료');
 
     // 성공 시 모달 닫기 및 부모 컴포넌트에 이벤트 전달
-    modalState.$patch({ isOpen: false, type: 'test-create' });
     emit('testPostSuccess');
 
+    modalState.$patch({ isOpen: false, type: 'test-create' });
     //close modal
   } catch (err) {
     console.log(err);

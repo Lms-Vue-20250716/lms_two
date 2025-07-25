@@ -215,7 +215,6 @@ const submitTest = async () => {
     } else if (response.data.result === 'isExist') {
       alert('이미 제출된 시험입니다.');
       modalState.$patch({ isOpen: false, type: 'test-take' });
-      emit('test-submit-success');
     } else {
       alert('제출에 실패했습니다. 다시 시도해 주세요.');
     }

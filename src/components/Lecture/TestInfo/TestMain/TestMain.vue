@@ -1,5 +1,4 @@
 <script setup>
-import PageNavigation from '@/components/common/PageNavigation.vue';
 import axios from 'axios';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -9,6 +8,7 @@ import TestUpdate from '../TestModal/TestUpdate.vue';
 import TestDetail from '../TestModal/TestDetail.vue';
 import { useUserInfo } from '@/stores/loginInfoState';
 import TakeTest from '../TestModal/TakeTest.vue';
+import PageNavigation2 from '@/components/common/PageNavigation2.vue';
 
 // --- 로그인 정보 가져오기 ---
 const userInfoStore = useUserInfo();
@@ -26,6 +26,7 @@ const selectedTestData = ref(null);
 // --- 게시판
 const testList = ref([]);
 const testCount = ref(0);
+const currentPage = ref(1);
 
 // --- test-take modal을 위한 props
 const testMode = ref('take'); // 'take' 또는 'result' 값을 가짐
@@ -136,6 +137,8 @@ const testSearch = async (cPage = 1) => {
 
       testList.value = res.data.list;
       testCount.value = res.data.count;
+
+      currentPage.value = cPage;
     });
   } else if (userType.value === 'T') {
     axios.post('/api/lecture/testInfoListBody.do', param).then((res) => {
@@ -151,11 +154,14 @@ const testSearch = async (cPage = 1) => {
         // loginId가 아직 로드되지 않은 경우, 빈 목록을 표시하여 오류를 방지합니다.
         testList.value = [];
       }
+
+      currentPage.value = cPage;
     });
   } else if (userType.value === 'M') {
     axios.post('/api/lecture/testInfoListBody.do', param).then((res) => {
       testList.value = res.data.list;
       testCount.value = res.data.count;
+      currentPage.value = cPage;
     });
   } else {
     alert('권한이 없습니다!');
@@ -198,10 +204,20 @@ const testProblemsDetail = (selectedLecId) => {
   modalState.$patch({ isOpen: true, type: 'test-detail' });
 };
 
+const paginationStateChanged = (page) => {
+  currentPage.value = page;
+  testSearch(page);
+};
+
+const ModalSubmitSuccess = (page = 1) => {
+  currentPage.value = page;
+  testSearch(page);
+};
+
 watch(
   () => route.query,
   () => {
-    testSearch();
+    testSearch(1);
   },
 );
 
@@ -220,7 +236,7 @@ watch(
 );
 
 onMounted(() => {
-  testSearch();
+  testSearch(1);
 });
 </script>
 
@@ -293,27 +309,32 @@ onMounted(() => {
         </template>
       </tbody>
     </table>
-    <PageNavigation :total-items="testCount" :items-per-page="5" :on-page-change="testSearch" />
+    <PageNavigation2
+      :total-items="testCount"
+      :items-per-page="5"
+      :on-page-change="paginationStateChanged"
+      :current-page="currentPage"
+    />
   </div>
   <TestRegister
     v-if="modalState.isOpen && modalState.type === 'test-create'"
-    @test-post-success="testSearch()"
+    @test-post-success="ModalSubmitSuccess()"
   />
   <TestUpdate
     v-if="modalState.isOpen && modalState.type === 'test-update'"
     :lectureData="selectedTestData"
-    @test-update-success="testSearch()"
+    @test-update-success="ModalSubmitSuccess()"
   />
   <TestDetail
     v-if="modalState.isOpen && modalState.type === 'test-detail'"
     :lectureData="selectedTestData"
-    @test-update-success="testSearch()"
+    @test-update-success="ModalSubmitSuccess()"
   />
   <TakeTest
     v-if="modalState.isOpen && modalState.type === 'test-take'"
     :testTakeProps="testTakeProps"
     :mode="testMode"
-    @test-submit-success="testSearch()"
+    @test-submit-success="ModalSubmitSuccess()"
   />
 </template>
 
