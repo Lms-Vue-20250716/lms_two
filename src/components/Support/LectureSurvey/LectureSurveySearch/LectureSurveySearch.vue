@@ -38,21 +38,6 @@ onMounted(fetchLectureList);
 </script>
 
 <template>
-  <!-- <div class="search-box">
-    <label for="lecture" class="block text-sm font-medium text-gray-700">강의명</label>
-    <select
-      id="lecture"
-      v-model="selectedLectureId"
-      @change="onLectureChange"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-    >
-      <option disabled value="">강의를 선택하세요</option>
-      <option v-for="lecture in lectureList" :key="lecture.lecId" :value="lecture.lecId">
-        {{ lecture.lecName }}
-      </option>
-    </select>
-  </div> -->
-
   <div style="margin-top: 15px">
     <table class="row">
       <tbody>
@@ -60,33 +45,58 @@ onMounted(fetchLectureList);
           <th scope="row">강의명<span class="font_red"> *</span></th>
           <td colspan="3" style="position: relative">
             <input
-              type="text"
               id="lecName"
+              v-model="selectedLectureName"
+              type="text"
               name="lecName"
               class="inputTxt p100"
-              style="padding-left: 10px"
+              style="
+                padding-left: 10px;
+                width: 94%;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                height: 30px;
+                cursor: pointer;
+                background: #fff;
+              "
               readonly
               placeholder="클릭해서 강의 선택"
-              :value="selectedLectureName"
               @click="toggleDropdown"
             />
-            <input type="hidden" id="lecId" name="lecId" :value="selectedLectureId" />
-            <div v-if="showDropdown" id="lecDropdown">
-              <div v-if="lectureList.length === 0" style="padding: 8px; color: #888">
+            <input id="lecId" type="hidden" name="lecId" :value="selectedLectureId" />
+            <div
+              v-if="showDropdown"
+              id="lecDropdown"
+              style="
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 94%;
+                max-height: 150px;
+                overflow-y: auto;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                background: #fff;
+                z-index: 1000;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+              "
+            >
+              <div
+                v-if="lectureList.length === 0"
+                style="padding: 8px; color: #888; border-bottom: 1px solid #ccc"
+              >
                 수강중인 강의가 없습니다.
               </div>
-            </div>
-
-            <ul v-else>
-              <li
+              <div
+                v-else
                 v-for="lecture in lectureList"
                 :key="lecture.lecId"
                 @click="selectLecture(lecture)"
-                style="padding: 8px; cursor: pointer"
+                style="padding: 8px; cursor: pointer; border-bottom: 1px solid #eee"
               >
-                {{ lecture.lecname }}
-              </li>
-            </ul>
+                {{ lecture.lecName }}
+              </div>
+            </div>
           </td>
         </tr>
       </tbody>
@@ -95,5 +105,24 @@ onMounted(fetchLectureList);
 </template>
 
 <style>
-@import './styled.css';
+.inputTxt {
+  outline: none;
+}
+.p100 {
+  width: 100%;
+}
+.font_red {
+  color: red;
+}
+.row {
+  width: 100%;
+  border-collapse: collapse;
+}
+.row th {
+  text-align: left;
+  padding: 5px;
+}
+.row td {
+  padding: 5px;
+}
 </style>
