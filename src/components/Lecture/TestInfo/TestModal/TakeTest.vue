@@ -410,9 +410,10 @@ watch(
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   width: 90%;
   max-width: 900px;
+  /* display: flex; 
+  flex-direction: column; */
   max-height: 90vh;
-  display: flex;
-  flex-direction: column;
+  overflow-y: auto;
 }
 
 .test-take-modal.is-loading {
@@ -434,9 +435,7 @@ watch(
 
 /* --- 콘텐츠 영역 --- */
 .modal-content {
-  @apply bg-slate-50 p-6;
-  flex-grow: 1; /* 남는 공간을 모두 차지하도록 설정 */
-  overflow-y: auto; /* 콘텐츠가 길어지면 여기서만 스크롤바 생성 */
+  @apply overflow-y-auto bg-slate-50 p-6;
 }
 
 .loading-message,
@@ -455,7 +454,7 @@ watch(
   @apply w-1/3 p-2 text-left font-semibold text-gray-600;
 }
 .result-summary-table td {
-  @apply flex justify-end p-2 text-gray-600;
+  @apply text-grey-800 flex justify-end p-2;
 }
 
 /* --- 질문 목록 --- */
