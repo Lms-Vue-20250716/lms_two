@@ -29,8 +29,16 @@ const companyDetail = (id) => {
 };
 
 const formatDate = (timestamp) => {
+  if (!timestamp) return '';
   const date = new Date(timestamp);
-  return date.toISOString().split('T')[0];
+  return date
+    .toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    })
+    .replace(/\. /g, '-')
+    .replace('.', '');
 };
 
 watch(

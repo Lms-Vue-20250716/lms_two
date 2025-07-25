@@ -29,8 +29,16 @@ const EquipmentSearch = async (cpage = 1) => {
 };
 
 const formatDate = (timestamp) => {
+  if (!timestamp) return '';
   const date = new Date(timestamp);
-  return date.toISOString().split('T')[0];
+  return date
+    .toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    })
+    .replace(/\. /g, '-')
+    .replace('.', '');
 };
 
 const deleteEquip = async (equipId) => {
@@ -74,35 +82,42 @@ onMounted(() => {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="equip in equipmentList" :key="equip.equipId" class="equipment-table-row">
-          <td>
-            <img
-              v-if="equip.fileExt === 'jpg' || equip.fileExt === 'png'"
-              :src="`/api${equip.logicalPath}`"
-              class="h-10 w-10 object-cover"
-            />
-            <span v-else>이미지 없음</span>
-          </td>
-          <td class="equipment-cell">{{ equip.equipSerial }}</td>
-          <td class="equipment-cell">{{ equip.equipGroup }}</td>
-          <td
-            class="equipment-cell cursor-pointer !font-bold text-blue-600 hover:underline"
-            @click="equipmentDetail(equip.equipId)"
-          >
-            {{ equip.equipName }}
-          </td>
-          <td class="equipment-cell">{{ equip.equipQuantity }}</td>
-          <td class="equipment-cell">{{ formatDate(equip.equipPurchaseDate) }}</td>
-          <td>
-            <span v-if="equip.remainPeroid >= 0">{{ equip.remainPeroid }}일</span>
-            <span
-              v-else
-              class="equipment-cell cursor-pointer !font-bold !text-red-600 underline"
-              @click="deleteEquip(equip.equipId)"
-              >장비 삭제</span
+        <template v-if="equipmentCnt > 0">
+          <tr v-for="equip in equipmentList" :key="equip.equipId" class="equipment-table-row">
+            <td>
+              <img
+                v-if="equip.fileExt === 'jpg' || equip.fileExt === 'png'"
+                :src="`/api${equip.logicalPath}`"
+                class="h-10 w-10 object-cover"
+              />
+              <span v-else>이미지 없음</span>
+            </td>
+            <td class="equipment-cell">{{ equip.equipSerial }}</td>
+            <td class="equipment-cell">{{ equip.equipGroup }}</td>
+            <td
+              class="equipment-cell cursor-pointer !font-bold text-blue-600 hover:underline"
+              @click="equipmentDetail(equip.equipId)"
             >
-          </td>
-        </tr>
+              {{ equip.equipName }}
+            </td>
+            <td class="equipment-cell">{{ equip.equipQuantity }}</td>
+            <td class="equipment-cell">{{ formatDate(equip.equipPurchaseDate) }}</td>
+            <td>
+              <span v-if="equip.remainPeroid >= 0">{{ equip.remainPeroid }}일</span>
+              <span
+                v-else
+                class="equipment-cell cursor-pointer !font-bold !text-red-600 underline"
+                @click="deleteEquip(equip.equipId)"
+                >장비 삭제</span
+              >
+            </td>
+          </tr>
+        </template>
+        <template v-else>
+          <tr>
+            <td colspan="4" class="equipment-empty-row">일치하는 검색 결과가 없습니다</td>
+          </tr>
+        </template>
       </tbody>
     </table>
     <PageNavigation
