@@ -36,9 +36,9 @@ const handlerSearch = () => {
 
   // 1. searchTitle의 값이 있을 경우, 쿼리라는 array에 담아 둘껍니다.
   !searchTag.value || query.push(`searchTag=${searchTag.value}`);
-  !searchTitle.value || query.push(`title=${searchTitle.value}`);
-  !searchStDate.value || query.push(`startDate=${searchStDate.value}`);
-  !searchEdDate.value || query.push(`endDate=${searchEdDate.value}`);
+  !searchTitle.value || query.push(`searchTitle=${searchTitle.value}`);
+  !searchStDate.value || query.push(`searchStDate=${searchStDate.value}`);
+  !searchEdDate.value || query.push(`searchEdDate=${searchEdDate.value}`);
 
   const queryString = query.length > 0 ? `?${query.join('&')}` : '';
 
