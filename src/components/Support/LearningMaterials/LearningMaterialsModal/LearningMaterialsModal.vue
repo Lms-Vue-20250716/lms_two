@@ -80,7 +80,6 @@ watch(isDeleting, (newVal) => {
         <label>
           내용:<input v-model="detail.materiContent" type="text" name="materiContent" />
         </label>
-
         파일:
         <input id="fileInput" type="file" name="file" @change="handlerFile" />
         <label class="img-label" htmlFor="fileInput"> 파일 첨부하기 </label>
@@ -94,7 +93,7 @@ watch(isDeleting, (newVal) => {
           <button v-if="id" type="button" @click="handlerDelete">
             {{ isDeleting ? '취소' : '삭제' }}
           </button>
-          <button type="button" @click="closeModal">닫기</button>
+          <button type="button" @click="closeModal">취소</button>
         </div>
       </form>
     </div>
