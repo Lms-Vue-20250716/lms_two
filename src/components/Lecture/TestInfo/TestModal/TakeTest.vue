@@ -67,10 +67,20 @@ const resultSummary = computed(() => {
   }
   const totalQuestions = questions.value.length;
   const totalPossibleScore = questions.value.reduce((sum, q) => sum + (q.questionScore || 0), 0);
+  // 맞은 문제 수를 직접 계산합니다.
+  const correctAnswerCount = questions.value.reduce((count, question) => {
+    const questionId = question.questionId;
+    // 학생이 제출한 답안과 실제 정답을 비교합니다.
+    if (studentAnswers.value[questionId] === correctAnswers.value[questionId]) {
+      return count + 1;
+    }
+    return count;
+  }, 0);
 
   return {
     scoreText: `${testResultInfo.value.testScore || 0} / ${totalPossibleScore}점`,
-    countText: `${testResultInfo.value.correctAnswerCount || 0} / ${totalQuestions}문제`,
+    countText: `${correctAnswerCount || 0} / ${totalQuestions}`,
+    totalQuestionQuantity: totalQuestions,
     totalCountText: `${totalQuestions}문제`,
     submitDate: testResultInfo.value.testResultRegDate
       ? formatDateTime(testResultInfo.value.testResultRegDate, 'YYYY-MM-DD HH:mm:ss')
@@ -123,6 +133,9 @@ const fetchTestResultDetails = async () => {
     questions.value = response.data.testQuestionInfoDetail || [];
     allOptions.value = response.data.testQuestionOptionInfoDetail || [];
     testResultInfo.value = response.data.testResultInfoValue || {};
+
+    console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
+    console.log(testResultInfo.value);
 
     const submitted = response.data.testSubmitOptionDetailValue || [];
     submitted.forEach((ans) => {
@@ -287,12 +300,12 @@ watch(
             <table>
               <tbody>
                 <tr>
-                  <th>채점 점수</th>
-                  <td>{{ resultSummary.scoreText }}</td>
+                  <th>채점 문제수/채점 점수</th>
+                  <td>{{ resultSummary.countText + ' (' + resultSummary.scoreText + ')' }}</td>
                 </tr>
                 <tr>
-                  <th>맞은 문제 수</th>
-                  <td>{{ resultSummary.countText }}</td>
+                  <th>전체 문제 수</th>
+                  <td>{{ resultSummary.totalQuestionQuantity + '문제' }}</td>
                 </tr>
                 <tr>
                   <th>시험 제출일</th>
@@ -441,7 +454,7 @@ watch(
   @apply w-1/3 p-2 text-left font-semibold text-gray-600;
 }
 .result-summary-table td {
-  @apply p-2 text-gray-800;
+  @apply text-grey-800 flex justify-end p-2;
 }
 
 /* --- 질문 목록 --- */
