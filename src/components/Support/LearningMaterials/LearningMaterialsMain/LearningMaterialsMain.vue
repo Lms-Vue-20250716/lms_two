@@ -3,13 +3,12 @@ import PageNavigation from '@/components/common/PageNavigation.vue';
 import { useModalState } from '@/stores/modalState';
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { onMounted } from 'vue';
-import { watch } from 'vue';
+import { onMounted, watch } from 'vue';
 import axios from 'axios';
 import LearningMaterialsModal from '../LearningMaterialsModal/LearningMaterialsModal.vue';
 
 const route = useRoute();
-const learningMaterialsList = ref([]); // ref([])에서 []는 초깃값이고, 빈 배열로 시작하되 나중에 목록 데이터를 넣겠다는 의도
+const learningMaterialsList = ref([]);
 const learningMaterialsCount = ref(0);
 const modalState = useModalState();
 const detailId = ref(0);
@@ -18,11 +17,18 @@ const learningMaterialsSearch = (cPage = 1) => {
   const param = new URLSearchParams(route.query);
   param.append('currentPage', cPage);
   param.append('pageSize', 5);
+  console.log('Request Params:', param.toString());
 
-  axios.post('/api/support/getMtrListBody.do', param).then((res) => {
-    learningMaterialsList.value = res.data.list;
-    learningMaterialsCount.value = res.data.count;
-  });
+  axios
+    .post('/api/support/getMtrListBody.do', param)
+    .then((res) => {
+      console.log('API Response:', res.data);
+      learningMaterialsList.value = res.data.mtrList || [];
+      learningMaterialsCount.value = res.data.mtrCnt || 0;
+    })
+    .catch((error) => {
+      console.error('API Error:', error);
+    });
 };
 
 onMounted(() => {
@@ -30,15 +36,17 @@ onMounted(() => {
 });
 
 const learningMaterialsDetail = (id) => {
-  modalState.$patch({ isOpen: true });
+  modalState.$patch({ isOpen: true, type: 'learningMaterials' });
   detailId.value = id;
 };
 
 watch(
   () => route.query,
   () => {
+    console.log('Route query changed:', route.query);
     learningMaterialsSearch();
   },
+  { deep: true },
 );
 </script>
 
@@ -85,7 +93,7 @@ watch(
     />
   </div>
   <LearningMaterialsModal
-    v-if="modalState.isOpen"
+    v-if="modalState.isOpen && modalState.type === 'learningMaterials'"
     :detail-id="detailId"
     @post-success="learningMaterialsSearch()"
     @un-mounted-modal="detailId = $event"

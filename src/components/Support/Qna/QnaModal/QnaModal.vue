@@ -14,6 +14,7 @@ const modalState = useModalState();
 const formRef = ref();
 const detail = ref({
   qnaId: 0,
+  lecId: '',
   lecName: '',
   loginId: props.loginId,
   qnaTitle: '',
@@ -24,16 +25,7 @@ const detail = ref({
 });
 
 const selectedLecture = ref('');
-const lecOptions = ref([
-  { value: 2, label: 'React' },
-  { value: 1, label: 'Nodejs' },
-  { value: 3, label: 'Vue' },
-  { value: 4, label: 'Spring' },
-  { value: 5, label: 'Java' },
-  { value: 6, label: 'C#' },
-  { value: 7, label: '요리' },
-  { value: 8, label: '직접추가' },
-]);
+const lecOptions = ref([]);
 
 const isNew = computed(() => props.mode === 'create');
 
@@ -60,6 +52,7 @@ const fetchLectureList = async () => {
       value: item.lecId,
     }));
     if (lecOptions.value.length === 0) {
+      console.warn('강의 목록이 비어 있습니다. 기본값을 사용합니다.');
       lecOptions.value = [
         { value: 2, label: 'React' },
         { value: 1, label: 'Nodejs' },
@@ -91,21 +84,27 @@ const fetchDetail = async () => {
 
   const param = new URLSearchParams();
   param.append('qnaId', props.detailId);
-  const res = await axios.post('/api/support/getQnaDetail.do', param);
-
-  if (res.data) {
-    detail.value = {
-      qnaId: res.data.qnaId,
-      lecId: res.data.lecId,
-      lecName: res.data.lecName,
-      loginId: res.data.loginId,
-      qnaTitle: res.data.qnaTitle,
-      qnaContent: res.data.qnaContent,
-      qnaAnswer: res.data.qnaAnswer || '',
-      qnaRegDate: res.data.qnaRegDate,
-      qnaAnswerDate: res.data.qnaAnswerDate || '',
-    };
-    selectedLecture.value = res.data.lecId || '';
+  try {
+    const res = await axios.post('/support/qnaDetail.do', param); // 엔드포인트 수정
+    if (res.data && !res.data.error) {
+      detail.value = {
+        qnaId: res.data.qnaId || 0,
+        lecId: res.data.lecId || '',
+        lecName: res.data.lecName || '',
+        loginId: res.data.qnaAnswerWriter || props.loginId,
+        qnaTitle: res.data.qnaTitle || '',
+        qnaContent: res.data.qnaContent || '',
+        qnaAnswer: res.data.qnaAnswer || '',
+        qnaRegDate: res.data.qnaRegDate || '',
+        qnaAnswerDate: res.data.qnaAnswerDate || '',
+      };
+      selectedLecture.value = res.data.lecId || '';
+      console.log('상세 데이터 로드:', detail.value); // 디버깅용
+    } else {
+      console.error('데이터를 불러오지 못했습니다.', res.data.error);
+    }
+  } catch (error) {
+    console.error('API 호출 오류:', error);
   }
 };
 
@@ -125,16 +124,15 @@ const handleSubmit = async () => {
 
   const formData = new URLSearchParams();
   formData.append('qnaId', detail.value.qnaId);
-  formData.append('lecName', detail.value.lecName);
+  formData.append('lecId', selectedLecture.value); // lecId 사용
   formData.append('qnaTitle', detail.value.qnaTitle);
   formData.append('qnaContent', detail.value.qnaContent);
 
   if (!isNew.value) {
-    formData.append('lecId', selectedLecture.value);
     formData.append('qnaAnswer', detail.value.qnaAnswer);
   }
 
-  const api = isNew.value ? '/api/support/saveQuestion.do' : '/api/support/updateAnswer.do';
+  const api = isNew.value ? '/api/support/saveQuestion.do' : '/api/support/saveAnswer.do';
 
   try {
     const res = await axios.post(api, formData);
