@@ -6,17 +6,24 @@ import { onMounted, onUnmounted, ref, computed } from 'vue';
 const emit = defineEmits(['postSuccess', 'unMountedModal']);
 const props = defineProps({
   detailId: { type: Number, default: 0 },
-  mode: { type: String, default: 'create' }, //'create' or 'detail'
-  loginId: { type: String, required: true }, // 현재 로그인한 사용자의  ID
+  mode: { type: String, default: 'create' }, // 'create' or 'detail'
+  loginId: { type: String, required: true }, // 현재 로그인한 사용자의 ID
 });
 
-// const { detaiId: id } = defineProps({ detailId: { type: Number, default: 0 } });
-
 const modalState = useModalState();
-// // 클릭한 질문 항목 데이터를 여기에 바인딩
-// const selectedItem = ref(null);
+const formRef = ref();
+const detail = ref({
+  qnaId: 0,
+  lecName: '',
+  loginId: props.loginId,
+  qnaTitle: '',
+  qnaContent: '',
+  qnaAnswer: '',
+  qnaRegDate: '',
+  qnaAnswerDate: '',
+});
+
 const selectedLecture = ref('');
-// 강의명 목록을 서버에서 불러오려고 했는데, 뜨는 강의가 없어서, 수동 입력.
 const lecOptions = ref([
   { value: 2, label: 'React' },
   { value: 1, label: 'Nodejs' },
@@ -27,23 +34,9 @@ const lecOptions = ref([
   { value: 7, label: '요리' },
   { value: 8, label: '직접추가' },
 ]);
-// 참조 객체
-const formRef = ref();
-const detail = ref({
-  qnaId: 0,
-  lecName: '',
-  loginId: props.loginId, // 현재 로그인한 사용자의 ID
-  qnaTitle: '',
-  qnaContent: '',
-  qnaAnswer: '',
-  qnaRegDate: '',
-  qnaAnswerDate: '',
-});
 
-// 신규인지 여부 판단
 const isNew = computed(() => props.mode === 'create');
 
-// 신규 모드: 입력값 초기화
 const resetForm = () => {
   detail.value = {
     qnaId: 0,
@@ -59,27 +52,6 @@ const resetForm = () => {
   selectedLecture.value = '';
 };
 
-// const title = ref('');
-// const content = ref('');
-// const lectureId = ref('');
-
-// // 등록
-// const registerQna = async () => {
-//   try {
-//     const payload = {
-//       title: title.value,
-//       content: content.value,
-//       lectureId: lectureId.value,
-//     };
-//     const res = await axios.post('/api/qna/register', payload);
-//     console.log('등록 성공:', res.data);
-//     emit('postSuccess');
-//     emit('unMountedModal');
-//   } catch (err) {
-//     console.error('등록 실패:', err);
-//   }
-// };
-
 const fetchLectureList = async () => {
   try {
     const response = await axios.get('/support/getQnaLectureListBody.do');
@@ -87,12 +59,33 @@ const fetchLectureList = async () => {
       label: item.lecName,
       value: item.lecId,
     }));
+    if (lecOptions.value.length === 0) {
+      lecOptions.value = [
+        { value: 2, label: 'React' },
+        { value: 1, label: 'Nodejs' },
+        { value: 3, label: 'Vue' },
+        { value: 4, label: 'Spring' },
+        { value: 5, label: 'Java' },
+        { value: 6, label: 'C#' },
+        { value: 7, label: '요리' },
+        { value: 8, label: '직접추가' },
+      ];
+    }
   } catch (error) {
     console.error('강의 목록을 불러오는데 실패했습니다.', error);
+    lecOptions.value = [
+      { value: 2, label: 'React' },
+      { value: 1, label: 'Nodejs' },
+      { value: 3, label: 'Vue' },
+      { value: 4, label: 'Spring' },
+      { value: 5, label: 'Java' },
+      { value: 6, label: 'C#' },
+      { value: 7, label: '요리' },
+      { value: 8, label: '직접추가' },
+    ];
   }
 };
 
-// 상세조회 (수정/답변)
 const fetchDetail = async () => {
   if (props.detailId === 0) return;
 
@@ -105,18 +98,17 @@ const fetchDetail = async () => {
       qnaId: res.data.qnaId,
       lecId: res.data.lecId,
       lecName: res.data.lecName,
-      loginId: res.data.loginId, // DB에서 가져온 작성자 ID
+      loginId: res.data.loginId,
       qnaTitle: res.data.qnaTitle,
       qnaContent: res.data.qnaContent,
       qnaAnswer: res.data.qnaAnswer || '',
       qnaRegDate: res.data.qnaRegDate,
       qnaAnswerDate: res.data.qnaAnswerDate || '',
     };
-    selectedLecture.value = res.data.lecId;
+    selectedLecture.value = res.data.lecId || '';
   }
 };
 
-// 권한 확인 (강사인지 체크)
 const checkTeacherPermission = async () => {
   const param = new URLSearchParams();
   param.append('questionId', props.detailId);
@@ -125,7 +117,6 @@ const checkTeacherPermission = async () => {
   return res.data > 0;
 };
 
-// 등록/수정 처리
 const handleSubmit = async () => {
   if (isNew.value && !selectedLecture.value) {
     alert('강의를 선택하세요.');
@@ -135,13 +126,11 @@ const handleSubmit = async () => {
   const formData = new URLSearchParams();
   formData.append('qnaId', detail.value.qnaId);
   formData.append('lecName', detail.value.lecName);
-  // formData.append('loginId', props.loginId);
   formData.append('qnaTitle', detail.value.qnaTitle);
   formData.append('qnaContent', detail.value.qnaContent);
 
   if (!isNew.value) {
     formData.append('lecId', selectedLecture.value);
-  } else {
     formData.append('qnaAnswer', detail.value.qnaAnswer);
   }
 
@@ -153,7 +142,7 @@ const handleSubmit = async () => {
     if (res.data.result === 'success') {
       alert('저장되었습니다.');
       const isTeacher = await checkTeacherPermission();
-      if (isTeacher && !isNew.value) return; // 강사이고 상세 모드일 경우 모달 유지 // 모달을 열린 상태로 유지
+      if (isTeacher && !isNew.value) return;
       modalState.$patch({ isOpen: false });
       emit('postSuccess');
     } else {
@@ -165,7 +154,7 @@ const handleSubmit = async () => {
   }
 };
 
-const handleDelete = async () => {
+const handleQuestionDelete = async () => {
   if (!confirm('정말 삭제하시겠습니까?')) return;
 
   const param = new URLSearchParams();
@@ -174,8 +163,8 @@ const handleDelete = async () => {
   try {
     const res = await axios.post('/api/support/deleteQuestion.do', param);
     if (res.data.result === 'success') {
-      alert('삭제 되었습니다');
-      modalState.$patch({ isOpen: false }); //false면 창이 꺼지고 true면 창이 열리는 거잖아? 이건 됐고 그...머였지. 타입? 이름을 개인걸로 지정해야 다른 분이 한거에서 모달창이 연동이 안된대...
+      alert('삭제되었습니다');
+      modalState.$patch({ isOpen: false });
       emit('postSuccess');
     } else {
       alert('삭제 실패');
@@ -183,6 +172,33 @@ const handleDelete = async () => {
   } catch (err) {
     console.error('삭제 요청 실패:', err);
     alert('삭제 중 오류가 발생했습니다.');
+  }
+};
+
+const handleAnswerDelete = async () => {
+  const isTeacher = await checkTeacherPermission();
+  if (!isTeacher) {
+    alert('해당 강의의 강사만 삭제할 수 있습니다.');
+    return;
+  }
+
+  if (!confirm('정말 답변을 삭제하시겠습니까?')) return;
+
+  const param = new URLSearchParams();
+  param.append('qnaId', props.detailId);
+
+  try {
+    const res = await axios.post('/api/support/deleteAnswer.do', param);
+    if (res.data.result === 'success') {
+      alert('답변 삭제되었습니다');
+      detail.value.qnaAnswer = '';
+      detail.value.qnaAnswerDate = '';
+    } else {
+      alert('답변 삭제 실패');
+    }
+  } catch (err) {
+    console.error('답변 삭제 요청 실패:', err);
+    alert('답변 삭제 중 오류가 발생했습니다.');
   }
 };
 
@@ -204,101 +220,178 @@ onUnmounted(() => {
   <Teleport to="body">
     <div class="modal-overlay">
       <form ref="formRef" class="modal-form modal-container">
-        <h2 class="modal-title">Q&A</h2>
-
-        <div class="modal-section border-bottom">
-          <div class="form-row">
-            <label>강의명</label>
-            <select v-model="selectedLecture" :disabled="!isNew" required>
-              <option disabled value="">클릭해서 강의 선택</option>
-              <template v-if="lecOptions.length > 0">
-                <option v-for="opt in lecOptions" :key="opt.value" :value="opt.value">
-                  {{ opt.label }}
-                  =======
-                </option>
-
-                <option v-for="lec in lecOptions" :key="lec.lecId" :value="lec.lecId">
-                  {{ lec.lecName }}
-                </option>
-
-                <option v-for="lec in lecOptions" :key="lec.lecId" :value="lec.lecId">
-                  {{ lec.lecName }}
-                </option>
-              </template>
-              <template v-else>
-                <option disabled>수강중인 강의가 없습니다.</option>
-              </template>
-            </select>
-          </div>
-
-          <div class="form-row">
-            <label>제목</label>
-            <input
-              v-model="detail.qnaTitle"
-              type="text"
-              name="qnaTitle"
-              :readonly="!isNew"
-              required
-            />
-          </div>
-
-          <div class="form-row">
-            <label>내용</label>
-            <textarea
-              v-model="detail.qnaContent"
-              type="qnaContent"
-              rows="4"
-              class="textarea"
-              required
-            ></textarea>
-          </div>
+        <div class="modal-header">
+          <h2>Q&A</h2>
         </div>
-
-        <!-- 답변은 detail 모드일 때만 보여줌 -->
-        <div v-if="!isNew" class="modal-section">
-          <h3 class="section-title">댓글</h3>
-
-          <div class="form-row">
-            <label>작성자</label>
-            <input type="text" value="admin" readonly />
+        <div class="modal-body">
+          <div class="modal-section">
+            <div class="form-row">
+              <label>강의명:</label>
+              <select v-model="selectedLecture" :disabled="false" required>
+                <option disabled value="">클릭해서 강의 선택</option>
+                <option v-for="lec in lecOptions" :key="lec.value" :value="lec.value">
+                  {{ lec.label }}
+                </option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>제목:</label>
+              <input
+                v-model="detail.qnaTitle"
+                type="text"
+                name="qnaTitle"
+                :readonly="!isNew"
+                required
+              />
+            </div>
+            <div class="form-row">
+              <label>내용:</label>
+              <textarea
+                v-model="detail.qnaContent"
+                type="qnaContent"
+                rows="3"
+                class="textarea"
+                required
+              ></textarea>
+            </div>
+            <div class="button-container-middle">
+              <button type="button" @click="handleQuestionDelete" class="btn-secondary">
+                삭제
+              </button>
+              <button type="button" @click="closeModal" class="btn-secondary">취소</button>
+            </div>
           </div>
-
-          <div class="form-row">
-            <label>내용</label>
-            <textarea
-              v-model="detail.qnaAnswer"
-              name="qnaAnswer"
-              rows="4"
-              placeholder="답변을 입력하세요"
-            ></textarea>
+          <div v-if="!isNew" class="modal-section">
+            <h3 class="section-title">댓글</h3>
+            <div class="form-row">
+              <label>작성자:</label>
+              <input type="text" value="admin" readonly />
+            </div>
+            <div class="form-row">
+              <label>내용:</label>
+              <textarea
+                v-model="detail.qnaAnswer"
+                name="qnaAnswer"
+                rows="3"
+                placeholder="답변을 입력하세요"
+              ></textarea>
+            </div>
+            <div class="form-row">
+              <label>답변일:</label>
+              <input
+                type="text"
+                :value="detail.qnaAnswerDate || new Date().toLocaleDateString()"
+                readonly
+              />
+            </div>
+            <div class="button-container-middle">
+              <button type="button" @click="handleAnswerDelete" class="btn-secondary">
+                답변 삭제
+              </button>
+              <button type="button" @click="handleSubmit" class="btn-primary">등록</button>
+            </div>
           </div>
-
-          <div class="form-row">
-            <label>답변일</label>
-            <input
-              type="text"
-              :value="detail.qnaAnswerDate || new Date().toLocaleDateString()"
-              readonly
-            />
-          </div>
-        </div>
-
-        <div class="button-container">
-          <template v-if="isNew">
-            <button type="button" @click="resetForm">초기화</button>
-            <button type="button" @click="handleSubmit">등록</button>
-          </template>
-          <template v-else>
-            <button type="button" @click="handleSubmit">등록</button>
-            <button type="button" @click="handleDelete">삭제</button>
-          </template>
-          <button type="button" @click="closeModal">취소</button>
         </div>
       </form>
     </div>
   </Teleport>
 </template>
 
-<style>
+<style scoped>
 @import './styled.css';
+
+.modal-container {
+  display: flex;
+  flex-direction: column;
+  width: 700px; /* 더 넓게 조정 */
+  background: #f9f9f9;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  padding: 10px;
+  background: #172554;
+  border-bottom: 1px solid #ccc;
+  text-align: center;
+}
+
+.modal-body {
+  padding: 15px;
+  flex-grow: 1;
+}
+
+.modal-section {
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 3px;
+}
+
+.section-title {
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-bottom: 10px;
+  padding-left: 5px;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start; /* 상단 정렬 */
+  margin-bottom: 10px;
+}
+
+label {
+  width: 120px; /* 레이블 폭 */
+  margin-right: 15px;
+  font-weight: bold;
+  text-align: right;
+  padding-top: 5px; /* 세로 정렬 맞춤 */
+}
+
+input,
+select,
+textarea {
+  flex: 1;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  min-width: 0; /* 플렉스 아이템 크기 조정 */
+}
+
+textarea {
+  resize: vertical;
+  min-height: 60px; /* 높이 조정 */
+  width: 100%; /* 가로 꽉 채우기 */
+}
+
+.button-container-middle {
+  margin: 10px 0;
+  text-align: right;
+}
+
+.btn-primary {
+  /* background-color: #007bff; */
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+/* .btn-primary:hover,
+.btn-secondary:hover {
+  opacity: 0.9;
+} */
 </style>
