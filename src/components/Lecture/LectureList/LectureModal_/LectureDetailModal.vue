@@ -11,7 +11,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['postSuccess']);
+const emit = defineEmits(['lectureListRegisterSubmitSuccess']);
 
 // --- 로그인 정보 가져오기 ---
 const userInfoStore = useUserInfo();
@@ -91,13 +91,14 @@ const courseRegister = async () => {
 
     const response = await axios.post('/api/lecture/lectureStdRegister.do', params);
 
-    console.log(response);
+    // console.log(response);
 
     const resultData = response.data;
 
     if (resultData.result === 'success') {
       alert('신청되었습니다.');
-      modalState.$patch({ isOpen: false, type: 'lecture-list-detail' });
+      emit('lecture-list-register-submit-success');
+      closeModal();
     } else if (resultData.result === 'loginIdNotExist') {
       alert('학생정보가 등록되어 있지 않아 수강 신청할 수 없습니다.\n관리자에게 문의하시오.');
     } else if (resultData.result === 'lecIdAlreadyExist') {
@@ -112,6 +113,10 @@ const courseRegister = async () => {
     alert('수강 신청 실패!');
     return;
   }
+};
+
+const closeModal = () => {
+  modalState.$patch({ isOpen: false, type: 'lecture-list-detail' });
 };
 
 watch(
@@ -135,12 +140,7 @@ watch(
       <div class="lecture-detail-modal">
         <div class="modal-header">
           <h2>강의 상세 및 계획서</h2>
-          <button
-            class="close-btn"
-            @click="modalState.$patch({ isOpen: false, type: 'lecture-list-detail' })"
-          >
-            &times;
-          </button>
+          <button class="close-btn" @click="closeModal()">&times;</button>
         </div>
 
         <div class="modal-content">
@@ -230,12 +230,7 @@ watch(
           <button class="btn btn-primary" @click="courseRegister" v-if="userType === 'S'">
             신청
           </button>
-          <button
-            class="btn btn-secondary"
-            @click="modalState.$patch({ isOpen: false, type: 'lecture-list-detail' })"
-          >
-            닫기
-          </button>
+          <button class="btn btn-secondary" @click="closeModal()">닫기</button>
         </div>
       </div>
     </div>

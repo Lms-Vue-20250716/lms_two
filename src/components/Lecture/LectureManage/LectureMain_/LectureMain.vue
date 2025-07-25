@@ -1,22 +1,23 @@
 <script setup>
-import PageNavigation from '@/components/common/PageNavigation.vue';
 import axios from 'axios';
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useModalState } from '@/stores/modalState';
 import LecturePlanModal from '../LectureModal_/LecturePlanModal.vue';
 import LectureRegister from '../LectureModal_/LectureRegister.vue';
+import PageNavigation2 from '@/components/common/PageNavigation2.vue';
 
 const route = useRoute();
 const lectureList = ref([]);
 const lectureCount = ref(0);
 const modalState = useModalState();
+const currentPage = ref(1);
 
 const selectedLecture = ref(null);
 
-const lectureSearch = (cPage = 1) => {
+const lectureSearch = (pageToGo = 1) => {
   const param = new URLSearchParams(route.query);
-  param.append('currentPage', cPage);
+  param.append('currentPage', pageToGo);
   param.append('pageSize', 5);
 
   // console.log(param);
@@ -27,6 +28,10 @@ const lectureSearch = (cPage = 1) => {
 
     // console.log(res.data);
   });
+};
+const paginationStateChanged = (page) => {
+  currentPage.value = page;
+  lectureSearch(page);
 };
 
 const selectForEdit = (lecture) => {
@@ -41,18 +46,23 @@ const openLecturePlan = (lecture) => {
 
 const closeLectureRegisterModal = () => {
   selectedLecture.value = null;
-  lectureSearch();
+  lectureSearch(1);
+};
+
+const ModalSubmitSuccess = () => {
+  currentPage.value = 1;
+  lectureSearch(1);
 };
 
 watch(
   () => route.query,
   () => {
-    lectureSearch();
+    lectureSearch(1);
   },
 );
 
 onMounted(() => {
-  lectureSearch();
+  lectureSearch(1);
 });
 </script>
 
@@ -100,21 +110,23 @@ onMounted(() => {
         </template>
       </tbody>
     </table>
-    <PageNavigation
+    <PageNavigation2
       :total-items="lectureCount"
       :items-per-page="5"
-      :on-page-change="lectureSearch"
+      :on-page-change="paginationStateChanged"
+      :current-page="currentPage"
     />
   </div>
   <LectureRegister
     v-if="modalState.isOpen && modalState.type === 'lecture-manage-register'"
     :lecture-data="selectedLecture"
     @lecture-manage-register-close="closeLectureRegisterModal()"
+    @lecture-manage-register-submit-success="ModalSubmitSuccess()"
   />
   <LecturePlanModal
     v-if="modalState.isOpen && modalState.type === 'lecture-manage-plan'"
     :lecture-data="selectedLecture"
-    @post-success="lectureSearch()"
+    @lecture-manage-register-submit-success="ModalSubmitSuccess()"
   />
 </template>
 

@@ -1,5 +1,4 @@
 <script setup>
-import { useUserInfo } from '@/stores/loginInfoState';
 import { useModalState } from '@/stores/modalState';
 import axios from 'axios';
 import { computed, ref, watch } from 'vue';
@@ -12,11 +11,7 @@ const props = defineProps({
   },
 });
 
-// --- 로그인 정보 가져오기 ---
-const userInfoStore = useUserInfo();
-// computed를 사용해 user 객체가 null일 때도 에러 없이 안전하게 값을 가져옴
-const loginId = computed(() => userInfoStore.user?.loginId);
-const userType = computed(() => userInfoStore.user?.userType);
+const emit = defineEmits(['lecturePlanRegisterSubmitSuccess']);
 
 // --- 모달 관련
 const modalState = useModalState();
@@ -124,18 +119,6 @@ const LecturePlanSave = async () => {
   try {
     //validation check
 
-    //전처리
-
-    //param에 담기
-    //? - hidden field?
-
-    // const params = new URLSearchParams();
-    // params.append('lecId', lecId.value || detailProps.value.lecId);
-    // params.append('lecGoal', lecGoal.value);
-    // params.append('lecContent', lecContent.value);
-    // params.append('lecSpecifics', lecSpecifics.value);
-    // params.append('lecManageWeekPlanList', displayWeekPlan.value);
-
     const params = {
       lecId: lecId.value || detailProps.value.lecId,
       lecGoal: lecGoal.value,
@@ -159,12 +142,17 @@ const LecturePlanSave = async () => {
       }
     }
 
-    modalState.$patch({ isOpen: false, type: 'lecture-manage-plan' });
+    emit('lecture-plan-register-submit-success');
+    closeModal();
   } catch (err) {
     console.log(err);
     alert('오류로 인한 실패!');
     return;
   }
+};
+
+const closeModal = () => {
+  modalState.$patch({ isOpen: false, type: 'lecture-manage-plan' });
 };
 
 watch(
@@ -188,12 +176,7 @@ watch(
       <div class="lecture-detail-modal">
         <div class="modal-header">
           <h2>강의 상세 및 계획서</h2>
-          <button
-            class="close-btn"
-            @click="modalState.$patch({ isOpen: false, type: 'lecture-manage-plan' })"
-          >
-            &times;
-          </button>
+          <button class="close-btn" @click="closeModal()">&times;</button>
         </div>
 
         <div class="modal-content">
@@ -279,12 +262,7 @@ watch(
           <button class="btn btn-primary" @click="LecturePlanSave">
             {{ isUpdate ? '수정' : '신청' }}
           </button>
-          <button
-            class="btn btn-secondary"
-            @click="modalState.$patch({ isOpen: false, type: 'lecture-manage-plan' })"
-          >
-            닫기
-          </button>
+          <button class="btn btn-secondary" @click="closeModal()">닫기</button>
         </div>
       </div>
     </div>

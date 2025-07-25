@@ -13,6 +13,8 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(['testUpdateSuccess']);
+
 const isLoading = ref(true);
 
 // --- 로그인 정보 가져오기 ---
@@ -303,6 +305,7 @@ const saveQuestionList = async () => {
 
         if (res.data.result === 'success') {
           alert('문제 저장이 완료되었습니다.');
+          emit('testUpdateSuccess');
         } else if (res.data.result === 'CannotModifyDueToExistingSubmission') {
           alert('시험 응시자가 존재하여 수정이 불가합니다.\n시험을 새로 등록하세요.');
         } else {
@@ -329,6 +332,7 @@ const saveQuestionList = async () => {
     try {
       //axios
       await axios.post('/api/lecture/testQuestionsInfoSave.do', params);
+      emit('testUpdateSuccess');
       alert('문제 저장이 완료되었습니다.');
 
       //close modal

@@ -16,7 +16,7 @@ const props = defineProps({
 const isEditMode = ref(false);
 const lecId = ref();
 
-const emit = defineEmits(['lectureManageRegisterClose']);
+const emit = defineEmits(['lectureManageRegisterClose', 'lectureManageRegisterSubmitSuccess']);
 
 const modalState = useModalState();
 
@@ -230,10 +230,9 @@ const handleSave = async () => {
     //step5. 후처리
     alert('강의 저장 성공!');
 
-    emit('lecture-manage-register-close');
+    emit('lecture-manage-register-submit-success');
 
-    //close modal
-    modalState.$patch({ isOpen: false, type: 'lecture-manage-save' });
+    closeModal();
   } catch (err) {
     console.log(err);
     alert('강의 저장에 실패했습니다!');

@@ -1,6 +1,6 @@
 <script setup>
 import { formatTimestampToDate } from '@/common/common_time';
-import PageNavigation from '@/components/common/PageNavigation.vue';
+import PageNavigation2 from '@/components/common/PageNavigation2.vue';
 import axios from 'axios';
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -8,7 +8,7 @@ import { useRoute } from 'vue-router';
 const route = useRoute();
 const attendanceList = ref([]);
 const attendanceCount = ref(0);
-// const attendState = ref('');
+const currentPage = ref(1);
 
 /**
  * 출석/퇴실 처리 비즈니스 로직 (서버 기준)
@@ -71,7 +71,7 @@ const handleAttendanceCheck = async (lecId) => {
         console.log(res);
         if (res.data.result === 'success') {
           alert('출석 처리되었습니다.');
-          attendanceSearch(); // 목록 새로고침
+          attendanceSearch(currentPage.value); // 목록 새로고침
         } else {
           alert('날짜를 확인해주세요.');
         }
@@ -92,7 +92,7 @@ const handleAttendanceOut = async (lecId) => {
       const params = new URLSearchParams({ lecId });
       await axios.post('/api/lecture/attendanceOut.do', params);
       alert('퇴실 처리되었습니다.');
-      attendanceSearch(); // 목록 새로고침
+      attendanceSearch(currentPage.value); // 목록 새로고침
     } catch (error) {
       console.error('퇴실 처리 중 오류 발생:', error);
       alert('오류가 발생했습니다.');
@@ -100,15 +100,20 @@ const handleAttendanceOut = async (lecId) => {
   }
 };
 
+const paginationStateChanged = (page) => {
+  currentPage.value = page;
+  attendanceSearch(page);
+};
+
 watch(
   () => route.query,
   () => {
-    attendanceSearch();
+    attendanceSearch(1);
   },
 );
 
 onMounted(() => {
-  attendanceSearch();
+  attendanceSearch(1);
 });
 </script>
 
@@ -165,38 +170,6 @@ onMounted(() => {
               >
                 {{ attendanceStatusText[attendance.attendState] }}
               </button>
-              <!-- <button
-                v-if="attendance.attendState && attendance.attendEnddate"
-                class="attendance-button leave"
-              >
-                {{ attendanceStatusText[attendance.attendState] || '완료' }}
-              </button>
-
-              <button
-                v-else-if="
-                  (attendance.attendState === 'E' || attendance.attendState === 'L') &&
-                  !attendance.attendEnddate
-                "
-                class="attendance-button leave"
-                @click="handleAttendanceOut(attendance.lecId)"
-              >
-                퇴실
-              </button>
-
-              <button
-                v-else-if="attendance.attendState === 'F' || attendance.attendState === 'J'"
-                class="attendance-button other"
-              >
-                {{ attendanceStatusText[attendance.attendState] }}
-              </button>
-
-              <button
-                v-else
-                class="attendance-button attend"
-                @click="handleAttendanceCheck(attendance.lecId)"
-              >
-                출석
-              </button> -->
             </td>
           </tr>
         </template>
@@ -207,10 +180,11 @@ onMounted(() => {
         </template>
       </tbody>
     </table>
-    <PageNavigation
+    <PageNavigation2
       :total-items="attendanceCount"
       :items-per-page="5"
-      :on-page-change="attendanceSearch"
+      :on-page-change="paginationStateChanged"
+      :current-page="currentPage"
     />
   </div>
 </template>
