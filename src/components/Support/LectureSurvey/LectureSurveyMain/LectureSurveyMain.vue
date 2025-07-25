@@ -61,43 +61,51 @@ onMounted(fetchLectureList);
     <LectureSurveySearch
       :lecOptions="lecOptions"
       v-model:selectedLecId="selectedLecId"
-      @search="fetchSurveyByLecture"
+      @lectureSelected="fetchSurveyByLecture"
     />
-    <div clsass="survey-container">
-      <h3>설문조사</h3>
-      <div v-if="!showSurvey" class="mt-8 text-center text-gray-500">먼저 강의를 선택해주세요.</div>
 
-      <div v-else class="mt-8">
-        <!-- 설문 내용 -->
-        <div class="rounded border p-4">
-          <div class="mb-2 font-semibold">설문조사</div>
-          <div>
-            {{ surveyData[currentPage].question }}
-          </div>
-        </div>
-
-        <!-- 이전/다음 버튼 -->
-        <div class="mt-4 flex justify-between">
-          <button
-            class="rounded bg-gray-200 px-4 py-2"
-            @click="goPrev"
-            :disabled="currentPage === 0"
-          >
-            이전
-          </button>
-          <button
-            class="rounded bg-blue-500 px-4 py-2 text-white"
-            @click="goNext"
-            :disabled="currentPage === surveyData.length - 1"
-          >
-            다음
-          </button>
-        </div>
+    <div class="survey-container">
+      <div class="survey-header">
+        <h1>설문조사</h1>
       </div>
+      <div id="question-box" v-if="!showSurvey" class="question-box" style="margin-bottom: 30px">
+        <h2>먼저 강의를 선택해주세요.</h2>
+      </div>
+    </div>
+
+    <!-- 이전/다음 버튼 -->
+    <div class="mt-4 flex justify-between">
+      <button class="rounded bg-gray-200 px-4 py-2" @click="goPrev" :disabled="currentPage === 0">
+        이전
+      </button>
+      <button
+        class="rounded bg-blue-500 px-4 py-2 text-white"
+        :disabled="currentPage === surveyData.length - 1"
+        @click="goNext"
+      >
+        다음
+      </button>
     </div>
   </div>
 </template>
 
 <style>
 @import './styled.css';
+
+.survey-container {
+  max-width: 1000px;
+  margin: 40px auto;
+  font-family: sans-serif;
+  border: 1px solid #ccc;
+  padding: 20px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+
+.question-box h2 {
+  margin-bottom: 25px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
 </style>
