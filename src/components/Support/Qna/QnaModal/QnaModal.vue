@@ -234,7 +234,6 @@ onUnmounted(() => {
                 </option>
               </select>
               <span>{{ detail.lecName }}</span>
-              ======= >>>>>>> 398b565 (feat: qna 모달 진행중)
             </div>
             <div class="form-row">
               <label>제목:</label>
