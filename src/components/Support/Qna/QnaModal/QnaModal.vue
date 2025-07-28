@@ -85,7 +85,7 @@ const fetchDetail = async () => {
   const param = new URLSearchParams();
   param.append('qnaId', props.detailId);
   try {
-    const res = await axios.post('/support/qnaDetail.do', param); // 엔드포인트 수정
+    const res = await axios.post('/api/support/qnaDetail.do', param); // 엔드포인트 수정
     if (res.data && !res.data.error) {
       detail.value = {
         qnaId: res.data.qnaId || 0,
@@ -231,6 +231,7 @@ onUnmounted(() => {
                   {{ lec.label }}
                 </option>
               </select>
+              <span>{{ detail.lecName }}</span>
             </div>
             <div class="form-row">
               <label>제목:</label>
