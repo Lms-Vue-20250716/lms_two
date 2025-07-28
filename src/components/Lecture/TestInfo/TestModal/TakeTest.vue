@@ -409,7 +409,7 @@ watch(
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   width: 90%;
   max-width: 900px;
-  /* display: flex; 
+  /* display: flex;
   flex-direction: column; */
   max-height: 90vh;
   overflow-y: auto;
@@ -453,7 +453,7 @@ watch(
   @apply w-1/3 p-2 text-left font-semibold text-gray-600;
 }
 .result-summary-table td {
-  @apply text-grey-800 flex justify-end p-2;
+  @apply flex justify-end p-2 text-gray-800;
 }
 
 /* --- 질문 목록 --- */
