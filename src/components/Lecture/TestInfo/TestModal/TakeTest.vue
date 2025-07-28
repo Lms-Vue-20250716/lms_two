@@ -412,7 +412,7 @@ watch(
   /* display: flex;
   flex-direction: column; */
   max-height: 90vh;
-  overflow-y: auto;
+  /* overflow-y: auto; */
 }
 
 .test-take-modal.is-loading {
@@ -518,7 +518,6 @@ watch(
   @apply text-green-700;
 }
 
-/* --- 푸터 --- */
 .modal-footer {
   @apply flex flex-shrink-0 justify-end space-x-2 rounded-b-lg bg-slate-100 p-4;
 }
