@@ -110,7 +110,7 @@ watch(isDeleting, (newVal) => {
           <button v-if="id" type="button" @click="handlerDelete">
             {{ isDeleting ? '취소' : '삭제' }}
           </button>
-          <button type="button" @click="closeModal">취소</button>
+          <button type="button" @click="closeModal">닫기</button>
         </div>
       </form>
     </div>
