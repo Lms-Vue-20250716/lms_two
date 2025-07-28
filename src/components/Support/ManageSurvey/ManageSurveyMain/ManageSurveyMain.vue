@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import axios from 'axios';
+import PageNavigation from '@/components/common/PageNavigation.vue'; // ✅ 추가
 import ManageSurveyModal from '../ManageSurveyModal/ManageSurveyModal.vue';
 
 const selectedTab = ref('');
@@ -11,7 +12,6 @@ const currentPage = ref(1);
 const pageSize = ref(10);
 const totalItems = ref(0);
 
-// Enum을 기반으로 avgScore를 텍스트로 변환하는 함수
 const getScoreText = (score) => {
   const scoreMap = {
     1: '매우나쁨',
@@ -25,13 +25,10 @@ const getScoreText = (score) => {
   return scoreMap[score] || '평가 없음';
 };
 
-// paginatedList: completed는 서버 페이지 데이터 그대로, result는 클라이언트 slice 처리
 const paginatedList = computed(() => {
   if (selectedTab.value === 'completed') {
-    // 서버가 페이징된 데이터 줌 → 그대로 사용
     return dataList.value;
   } else {
-    // 서버가 전체 데이터 줌 → 클라이언트에서 slice로 페이징 처리
     const start = (currentPage.value - 1) * pageSize.value;
     const end = start + pageSize.value;
     return dataList.value.slice(start, end);
@@ -70,21 +67,15 @@ const fetchData = async () => {
   }
 };
 
-const totalPages = computed(() => Math.ceil(totalItems.value / pageSize.value));
-
-const changePage = (page) => {
-  if (page > 0 && page <= totalPages.value && page !== currentPage.value) {
-    currentPage.value = page;
-    // fetchData() 호출 제거! watch가 담당
-  }
+// ✅ 페이지네이션에서 페이지 변경 시 호출할 함수
+const handlePageChange = (page) => {
+  currentPage.value = page;
 };
 
-// 탭 변경 시 currentPage 초기화
 watch(selectedTab, () => {
   currentPage.value = 1;
 });
 
-// selectedTab, currentPage 변경 시 fetchData 호출
 watch([selectedTab, currentPage], fetchData, { immediate: true });
 
 const openDetailModal = (item) => {
@@ -155,22 +146,11 @@ const openDetailModal = (item) => {
         </tbody>
       </table>
 
-      <div class="pagination" v-if="totalItems > pageSize">
-        <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1">이전</button>
-
-        <button
-          v-for="page in totalPages"
-          :key="page"
-          :class="{ active: page === currentPage }"
-          @click="changePage(page)"
-        >
-          {{ page }}
-        </button>
-
-        <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages">
-          다음
-        </button>
-      </div>
+      <PageNavigation
+        :total-items="totalItems"
+        :items-per-page="pageSize"
+        :on-page-change="handlePageChange"
+      />
 
       <ManageSurveyModal
         v-if="isModalOpen"
