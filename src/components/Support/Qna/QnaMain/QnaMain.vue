@@ -34,13 +34,13 @@ onMounted(() => {
 const openDetailModal = (id) => {
   detailId.value = id;
   modalMode.value = 'detail';
-  modalState.isOpen = true;
+  modalState.$patch({ isOpen: true, type: 'qna' });
 };
 
 const openCreateModal = () => {
   detailId.value = 0;
   modalMode.value = 'create';
-  modalState.isOpen = true;
+  modalState.$patch({ isOpen: true, type: 'qna' });
 };
 
 watch(
@@ -89,7 +89,7 @@ watch(
   </div>
 
   <QnaModal
-    v-if="modalState.isOpen"
+    v-if="modalState.isOpen && modalState.type === 'qna'"
     :detail-id="detailId"
     :mode="modalMode"
     :login-id="loginId"

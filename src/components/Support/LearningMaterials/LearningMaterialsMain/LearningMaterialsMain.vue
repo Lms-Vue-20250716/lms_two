@@ -11,7 +11,21 @@ const route = useRoute();
 const learningMaterialsList = ref([]);
 const learningMaterialsCount = ref(0);
 const modalState = useModalState();
+// const selectedId = ref(0);
 const detailId = ref(0);
+
+// const openModal = (id) => {
+//   selectedId.value = id;
+//   modalState.$patch({ isOpen: true, type: 'material' });
+// };
+
+// const fetchList = () => {
+//   // 목록 갱신 로직
+// };
+
+// const clearSelected = () => {
+//   selectedId.value = 0;
+// };
 
 const learningMaterialsSearch = (cPage = 1) => {
   const param = new URLSearchParams(route.query);
@@ -36,7 +50,7 @@ onMounted(() => {
 });
 
 const learningMaterialsDetail = (id) => {
-  modalState.$patch({ isOpen: true, type: 'learningMaterials' });
+  modalState.$patch({ isOpen: true, type: 'material' });
   detailId.value = id;
 };
 
@@ -93,7 +107,7 @@ watch(
     />
   </div>
   <LearningMaterialsModal
-    v-if="modalState.isOpen && modalState.type === 'learningMaterials'"
+    v-if="modalState.isOpen && modalState.type === 'material'"
     :detail-id="detailId"
     @post-success="learningMaterialsSearch()"
     @un-mounted-modal="detailId = $event"
