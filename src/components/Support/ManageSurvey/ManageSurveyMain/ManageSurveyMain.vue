@@ -151,8 +151,7 @@ const openDetailModal = (item) => {
         :items-per-page="pageSize"
         :on-page-change="handlePageChange"
       />
-
-      =======
+      <<<<<<< HEAD =======
 
       <div class="pagination" v-if="totalItems > pageSize">
         <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1">이전</button>
@@ -170,6 +169,7 @@ const openDetailModal = (item) => {
           다음
         </button>
       </div>
+      ======= >>>>>>> 9d3e9fe (fix: survey 페이지내이션 수정)
 
       <ManageSurveyModal
         v-if="isModalOpen"
