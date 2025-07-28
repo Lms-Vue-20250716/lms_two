@@ -93,8 +93,6 @@ watch(isDeleting, (newVal) => {
         <label>
           내용:<input v-model="detail.materiContent" type="text" name="materiContent" />
         </label>
-        <input id="fileInput" type="file" name="file" @change="handlerFile" />
-        <label class="img-label" htmlFor="fileInput"> 파일 첨부하기 </label>
         파일:
         <input id="fileInput" type="file" name="file" @change="handlerFile" />
         <label class="img-label" htmlFor="fileInput"> 파일 첨부하기 </label>
