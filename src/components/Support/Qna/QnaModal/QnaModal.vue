@@ -46,7 +46,7 @@ const resetForm = () => {
 
 const fetchLectureList = async () => {
   try {
-    const response = await axios.get('/support/getQnaLectureListBody.do');
+    const response = await axios.get('/api/support/getQnaLectureListBody.do');
     lecOptions.value = response.data.lectureList.map((item) => ({
       label: item.lecName,
       value: item.lecId,
