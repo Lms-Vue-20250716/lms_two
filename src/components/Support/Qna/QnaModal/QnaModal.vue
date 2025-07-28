@@ -125,6 +125,7 @@ const handleSubmit = async () => {
   const formData = new URLSearchParams();
   formData.append('qnaId', detail.value.qnaId);
   formData.append('lecId', selectedLecture.value); // lecId 사용
+  formData.append('lecName', detail.value.lecName);
   formData.append('qnaTitle', detail.value.qnaTitle);
   formData.append('qnaContent', detail.value.qnaContent);
 
@@ -203,10 +204,12 @@ const handleAnswerDelete = async () => {
 };
 
 const closeModal = () => {
-  modalState.$patch({ isOpen: false });
+  modalState.$patch({ isOpen: false, type: '' });
+  emit('unMountedModal', 0);
 };
 
 onMounted(() => {
+  modalState.$patch({ isOpen: true, type: 'qna' });
   fetchLectureList();
   if (!isNew.value) fetchDetail();
 });
