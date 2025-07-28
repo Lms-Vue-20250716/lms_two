@@ -12,6 +12,12 @@ const detail = ref({});
 const originalDetail = ref([]); // 원래 데이터 저장용
 const isDeleting = ref(false); // 삭제/취소 상태 관리
 
+// 모달 닫기 함수
+const closeModal = () => {
+  modalState.$patch({ isOpen: false });
+  emit('unMountedModal', 0);
+};
+
 const handlerDelete = () => {
   if (isDeleting.value) {
     // 취소 로직: 원래 데이터로 복원
@@ -21,11 +27,12 @@ const handlerDelete = () => {
     // 삭제 로직
     if (confirm('정말 삭제하시겠습니까?')) {
       const param = new URLSearchParams();
-      param.append('qnaId', id);
+      param.append('materiId', id);
+
       axios.post('/api/support/deleteMtr.do', param).then((res) => {
         if (res.data.result === 'success') {
           alert('삭제 되었습니다');
-          modalState.$patch({ isOpen: false });
+          closeModal();
           emit('postSuccess');
         } else {
           alert('삭제 실패');
@@ -35,32 +42,6 @@ const handlerDelete = () => {
     }
     isDeleting.value = true; // 삭제 후 취소 상태로 전환
   }
-};
-
-// 저장 버튼 클릭시 저장
-const handlerInsert = () => {
-  const formData = new FormData(formRef.value);
-
-  axios.post('/api/support/saveMtr.do', formData).then((res) => {
-    if (res.data.result === 'success') {
-      alert('저장 되었습니다.');
-      modalState.$patch({ isOpen: false });
-      emit('postSuccess');
-    }
-  });
-};
-
-// 수정 로직 (추가)
-const handlerUpdate = () => {
-  const formData = new FormData(formRef.value);
-  axios.post('/api/support/updateMtr.do', formData).then((res) => {
-    // update API 경로 확인 필요
-    if (res.data.result === 'success') {
-      alert('수정 되었습니다.');
-      modalState.$patch({ isOpen: false });
-      emit('postSuccess');
-    }
-  });
 };
 
 // 제목 클릭시 모달창 조회
@@ -91,27 +72,30 @@ watch(isDeleting, (newVal) => {
   <Teleport to="body">
     <div class="modal-overlay">
       <form ref="formRef" class="modal-form modal-container">
+        <button type="button" class="modal-close-button" @click="closeModal">닫기</button>
+
         <label> 강의명:<input v-model="detail.lecName" type="text" name="lecName" /> </label>
         <label> 제목:<input v-model="detail.materiTitle" type="text" name="materiTitle" /> </label>
         <label>
           내용:<input v-model="detail.materiContent" type="text" name="materiContent" />
         </label>
+
         파일:
         <input id="fileInput" type="file" name="file" @change="handlerFile" />
         <label class="img-label" htmlFor="fileInput"> 파일 첨부하기 </label>
+
         <div @click="downloadFile">
           <div>
             <label>미리보기</label>
             <img :src="imageUrl" class="preview-image" />
           </div>
         </div>
+
         <div class="button-container">
-          <button type="button" @click="!id ? handlerInsert() : handlerUpdate()">
-            {{ !id ? '저장' : '수정' }}
-          </button>
-          <button v-if="id" type="button" @click="handlerDelete()">
+          <button v-if="id" type="button" @click="handlerDelete">
             {{ isDeleting ? '취소' : '삭제' }}
           </button>
+          <button type="button" @click="closeModal">닫기</button>
         </div>
       </form>
     </div>
