@@ -12,6 +12,12 @@ const detail = ref({});
 const originalDetail = ref([]); // 원래 데이터 저장용
 const isDeleting = ref(false); // 삭제/취소 상태 관리
 
+// 모달 닫기 함수
+const closeModal = () => {
+  modalState.$patch({ isOpen: false });
+  emit('unMountedModal', 0);
+};
+
 const handlerDelete = () => {
   if (isDeleting.value) {
     // 취소 로직: 원래 데이터로 복원
@@ -91,6 +97,8 @@ watch(isDeleting, (newVal) => {
   <Teleport to="body">
     <div class="modal-overlay">
       <form ref="formRef" class="modal-form modal-container">
+        <button type="button" class="modal-close-button" @click="closeModal">닫기</button>
+
         <label> 강의명:<input v-model="detail.lecName" type="text" name="lecName" /> </label>
         <label> 제목:<input v-model="detail.materiTitle" type="text" name="materiTitle" /> </label>
         <label>
@@ -112,6 +120,7 @@ watch(isDeleting, (newVal) => {
           <button v-if="id" type="button" @click="handlerDelete()">
             {{ isDeleting ? '취소' : '삭제' }}
           </button>
+          <button type="button" @click="closeModal">취소</button>
         </div>
       </form>
     </div>
