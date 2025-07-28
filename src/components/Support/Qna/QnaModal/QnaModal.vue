@@ -157,9 +157,11 @@ const handleQuestionDelete = async () => {
 
   const param = new URLSearchParams();
   param.append('qnaId', props.detailId);
+  console.log('삭제할 qnaId:', props.detailId);
 
   try {
     const res = await axios.post('/api/support/deleteQuestion.do', param);
+    console.log('서버 응답:', res.data); // 응답 확인
     if (res.data.result === 'success') {
       alert('삭제되었습니다');
       modalState.$patch({ isOpen: false });
