@@ -44,19 +44,6 @@ const handlerDelete = () => {
   }
 };
 
-// 수정 로직 (추가)
-const handlerUpdate = () => {
-  const formData = new FormData(formRef.value);
-  axios.post('/api/support/updateMtr.do', formData).then((res) => {
-    // update API 경로 확인 필요
-    if (res.data.result === 'success') {
-      alert('수정 되었습니다.');
-      modalState.$patch({ isOpen: false });
-      emit('postSuccess');
-    }
-  });
-};
-
 // 제목 클릭시 모달창 조회
 const searchDetail = () => {
   const param = new URLSearchParams();
