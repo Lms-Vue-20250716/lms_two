@@ -203,10 +203,12 @@ const handleAnswerDelete = async () => {
 };
 
 const closeModal = () => {
-  modalState.$patch({ isOpen: false });
+  modalState.$patch({ isOpen: false, type: '' });
+  emit('unMountedModal', 0);
 };
 
 onMounted(() => {
+  modalState.$patch({ isOpen: true, type: 'qna' });
   fetchLectureList();
   if (!isNew.value) fetchDetail();
 });

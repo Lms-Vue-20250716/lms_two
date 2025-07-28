@@ -14,7 +14,7 @@ const isDeleting = ref(false); // 삭제/취소 상태 관리
 
 // 모달 닫기 함수
 const closeModal = () => {
-  modalState.$patch({ isOpen: false });
+  modalState.$patch({ isOpen: false, type: '' });
   emit('unMountedModal', 0);
 };
 
@@ -56,6 +56,7 @@ const searchDetail = () => {
 };
 
 onMounted(() => {
+  modalState.$patch({ isOpen: true, type: 'material' });
   id && searchDetail();
 });
 
@@ -95,7 +96,7 @@ watch(isDeleting, (newVal) => {
           <button v-if="id" type="button" @click="handlerDelete">
             {{ isDeleting ? '취소' : '삭제' }}
           </button>
-          <button type="button" @click="closeModal">닫기</button>
+          <button type="button" @click="closeModal">취소</button>
         </div>
       </form>
     </div>
