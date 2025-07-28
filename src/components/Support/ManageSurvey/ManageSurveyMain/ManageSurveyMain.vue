@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import axios from 'axios';
-import PageNavigation from '@/components/common/PageNavigation.vue'; // ✅ 추가
+import PageNavigation from '@/components/common/PageNavigation.vue';
 import ManageSurveyModal from '../ManageSurveyModal/ManageSurveyModal.vue';
 
 const selectedTab = ref('');
@@ -50,16 +50,24 @@ const fetchData = async () => {
       totalItems.value = res.data.resultCnt || dataList.value.length;
     } else {
       const res = await axios.get('/api/support/getResultList.do', { params });
+
+      console.log('API 응답값:', res.data.fixedRes);
+
       const fixedRes = res.data.fixedRes || [];
 
-      dataList.value = fixedRes.map((item) => ({
-        ...item,
-        rate:
-          Number(item.coursesStudentCount) > 0
-            ? Math.round((item.respondentCount / item.coursesStudentCount) * 100)
-            : 0,
-        avgScore: getScoreText(item.avgScore),
-      }));
+      dataList.value = fixedRes.map((item, index) => {
+        const respondent = Number(item.respondentCount);
+        const total = Number(item.coursesStudentCount);
+        const rate = total > 0 ? Math.round((respondent / total) * 100) : 0;
+
+        console.log(`${index + 1} ▶ 응답자: ${respondent}, 수강생: ${total}, 완료율: ${rate}%`);
+
+        return {
+          ...item,
+          rate,
+          avgScore: getScoreText(item.avgScore),
+        };
+      });
       totalItems.value = res.data.resultCnt || dataList.value.length;
     }
   } catch (error) {
@@ -109,7 +117,7 @@ const openDetailModal = (item) => {
             <th v-if="selectedTab === 'result'">평균</th>
             <th v-if="selectedTab === 'result'">응답인원</th>
             <th v-if="selectedTab === 'result'">완료율(%)</th>
-            <th v-if="selectedTab === 'completed'">관리</th>
+            <th v-if="selectedTab === 'completed'">상세보기</th>
           </tr>
         </thead>
         <tbody>
@@ -128,18 +136,20 @@ const openDetailModal = (item) => {
             <td v-if="selectedTab === 'result'">{{ item.avgScore }}</td>
             <td v-if="selectedTab === 'result'">{{ item.respondentCount }}</td>
             <td v-if="selectedTab === 'result'">
-              {{ item.rate }}%
-              <div v-if="Number(item.rate) > 0" class="progress-bar-container">
-                <div class="progress-bar" :style="{ width: Number(item.rate) + '%' }"></div>
+              <div class="flex flex-col items-start">
+                <span>{{ item.rate }}%</span>
+                <div v-if="Number(item.rate) > 0" class="progress-bar-container">
+                  <div class="progress-bar" :style="{ width: item.rate + '%' }"></div>
+                </div>
               </div>
             </td>
             <td v-if="selectedTab === 'completed'">
               <button
                 v-if="selectedTab === 'completed'"
-                @click="openDetailModal(item)"
                 class="btn-detail"
+                @click="openDetailModal(item)"
               >
-                상세보기
+                보기
               </button>
             </td>
           </tr>
@@ -151,9 +161,8 @@ const openDetailModal = (item) => {
         :items-per-page="pageSize"
         :on-page-change="handlePageChange"
       />
-      <<<<<<< HEAD =======
 
-      <div class="pagination" v-if="totalItems > pageSize">
+      <!-- <div class="pagination" v-if="totalItems > pageSize">
         <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1">이전</button>
 
         <button
@@ -168,8 +177,7 @@ const openDetailModal = (item) => {
         <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages">
           다음
         </button>
-      </div>
-      ======= >>>>>>> 9d3e9fe (fix: survey 페이지내이션 수정)
+      </div> -->
 
       <ManageSurveyModal
         v-if="isModalOpen"
@@ -226,12 +234,12 @@ const openDetailModal = (item) => {
 }
 
 .progress-bar-container {
-  border: 1px solid red; /* 디버깅용 */
   width: 100%;
   height: 10px;
-  background-color: #f0f0f0;
+  background-color: #e0e0e0;
   border-radius: 5px;
   overflow: hidden;
+  margin-top: 4px;
 }
 
 .progress-bar {
