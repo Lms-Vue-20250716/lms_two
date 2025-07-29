@@ -68,23 +68,25 @@ onMounted(fetchLectureList);
       <div class="survey-header">
         <h1>설문조사</h1>
       </div>
-      <div id="question-box" v-if="!showSurvey" class="question-box" style="margin-bottom: 30px">
-        <h2>먼저 강의를 선택해주세요.</h2>
+      <div class="survey-content">
+        <div id="question-box" v-if="!showSurvey" class="question-box" style="margin-bottom: 30px">
+          <h2>먼저 강의를 선택해주세요.</h2>
+        </div>
       </div>
-    </div>
 
-    <!-- 이전/다음 버튼 -->
-    <div class="mt-4 flex justify-between">
-      <button class="rounded bg-gray-200 px-4 py-2" @click="goPrev" :disabled="currentPage === 0">
-        이전
-      </button>
-      <button
-        class="rounded bg-blue-500 px-4 py-2 text-white"
-        :disabled="currentPage === surveyData.length - 1"
-        @click="goNext"
-      >
-        다음
-      </button>
+      <!-- 이전/다음 버튼 -->
+      <div class="mt-4 flex justify-between">
+        <button class="rounded bg-gray-200 px-4 py-2" @click="goPrev" :disabled="currentPage === 0">
+          이전
+        </button>
+        <button
+          class="rounded bg-blue-500 px-4 py-2 text-white"
+          :disabled="currentPage === surveyData.length - 1"
+          @click="goNext"
+        >
+          다음
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -107,5 +109,11 @@ onMounted(fetchLectureList);
   margin-bottom: 25px;
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+.survey-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 </style>
