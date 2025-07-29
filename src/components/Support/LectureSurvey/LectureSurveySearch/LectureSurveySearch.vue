@@ -38,7 +38,7 @@ onMounted(fetchLectureList);
 </script>
 
 <template>
-  <div style="margin-top: 15px">
+  <div class="lecture-search-wrapper" style="margin-top: 15px">
     <table class="row">
       <tbody>
         <tr>
@@ -124,5 +124,11 @@ onMounted(fetchLectureList);
 }
 .row td {
   padding: 5px;
+}
+
+.lecture-search-wrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
 }
 </style>
