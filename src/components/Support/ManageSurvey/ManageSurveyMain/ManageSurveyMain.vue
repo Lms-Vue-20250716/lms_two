@@ -57,7 +57,8 @@ const fetchData = async () => {
 
       dataList.value = fixedRes.map((item, index) => {
         const respondent = Number(item.respondentCount);
-        const total = Number(item.coursesStudentCount);
+        const total = Number(item.coursesStudentCount) || 20;
+
         const rate = total > 0 ? Math.round((respondent / total) * 100) : 0;
 
         console.log(`${index + 1} ▶ 응답자: ${respondent}, 수강생: ${total}, 완료율: ${rate}%`);
@@ -136,12 +137,13 @@ const openDetailModal = (item) => {
             <td v-if="selectedTab === 'result'">{{ item.avgScore }}</td>
             <td v-if="selectedTab === 'result'">{{ item.respondentCount }}</td>
             <td v-if="selectedTab === 'result'">
-              <div class="flex flex-col items-start">
-                <span>{{ item.rate }}%</span>
-                <div v-if="Number(item.rate) > 0" class="progress-bar-container">
-                  <div class="progress-bar" :style="{ width: item.rate + '%' }"></div>
-                </div>
+              <div class="progress-wrapper">
+                <div class="progress-bar" :style="{ width: item.rate + '%' }"></div>
               </div>
+              <span style="margin-left: 6px">{{ item.rate }}%</span>
+              <!-- <div class="progress-bar-container" v-if="Number(item.rate) > 0">
+                <div class="progress-bar" :style="{ width: item.rate + '%' }"></div>
+              </div> -->
             </td>
             <td v-if="selectedTab === 'completed'">
               <button
@@ -231,6 +233,15 @@ const openDetailModal = (item) => {
 
 .view-selector:invalid {
   color: #666;
+}
+
+.progress-wrapper {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background: #eee;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .progress-bar-container {
