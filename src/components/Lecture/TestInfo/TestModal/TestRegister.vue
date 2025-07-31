@@ -55,6 +55,7 @@ const registerTest = async () => {
 
     const startHour = from.getHours();
     const endHour = to.getHours();
+    const today = new Date();
 
     // 시작 시간이 오전 6시 이전인지 확인
     if (startHour < 6) {
@@ -66,6 +67,11 @@ const registerTest = async () => {
     // (만약 종료일이 시작일과 다른 날짜일 경우, 종료 시간도 제한하는 것이 맞습니다.)
     if (endHour < 6) {
       alert('시험 종료 시간은 오전 6시 이후로 설정해야 합니다.');
+      return;
+    }
+
+    if (to < today) {
+      alert('시험 종료일은 과거일 수 없습니다.');
       return;
     }
 

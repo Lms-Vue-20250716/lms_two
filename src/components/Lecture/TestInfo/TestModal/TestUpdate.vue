@@ -25,8 +25,42 @@ const lecId = ref(''); //선택된 강의의 ID를 저장할 ref
 const lecName = ref(''); //선택된 강의의 ID를 저장할 ref
 const lecInstructorName = ref('');
 const lecRoomName = ref('');
-const lecStartDate = ref('');
-const lecEndDate = ref('');
+// 1. 날짜 데이터 저장을 위한 내부 ref
+// 이 ref들이 실제 데이터 소스 역할을 합니다.
+const _lecStartDate = ref('');
+const _lecEndDate = ref('');
+
+// 날짜 입력 실패시 강제 재랜더링을 위한 키값
+const startDateKey = ref(0);
+const endDateKey = ref(0);
+
+const lecStartDate = computed({
+  get() {
+    return _lecStartDate.value;
+  },
+  set(newValue) {
+    if (_lecEndDate.value && new Date(newValue) > new Date(_lecEndDate.value)) {
+      alert('시작일은 종료일 보다 늦을 수 없습니다.');
+      startDateKey.value++;
+      return;
+    }
+    _lecStartDate.value = newValue;
+  },
+});
+
+const lecEndDate = computed({
+  get() {
+    return _lecEndDate.value;
+  },
+  set(newValue) {
+    if (_lecStartDate.value && new Date(newValue) < new Date(_lecStartDate.value)) {
+      alert('시작일은 종료일 보다 늦을 수 없습니다.');
+      endDateKey.value++;
+      return;
+    }
+    _lecEndDate.value = newValue;
+  },
+});
 
 //testInfoUpdate.do
 const updateTest = async () => {
@@ -36,6 +70,7 @@ const updateTest = async () => {
       alert('id가 선택되지 않았습니다!');
       return;
     }
+    // 중복 validaction check이긴 하지만, 만일의 상황을 위해 다시 한번 검증한다.
     if (lecStartDate.value && lecEndDate.value) {
       const from = new Date(lecStartDate);
       const to = new Date(lecEndDate);
@@ -81,8 +116,8 @@ watch(
 
       // 2. 날짜 형식을 <input type="datetime-local">에 맞게 변환
       // 예: "2025-07-21 12:30:00" -> "2025-07-21T12:30"
-      lecStartDate.value = newData.testBeginDate.substring(0, 16).replace(' ', 'T');
-      lecEndDate.value = newData.testEndDate.substring(0, 16).replace(' ', 'T');
+      _lecStartDate.value = newData.testBeginDate.substring(0, 16).replace(' ', 'T');
+      _lecEndDate.value = newData.testEndDate.substring(0, 16).replace(' ', 'T');
     }
   },
   {
@@ -142,6 +177,7 @@ watch(
                     v-model="lecStartDate"
                     :readonly="userType !== 'M'"
                     name="start-datetime"
+                    :key="startDateKey"
                   />
                 </td>
                 <td class="label-cell">
@@ -154,6 +190,7 @@ watch(
                     v-model="lecEndDate"
                     :readonly="userType !== 'M'"
                     name="end-datetime"
+                    :key="endDateKey"
                   />
                 </td>
               </tr>
