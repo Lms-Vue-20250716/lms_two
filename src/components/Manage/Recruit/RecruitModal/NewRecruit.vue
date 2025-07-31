@@ -30,15 +30,15 @@ const save = async () => {
     alert('입사일을 선택해주세요.');
     return;
   }
-
-  // 입사일이 오늘 이후인지 검증
-  const today = new Date();
-  const joinDate = new Date(detail.value.empJoinDate);
-  if (joinDate > today) {
-    alert('입사일은 오늘 날짜 이후로 설정할 수 없습니다.');
-    return;
-  }
-
+  /*
+    // 입사일이 오늘 이후인지 검증
+    const today = new Date();
+    const joinDate = new Date(detail.value.empJoinDate);
+    if (joinDate > today) {
+      alert('입사일은 오늘 날짜 이후로 설정할 수 없습니다.');
+      return;
+    }
+   */
   const formatDate = (timestamp) => {
     const date = new Date(timestamp);
     const year = date.getFullYear();
