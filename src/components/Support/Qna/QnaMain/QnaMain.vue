@@ -16,6 +16,18 @@ const modalState = useModalState();
 const detailId = ref(0);
 const modalMode = ref('create');
 
+const formatDateTime = (rawDate) => {
+  if (!rawDate) return '-';
+  const date = new Date(rawDate);
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  const hh = String(date.getHours()).padStart(2, '0');
+  const mi = String(date.getMinutes()).padStart(2, '0');
+  const ss = String(date.getSeconds()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
+};
+
 const qnaSearch = (cPage = 1) => {
   const param = new URLSearchParams(route.query);
   param.append('currentPage', cPage);
@@ -23,6 +35,7 @@ const qnaSearch = (cPage = 1) => {
 
   axios.post('/api/support/getQnaListBody.do', param).then((res) => {
     qnaList.value = res.data.list;
+    console.log('qnaList:', qnaList.value);
     qnaCount.value = res.data.count;
   });
 };
@@ -74,8 +87,8 @@ watch(
             <td class="qna-cell cursor-pointer hover:underline" @click="openDetailModal(qna.qnaId)">
               {{ qna.qnaTitle }}
             </td>
-            <td class="qna-cell">{{ qna.qnaAnswerDate }}</td>
-            <td class="qna-cell">{{ qna.qnaAnswerWriter }}</td>
+            <td class="qna-cell">{{ qna.qnaRegDate ? formatDateTime(qna.qnaRegDate) : '-' }}</td>
+            <td class="qna-cell">{{ qna.loginId || '-' }}</td>
           </tr>
         </template>
         <template v-else>
