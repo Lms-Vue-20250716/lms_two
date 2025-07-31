@@ -103,13 +103,14 @@ onMounted(() => {
             <td class="equipment-cell">{{ equip.equipQuantity }}</td>
             <td class="equipment-cell">{{ formatDate(equip.equipPurchaseDate) }}</td>
             <td>
-              <span v-if="equip.remainPeroid >= 0">{{ equip.remainPeroid }}일</span>
+              <span v-if="equip.remainPeroid > 0"> {{ equip.remainPeroid }}일 </span>
               <span
-                v-else
+                v-else-if="equip.remainPeroid < 0"
                 class="equipment-cell cursor-pointer !font-bold !text-red-600 underline"
                 @click="deleteEquip(equip.equipId)"
-                >장비 삭제</span
               >
+                장비 삭제
+              </span>
             </td>
           </tr>
         </template>
