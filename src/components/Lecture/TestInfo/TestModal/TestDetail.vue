@@ -435,15 +435,22 @@ watch(
                         type="number"
                         v-model.number="totalQuestionQuantity"
                         :readonly="testQuestionInfoDetail.length > 0"
+                        min="0"
                       />
                     </td>
                     <td class="label-cell"><label for="total-score">총 만점</label></td>
-                    <td><input type="number" v-model.number="totalPoints" /></td>
+                    <td><input type="number" v-model.number="totalPoints" min="0" /></td>
                   </tr>
                   <tr>
                     <td class="label-cell"><label for="points">배점</label></td>
                     <td>
-                      <input v-model.number="newPoints" type="number" id="points" placeholder="" />
+                      <input
+                        v-model.number="newPoints"
+                        type="number"
+                        id="points"
+                        placeholder=""
+                        min="0"
+                      />
                     </td>
                     <td class="label-cell"><label for="correct-answer">정답 보기</label></td>
                     <td>
@@ -545,6 +552,7 @@ watch(
                             :id="'edit-points-' + index"
                             v-model.number="question.points"
                             :readonly="userType === 'T'"
+                            min="0"
                           />
 
                           <div v-for="(option, optIndex) in question.options" :key="optIndex">
