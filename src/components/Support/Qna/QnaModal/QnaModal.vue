@@ -157,8 +157,8 @@ const handleQuestionDelete = async () => {
   if (!confirm('정말 삭제하시겠습니까?')) return;
 
   const param = new URLSearchParams();
-  param.append('qnaId', props.detailId);
-  console.log('삭제할 qnaId:', props.detailId);
+  param.append('questionId', props.detailId);
+  console.log('삭제할 questionId:', props.detailId);
 
   try {
     const res = await axios.post('/api/support/deleteQuestion.do', param);
