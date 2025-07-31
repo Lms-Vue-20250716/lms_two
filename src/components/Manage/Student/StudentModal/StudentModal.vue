@@ -31,6 +31,14 @@ const searchDetail = async () => {
 
 };
 
+const formatDateForInput = (timestamp) => {
+  const date = new Date(timestamp);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 </script>
 
 <template>
@@ -61,7 +69,8 @@ const searchDetail = async () => {
                 <th class="student-manage-modal-table-th">이메일</th>
                 <td class="student-manage-modal-table-td break-all">{{ detail.studentEmail }}</td>
                 <th class="student-manage-modal-table-th">생일</th>
-                <td class="student-manage-modal-table-td">{{ detail.studentBirthday }}</td>
+                <td class="student-manage-modal-table-td">{{ detail.studentBirthday ?
+                  formatDateForInput(detail.studentBirthday) : '' }}</td>
               </tr>
               <tr>
                 <th class="student-manage-modal-table-th">취업 상태</th>
@@ -93,7 +102,7 @@ const searchDetail = async () => {
                   <td class="student-manage-modal-table-td">{{ lecture.lectureName }}</td>
                   <td class="student-manage-modal-table-td">{{ new
                     Date(lecture.lectureStartDate).toISOString().split('T')[0]
-                    }}</td>
+                  }}</td>
                   <td class="student-manage-modal-table-td">{{ new
                     Date(lecture.lectureEndDate).toISOString().split('T')[0] }}
                   </td>

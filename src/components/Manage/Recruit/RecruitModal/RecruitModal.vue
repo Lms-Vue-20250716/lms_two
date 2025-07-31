@@ -51,16 +51,16 @@ const edit = async () => {
   }
 
   // 날짜 검증
-  const today = new Date();
+  // const today = new Date();
   const joinDate = new Date(detail.value.empJoinDate);
   const retireDate = new Date(detail.value.empRetireDate);
-  
+  /*
   // 입사일이 오늘 이후인지 검증
   if (joinDate > today) {
     alert('입사일은 오늘 날짜 이후로 설정할 수 없습니다.');
     return;
-  }
-  
+  } */
+
   // 날짜 순서 검증
   if (joinDate >= retireDate) {
     alert('퇴사일은 입사일 이후여야 합니다.');
