@@ -1,31 +1,43 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import { ref, onMounted, watch } from 'vue';
 
-const emit = defineEmits(['lectureSelected']);
+const props = defineProps({
+  modelValue: String,
+});
+const emit = defineEmits(['update:modelValue', 'lectureSelected']);
 
 const lectureList = ref([]);
-const selectedLectureId = ref(''); // 선택된 강의 ID
-const selectedLectureName = ref(''); // 선택된 강의 이름
+const selectedLectureId = ref(props.modelValue || '');
+const selectedLectureName = ref('');
 const showDropdown = ref(false);
 
+// 강의 목록 호출
 const fetchLectureList = async () => {
   try {
-    const response = await axios.get('/support/getLectureSurveyList.do');
-    if (response.data && Array.isArray(response.data.lectureList)) {
-      lectureList.value = response.data.lectureList;
+    const res = await fetch('/support/lecture-surveyJson');
+    const data = await res.json();
+    console.log('응답 데이터:', data);
+
+    const lectures = data.lectures || data.lectureList || []; // 백엔드 이름에 따라 달라질 수 있음
+    if (Array.isArray(lectures)) {
+      lectureList.value = lectures;
+
+      const selected = lectures.find((l) => l.lecId === selectedLectureId.value);
+      if (selected) {
+        selectedLectureName.value = selected.lecName;
+      }
     } else {
-      lectureList.value = [];
-      console.warn('lectureList가 비어 있거나 잘못된 형식입니다.', response.data);
+      console.warn('lectures가 배열이 아님:', lectures);
     }
-  } catch (error) {
-    console.error('강의 목록을 불러오는데 실패했습니다.', error);
+  } catch (e) {
+    console.error('강의 목록 불러오기 실패:', e);
   }
 };
 
 const selectLecture = (lecture) => {
   selectedLectureId.value = lecture.lecId;
   selectedLectureName.value = lecture.lecName;
+  emit('update:modelValue', lecture.lecId);
   emit('lectureSelected', lecture.lecId);
   showDropdown.value = false;
 };
@@ -33,6 +45,13 @@ const selectLecture = (lecture) => {
 const toggleDropdown = () => {
   showDropdown.value = !showDropdown.value;
 };
+
+watch(
+  () => props.modelValue,
+  (val) => {
+    selectedLectureId.value = val;
+  },
+);
 
 onMounted(fetchLectureList);
 </script>
@@ -48,8 +67,10 @@ onMounted(fetchLectureList);
               id="lecName"
               v-model="selectedLectureName"
               type="text"
-              name="lecName"
               class="inputTxt p100"
+              placeholder="클릭해서 강의 선택"
+              readonly
+              @click="toggleDropdown"
               style="
                 padding-left: 10px;
                 width: 94%;
@@ -59,11 +80,8 @@ onMounted(fetchLectureList);
                 cursor: pointer;
                 background: #fff;
               "
-              readonly
-              placeholder="클릭해서 강의 선택"
-              @click="toggleDropdown"
             />
-            <input id="lecId" type="hidden" name="lecId" :value="selectedLectureId" />
+            <input id="lecId" type="hidden" :value="selectedLectureId" />
             <div
               v-if="showDropdown"
               id="lecDropdown"
@@ -125,7 +143,6 @@ onMounted(fetchLectureList);
 .row td {
   padding: 5px;
 }
-
 .lecture-search-wrapper {
   max-width: 1000px;
   margin: 0 auto;

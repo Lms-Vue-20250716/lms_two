@@ -1,88 +1,112 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { computed } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import axios from 'axios';
 import LectureSurveySearch from '../LectureSurveySearch/LectureSurveySearch.vue';
-// import LectureSurveyModal from '../LectureSurveyModal/LectureSurveyModal.vue';
 
-const lecOptions = ref([]); // 드롭다운에 쓸 강의 목록
+const lecOptions = ref([]); // 드롭다운 강의 목록
 const selectedLecId = ref(''); // 선택된 강의 ID
-const surveyData = ref([]); // 선택된 강
-const currentPage = ref(0); // 설문 페이지 번호
+const surveyData = ref([]); // 설문 문항 배열
+const currentPage = ref(0); // 현재 설문 문항 인덱스
+const surveyCompleted = ref(false); // 설문 완료 여부
+
 const showSurvey = computed(
-  () => selectedLecId.value && Array.isArray(surveyData.value) && surveyData.value.length > 0,
+  () => selectedLecId.value && !surveyCompleted.value && surveyData.value.length > 0,
 );
 
+// 강의 목록 불러오기
 const fetchLectureList = async () => {
   try {
-    const response = await axios.get('/support/getLectureListForSurvey.do');
-    lecOptions.value = response.data.lectureList.map((item) => ({
-      label: item.lecName,
-      value: item.lecId,
-    }));
-  } catch (error) {
-    console.error('강의 목록 불러오기 실패:', error);
+    const res = await axios.get('/support/lecture-surveyJson');
+    lecOptions.value = res.data.lectures || [];
+  } catch (err) {
+    console.error('강의 목록 불러오기 실패:', err);
   }
 };
 
-const fetchSurveyByLecture = async () => {
-  if (!selectedLecId.value) return;
+// 설문 문항 불러오기
+const fetchSurveyByLecture = async (lecId = selectedLecId.value) => {
+  if (!lecId) {
+    surveyData.value = [];
+    surveyCompleted.value = false;
+    currentPage.value = 0;
+    return;
+  }
+
   try {
-    const response = await axios.get('/support/getSurveyContents.do', {
-      params: { lecId: selectedLecId.value },
+    const res = await axios.get('/support/getSurveyContents.do', {
+      params: { lecId },
     });
-    console.log('설문 응답:', response.data.survey);
-    const questions = response.data;
-    surveyData.value = Array.isArray(questions) ? questions.map((q) => ({ question: q })) : [];
+
+    const data = res.data;
+
+    // 백엔드에서 중복일 경우 빈 배열 반환
+    if (Array.isArray(data) && data.length === 0) {
+      surveyCompleted.value = true;
+      surveyData.value = [];
+    } else {
+      surveyCompleted.value = false;
+      surveyData.value = data.map((q) => ({ question: q }));
+    }
 
     currentPage.value = 0;
-  } catch (error) {
-    console.error('설문 불러오기 실패:', error);
+  } catch (err) {
+    console.error('설문 불러오기 실패:', err);
     surveyData.value = [];
+    surveyCompleted.value = false;
+    currentPage.value = 0;
   }
 };
 
+// 다음/이전 버튼
 const goNext = () => {
-  if (currentPage.value < surveyData.value.length - 1) {
-    currentPage.value++;
-  }
+  if (currentPage.value < surveyData.value.length - 1) currentPage.value++;
 };
 const goPrev = () => {
-  if (currentPage.value > 0) {
-    currentPage.value--;
-  }
+  if (currentPage.value > 0) currentPage.value--;
 };
 
-onMounted(fetchLectureList);
+// 강의 선택 시 자동 호출
+watch(selectedLecId, (newId) => {
+  if (newId) fetchSurveyByLecture(newId);
+});
+
+// 최초 강의 목록 조회
+onMounted(() => {
+  fetchLectureList();
+});
 </script>
 
 <template>
   <div class="rounded bg-white p-4 shadow">
-    <LectureSurveySearch
-      :lecOptions="lecOptions"
-      v-model:selectedLecId="selectedLecId"
-      @lectureSelected="fetchSurveyByLecture"
-    />
+    <LectureSurveySearch v-model="selectedLecId" @lectureSelected="(id) => (selectedLecId = id)" />
 
     <div class="survey-container">
       <div class="survey-header">
         <h1>설문조사</h1>
       </div>
+
       <div class="survey-content">
-        <div id="question-box" v-if="!showSurvey" class="question-box" style="margin-bottom: 30px">
+        <div v-if="!selectedLecId" class="question-box">
           <h2>먼저 강의를 선택해주세요.</h2>
+        </div>
+
+        <div v-else-if="surveyCompleted" class="question-box">
+          <h2>이미 완료된 설문입니다.</h2>
+        </div>
+
+        <div v-else-if="showSurvey" class="question-box">
+          <h2>{{ surveyData[currentPage].question }}</h2>
         </div>
       </div>
 
-      <!-- 이전/다음 버튼 -->
       <div class="mt-4 flex justify-between">
         <button class="rounded bg-gray-200 px-4 py-2" @click="goPrev" :disabled="currentPage === 0">
           이전
         </button>
         <button
           class="rounded bg-blue-500 px-4 py-2 text-white"
-          :disabled="currentPage === surveyData.length - 1"
           @click="goNext"
+          :disabled="currentPage === surveyData.length - 1"
         >
           다음
         </button>
