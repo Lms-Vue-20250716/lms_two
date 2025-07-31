@@ -358,7 +358,15 @@ watch(lecEndDate, (newEnd) => {
     return;
   }
 
-  // 2. 종료일이 시작일보다 빠른지 체크
+  // 2. 강의 종료날짜는 미래여야 한다.
+  const today = new Date();
+  if (new Date(newEnd) < today) {
+    alert('강의 종료 날짜가 과거일 수 없습니다.');
+    lecEndDate.value = null;
+    return;
+  }
+
+  // 3. 종료일이 시작일보다 빠른지 체크
   if (start && newEnd < start) {
     alert('강의 종료일은 시작일보다 빠를 수 없습니다. 날짜를 조정합니다.');
     let nextDay = new Date(start);
@@ -374,7 +382,7 @@ watch(lecEndDate, (newEnd) => {
     return; // 자동 조정 후 함수 종료
   }
 
-  // 3. 최대 강의 기간(200일) 체크 및 자동 조정
+  // 4. 최대 강의 기간(200일) 체크 및 자동 조정
   if (lecDaysCnt.value > 200) {
     alert('강의 기간은 최대 200일까지만 설정할 수 있습니다. 종료일을 조정합니다.');
     let adjustedEnd = new Date(start);
@@ -401,7 +409,7 @@ watch(lecEndDate, (newEnd) => {
     <div class="modal-overlay">
       <form @submit.prevent="handleSave" class="test-register-modal">
         <div class="modal-header">
-          <h2>{{ isEditMode ? '강의 상세' : '시험 등록' }}</h2>
+          <h2>{{ isEditMode ? '강의 상세' : '강의 등록' }}</h2>
           <button class="close-btn" type="button" @click="closeModal()">&times;</button>
         </div>
 
