@@ -357,6 +357,27 @@ const toggleEdit = (index) => {
  * @param {number} index - 수정 완료된 문제의 배열 인덱스
  */
 const updateQuestion = (index) => {
+  const question = addedQuestions.value[index];
+
+  if (!question.content) {
+    alert('문제 내용을 입력해주세요.');
+    return;
+  }
+
+  // question.points가 비어있거나(null, undefined) 0 이하인 경우
+  if (!question.points || question.points <= 0) {
+    alert(`${index + 1}번 문제의 배점을 입력해주세요.`);
+    return; // 함수를 여기서 중단합니다.
+  }
+
+  for (let idx = 0; idx < question.options.length; idx++) {
+    if (!question.options[idx]) {
+      alert(`${idx + 1}번 보기의 내용을 입력해주세요.`);
+      return;
+    }
+  }
+
+  // 유효성 검사를 통과한 경우에만 수정 창을 닫습니다.
   isEditing.value[index] = false;
 };
 
