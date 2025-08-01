@@ -18,7 +18,7 @@ const fetchLectureList = async () => {
     const data = await res.json();
     console.log('응답 데이터:', data);
 
-    const lectures = data.lectures || data.lectureList || []; // 백엔드 이름에 따라 달라질 수 있음
+    const lectures = data.lectures || [];
     if (Array.isArray(lectures)) {
       lectureList.value = lectures;
 
