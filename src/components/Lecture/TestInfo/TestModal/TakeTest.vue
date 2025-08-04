@@ -135,6 +135,7 @@ const fetchTestResultDetails = async () => {
     testResultInfo.value = response.data.testResultInfoValue || {};
 
     console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
+    console.log(response);
     console.log(testResultInfo.value);
 
     const submitted = response.data.testSubmitOptionDetailValue || [];
