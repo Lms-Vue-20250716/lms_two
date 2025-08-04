@@ -8,15 +8,25 @@ const selectedLecId = ref(''); // 선택된 강의 ID
 const surveyData = ref([]); // 설문 문항 배열
 const currentPage = ref(0); // 현재 설문 문항 인덱스
 const surveyCompleted = ref(false); // 설문 완료 여부
+const loginInfo = ref(null);
+const userRole = ref(''); // userRole: 'student' 또는 'admin' 등 역할을 담는 변수
 
 const showSurvey = computed(
   () => selectedLecId.value && !surveyCompleted.value && surveyData.value.length > 0,
 );
 
+const loginData = localStorage.getItem('loginInfo'); // localStorage에서 로그인 정보 가져옴
+if (loginData) {
+  loginInfo.value = JSON.parse(loginData); // 문자열을 객체로 변환
+  userRole.value = loginInfo.value.role || ''; // role 값이 없으면 빈 문자열
+}
+
 // 강의 목록 불러오기
 const fetchLectureList = async () => {
   try {
-    const res = await axios.get('/support/lecture-surveyJson');
+    const res = await axios.get('/api/support/lecture-surveyJson', {
+      params: { loginId: loginInfo.value?.loginId },
+    });
     lecOptions.value = res.data.lectures || [];
   } catch (err) {
     console.error('강의 목록 불러오기 실패:', err);
@@ -33,7 +43,7 @@ const fetchSurveyByLecture = async (lecId = selectedLecId.value) => {
   }
 
   try {
-    const res = await axios.get('/support/getSurveyContents.do', {
+    const res = await axios.get('/api/support/getSurveyContents.do', {
       params: { lecId },
     });
 
@@ -78,9 +88,13 @@ onMounted(() => {
 
 <template>
   <div class="rounded bg-white p-4 shadow">
-    <LectureSurveySearch v-model="selectedLecId" @lectureSelected="(id) => (selectedLecId = id)" />
+    <LectureSurveySearch
+      v-if="userRole === 'student'"
+      v-model="selectedLecId"
+      @lectureSelected="(id) => (selectedLecId = id)"
+    />
 
-    <div class="survey-container">
+    <div v-if="userRole === 'student'" class="survey-container">
       <div class="survey-header">
         <h1>설문조사</h1>
       </div>
