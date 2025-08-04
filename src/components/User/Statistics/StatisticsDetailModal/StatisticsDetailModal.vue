@@ -9,6 +9,9 @@ const { lectureId } = defineProps({
   lectureId: { type: Number, default: 0 },
 });
 
+const startDate = ref('');
+const endDate = ref('');
+
 const modalState = useModalState();
 const searchDetail = ref({});
 const lectureDetail = () => {
@@ -16,6 +19,8 @@ const lectureDetail = () => {
   axios.get(url).then((res) => {
     console.log(res);
     searchDetail.value = res.data;
+    startDate.value = searchDetail.value.lecStartDate.slice(0, 10);
+    endDate.value = searchDetail.value.lecEndDate.slice(0, 10);
   });
 };
 
@@ -70,12 +75,12 @@ onUnmounted(() => {
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">개강 일자</label>
-                <input v-model.lazy="searchDetail.lecStartDate" type="text" class="form-input" />
+                <input v-model.lazy="startDate" type="text" class="form-input" />
               </div>
 
               <div class="form-group">
                 <label class="form-label">종강 일자</label>
-                <input v-model.lazy="searchDetail.lecEndDate" type="text" class="form-input" />
+                <input v-model.lazy="endDate" type="text" class="form-input" />
               </div>
             </div>
 
