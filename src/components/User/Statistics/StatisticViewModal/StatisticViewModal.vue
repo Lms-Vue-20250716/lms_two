@@ -45,8 +45,8 @@ const viewData = () => {
 onBeforeMount(() => {
   if (
     !props.lecName ||
-    !props.lectureStartAround ||
-    !props.lectureEndAround ||
+    props.lectureStartAround === null ||
+    props.lectureEndAround === null ||
     props.lecName === ''
   ) {
     alert('통계를 내고자하는 데이터를 선택해주세요');

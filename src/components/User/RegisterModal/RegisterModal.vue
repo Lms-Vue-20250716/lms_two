@@ -1,6 +1,6 @@
 <script setup>
 import { useModalState } from '@/stores/modalState';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { ElMessage } from 'element-plus';
 import axios from 'axios';
 
@@ -108,6 +108,22 @@ const checkEmail = () => {
       }
     });
 };
+const todayDate = new Date();
+const maxRegDate = new Date(
+  todayDate.getFullYear() - 20,
+  todayDate.getMonth() + 1,
+  todayDate.getDate(),
+)
+  .toISOString()
+  .split('T')[0];
+const today = new Date().toISOString().split('T')[0].slice(0, 4);
+const birthValidation = () => {
+  if (form.value.birthday.slice(0, 4) > today - 20) {
+    ElMessage.error('저희 사이트는 20살 부터 가입 가능합니다.');
+    form.value.birthday = '';
+  }
+  return;
+};
 
 const validateForm = () => {
   const name = form.value.name.trim();
@@ -137,18 +153,19 @@ const validateForm = () => {
     return false;
   }
 
-  if (form.value.userType === 'T') {
-    if (!insAccount) {
-      ElMessage.error('계좌번호를 입력해주세요.');
-      accInput.value.focus();
-      return false;
+  if (form.value.birthday)
+    if (form.value.userType === 'T') {
+      if (!insAccount) {
+        ElMessage.error('계좌번호를 입력해주세요.');
+        accInput.value.focus();
+        return false;
+      }
+      if (!form.value.insBank) {
+        ElMessage.error('은행명을 선택해주세요.');
+        bnkSelect.value.focus();
+        return false;
+      }
     }
-    if (!form.value.insBank) {
-      ElMessage.error('은행명을 선택해주세요.');
-      bnkSelect.value.focus();
-      return false;
-    }
-  }
 
   if (!isCheckedId.value) {
     ElMessage.error('아이디 중복확인을 진행해주세요');
@@ -173,6 +190,13 @@ const validateForm = () => {
 
   return true;
 };
+
+watch(
+  () => form.value.birthday,
+  () => {
+    birthValidation();
+  },
+);
 
 const completeRegister = () => {
   if (!validateForm()) {
@@ -297,6 +321,7 @@ const completeRegister = () => {
                 v-model="form.birthday"
                 type="date"
                 class="form-input"
+                :max="maxRegDate"
               />
             </div>
 
