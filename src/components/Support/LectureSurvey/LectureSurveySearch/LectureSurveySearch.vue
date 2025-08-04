@@ -14,7 +14,7 @@ const showDropdown = ref(false);
 // 강의 목록 호출
 const fetchLectureList = async () => {
   try {
-    const res = await fetch('/support/lecture-surveyJson');
+    const res = await fetch('/api/support/lecture-surveyJson');
     const data = await res.json();
     console.log('응답 데이터:', data);
 
