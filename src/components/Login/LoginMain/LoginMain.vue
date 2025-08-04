@@ -8,6 +8,7 @@ import { useModalState } from '@/stores/modalState';
 import RegisterModal from '@/components/User/RegisterModal/RegisterModal.vue';
 import UserFindInfo from '@/components/User/UserFindInfo/UserFindInfo.vue';
 import ChangePwdModal from '@/components/User/ChangePwdModal/ChangePwdModal.vue';
+import { ElMessage } from 'element-plus';
 
 const loginInfo = ref({});
 const { setUserData } = useUserInfo();
@@ -18,7 +19,7 @@ const userEmail = ref('');
 
 const handlerLogin = () => {
   if (!loginInfo.value.lgn_Id || !loginInfo.value.pwd) {
-    alert('아이디와 비밀번호를 입력해주세요....');
+    ElMessage.error('아이디와 비밀번호를 입력해주세요....');
     return;
   }
   const param = new URLSearchParams(loginInfo.value);
@@ -30,7 +31,7 @@ const handlerLogin = () => {
       setUserData(data);
       router.push('/vue');
     } else {
-      alert('아이디 혹은 비밀번호가 일치하지 않아요');
+      ElMessage.error('아이디 혹은 비밀번호가 일치하지 않아요');
       return;
     }
   });
@@ -65,11 +66,11 @@ const changePwdModalOn = (data) => {
       <div class="buttons inputs">
         <div>
           <label> 아이디 </label>
-          <input v-model="loginInfo.lgn_Id" required />
+          <input v-model="loginInfo.lgn_Id" required @keyup.enter="handlerLogin" />
         </div>
         <div>
           <label> 비밀번호 </label>
-          <input v-model="loginInfo.pwd" required type="password" />
+          <input v-model="loginInfo.pwd" required type="password" @keyup.enter="handlerLogin" />
         </div>
         <div>
           <button class="login-button" @click="handlerLogin">Login</button>

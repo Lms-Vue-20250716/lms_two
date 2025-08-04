@@ -238,7 +238,9 @@ onMounted(() => {
                     <td>{{ student.studentsNumber }}</td>
                     <td>{{ student.hp }}</td>
                     <td>{{ student.email }}</td>
-                    <td @click="downloadFile(student)">{{ student.fileName }}</td>
+                    <td style="cursor: pointer" @click="downloadFile(student)">
+                      {{ student.fileName }}
+                    </td>
                     <td>
                       <input
                         :id="`fileInput-${student.studentId}`"
