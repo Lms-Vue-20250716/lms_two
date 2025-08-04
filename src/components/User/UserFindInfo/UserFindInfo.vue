@@ -23,14 +23,21 @@ const SendEmailForId = () => {
   }
   const urlParam = new URLSearchParams();
   urlParam.append('email', emailForId.value);
-  axios.post('/api/selectFindInfoId.do', urlParam).then((res) => {
-    if (res.data.result === 'FALSE') {
-      ElMessage.error('존재하지 않는 이메일입니다.');
-    } else if (res.data.result === 'SUCCESS') {
-      loginId.value = res.data.loginId;
-      ElMessage.success(`찾으시고자 하는 ID는 ${loginId.value}입니다.`);
-    }
-  });
+  axios
+    .post('/api/selectFindInfoId.do', urlParam)
+    .then((res) => {
+      console.log(res);
+      if (res.data.result === 'FALSE') {
+        ElMessage.error('존재하지 않는 이메일입니다.');
+      } else if (res.data.result === 'SUCCESS') {
+        loginId.value = res.data.loginId;
+        ElMessage.success(`찾으시고자 하는 ID는 ${loginId.value}입니다.`);
+      }
+    })
+    .catch((err) => {
+      ElMessage.error(`입력하신 이메일 ${emailForId.value}에 맞는 ID가 없습니다.`);
+      console.log('서버 오류 발생 err : ', err);
+    });
 };
 
 const SendEmailForPwd = () => {
