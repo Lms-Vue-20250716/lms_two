@@ -93,6 +93,16 @@ const goPrev = () => {
 };
 
 const handleSubmit = async () => {
+  if (!selectedLecId.value) {
+    alert('강의가 선택되지 않았습니다.');
+    return;
+  }
+
+  if (!surveyData.value.length) {
+    alert('설문 데이터가 아직 로딩되지 않았습니다. 잠시 후 다시 시도해주세요.');
+    return;
+  }
+
   const unanswered = surveyData.value.some((q) => !q.answer);
   if (unanswered) {
     alert('모든 질문에 답해주세요.');
@@ -100,17 +110,30 @@ const handleSubmit = async () => {
   }
 
   try {
-    const answers = surveyData.value.map((item) => ({
-      lecId: selectedLecId.value,
-      loginId: loginInfo.value?.loginId,
-      surveyContent: item.question,
-      surveyResult: item.options.indexOf(item.answer) + 1, // 점수로 저장
-    }));
+    for (const item of surveyData.value) {
+      const surveyResult = item.options.includes(item.answer)
+        ? item.options.indexOf(item.answer) + 1
+        : null;
 
-    await axios.post('/api/support/saveResult.do', answers);
+      if (surveyResult === null) {
+        alert(`문항 "${item.question}"에 유효하지 않은 답변이 있습니다.`);
+        return;
+      }
+
+      const payload = {
+        lecId: selectedLecId.value,
+        surveyId: item.surveyId,
+        loginId: loginInfo.value?.loginId,
+        surveyResult: surveyResult,
+      };
+
+      console.log('전송할 payload:', payload);
+
+      await axios.post('/api/support/saveResult.do', payload);
+    }
 
     alert('설문이 제출되었습니다.');
-    router.push('/support/manage-survey'); // 페이지 이동
+    router.push('/api/support/manage-survey');
   } catch (error) {
     console.error('제출 중 에러 발생:', error);
     alert('제출 중 오류가 발생했습니다.');
