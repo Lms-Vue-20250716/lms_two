@@ -30,10 +30,10 @@ const fetchSurveyByLecture = async (lecId = selectedLecId.value) => {
       surveyData.value = [];
     } else {
       surveyCompleted.value = false;
-
-      surveyData.value = data.map((item, idx) => ({
-        surveyId: item.surveyId ?? idx + 1, // surveyId 없으면 임시 번호
-        question: item.question || item, // 문자열만 온 경우 처리
+      surveyData.value = data.map((q, idx) => ({
+        surveyId: idx + 1,
+        question: typeof q === 'string' ? q : q.question,
+        answer: '',
         options: ['매우 나쁨', '나쁨', '보통', '좋음', '매우 좋음'],
         answer: '', // 사용자가 고를 값
       }));
@@ -46,33 +46,29 @@ const fetchSurveyByLecture = async (lecId = selectedLecId.value) => {
 // 설문 제출
 const handleSubmit = async () => {
   try {
-    for (const item of surveyData.value) {
-      const surveyResult = item.options.includes(item.answer)
-        ? item.options.indexOf(item.answer) + 1
-        : null;
+    const responses = surveyData.value;
 
-      if (surveyResult === null) {
-        alert(`문항 "${item.question}"에 유효하지 않은 답변이 있습니다.`);
-        return;
-      }
+    for (const item of responses) {
+      const payload = new URLSearchParams();
+      payload.append('lecId', selectedLecId.value);
+      payload.append('surveyId', item.id); // 설문 문항 번호
+      payload.append('surveyResult', item.answer); // 선택된 답변 값
 
-      const payload = {
-        lecId: selectedLecId.value,
-        surveyId: item.surveyId,
-        loginId: loginInfo.value?.loginId,
-        surveyResult: surveyResult,
-      };
+      console.log('전송할 payload:', payload.toString());
 
-      console.log('전송할 payload:', payload);
+      const res = await axios.post('/api/support/saveResult.do', payload, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
 
-      await axios.post('/api/support/saveResult.do', payload);
+      console.log('서버 응답:', res.data);
     }
 
-    alert('설문이 제출되었습니다.');
-    router.push('/api/support/manage-survey');
+    alert('설문이 성공적으로 제출되었습니다.');
   } catch (error) {
     console.error('제출 중 에러 발생:', error);
-    alert('제출 중 오류가 발생했습니다.');
+    alert('설문 제출 중 오류가 발생했습니다.');
   }
 };
 
