@@ -77,7 +77,7 @@ const handleSubmit = async () => {
         lecId: selectedLecId.value,
         surveyId: item.surveyId,
         loginId: loginInfo.value?.loginId,
-        surveyResult: surveyResult,
+        surveyResult,
       };
 
       const urlParam = new URLSearchParams(payload);
@@ -87,8 +87,7 @@ const handleSubmit = async () => {
       await axios.post('/api/support/saveResult.do', urlParam);
     }
 
-    alert('설문이 제출되었습니다.');
-    router.push('/api/support/manage-survey');
+    alert('설문이 성공적으로 제출되었습니다.');
   } catch (error) {
     console.error('제출 중 에러 발생:', error);
     alert('제출 중 오류가 발생했습니다.');
@@ -110,22 +109,66 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="surveyCompleted">
-    <p>이미 설문을 완료하셨습니다.</p>
-  </div>
+  <div class="rounded bg-white p-4 shadow">
+    <LectureSurveySearch
+      v-if="userRole === 'student'"
+      v-model="selectedLecId"
+      @lectureSelected="(id) => (selectedLecId = id)"
+    />
 
-  <div v-else>
-    <div v-for="(item, index) in surveyData" :key="index" class="survey-question">
-      <p>{{ item.question }}</p>
-      <div v-for="(option, idx) in item.options" :key="idx">
-        <label>
-          <input type="radio" :value="option" v-model="item.answer" />
-          {{ option }}
-        </label>
+    <div v-if="userRole === 'student'" class="survey-container">
+      <div class="survey-header">
+        <h1>설문조사</h1>
+      </div>
+
+      <div class="survey-content">
+        <div v-if="!selectedLecId" class="question-box">
+          <h2>먼저 강의를 선택해주세요.</h2>
+        </div>
+
+        <div v-else-if="surveyCompleted" class="question-box">
+          <h2>이미 완료된 설문입니다.</h2>
+        </div>
+
+        <div v-else-if="showSurvey" class="question-box">
+          <h2>Q{{ surveyData[currentPage].id }}. {{ surveyData[currentPage].question }}</h2>
+
+          <div class="options mt-4">
+            <label
+              v-for="option in surveyData[currentPage].options"
+              :key="option"
+              class="option-label"
+            >
+              <input
+                type="radio"
+                :name="'q' + surveyData[currentPage].id"
+                :value="option"
+                v-model="surveyData[currentPage].answer"
+              />
+              {{ option }}
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 flex justify-between">
+        <button class="rounded bg-gray-200 px-4 py-2" @click="goPrev" :disabled="currentPage === 0">
+          이전
+        </button>
+
+        <button
+          v-if="currentPage < surveyData.length - 1"
+          class="rounded bg-blue-500 px-4 py-2 text-white"
+          @click="goNext"
+        >
+          다음
+        </button>
+
+        <button v-else class="rounded bg-green-500 px-4 py-2 text-white" @click="handleSubmit">
+          완료
+        </button>
       </div>
     </div>
-
-    <button @click="handleSubmit">제출</button>
   </div>
 </template>
 
