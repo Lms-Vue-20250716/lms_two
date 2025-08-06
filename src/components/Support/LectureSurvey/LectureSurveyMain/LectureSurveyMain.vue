@@ -112,15 +112,13 @@ const handleSubmit = async () => {
   console.log('surveyData:', surveyData.value);
 
   try {
-    for (const item of surveyData.value) {
-      const surveyResult = item.options.includes(item.answer)
-        ? item.options.indexOf(item.answer) + 1
-        : null;
+    const responses = surveyData.value;
 
-      if (surveyResult === null) {
-        alert(`문항 "${item.question}"에 유효하지 않은 답변이 있습니다.`);
-        return;
-      }
+    for (const item of responses) {
+      const payload = new URLSearchParams();
+      payload.append('lecId', selectedLecId.value);
+      payload.append('surveyId', item.id); // 설문 문항 번호
+      payload.append('surveyResult', item.answer); // 선택된 답변 값
 
       const payload = {
         lecId: selectedLecId.value,
@@ -136,11 +134,10 @@ const handleSubmit = async () => {
       await axios.post('/api/support/saveResult.do', urlParam);
     }
 
-    alert('설문이 제출되었습니다.');
-    router.push('/api/support/manage-survey');
+    alert('설문이 성공적으로 제출되었습니다.');
   } catch (error) {
     console.error('제출 중 에러 발생:', error);
-    alert('제출 중 오류가 발생했습니다.');
+    alert('설문 제출 중 오류가 발생했습니다.');
   }
 };
 
