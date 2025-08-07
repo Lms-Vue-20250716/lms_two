@@ -45,6 +45,27 @@ const fetchSurveyByLecture = async (lecId = selectedLecId.value) => {
 
 // 설문 제출
 const handleSubmit = async () => {
+<<<<<<< HEAD
+=======
+  if (!selectedLecId.value) {
+    alert('강의가 선택되지 않았습니다.');
+    return;
+  }
+
+  if (!surveyData.value.length) {
+    alert('설문 데이터가 아직 로딩되지 않았습니다. 잠시 후 다시 시도해주세요.');
+    return;
+  }
+
+  const unanswered = surveyData.value.some((q) => !q.answer);
+  if (unanswered) {
+    alert('모든 질문에 답해주세요.');
+    return;
+  }
+
+  console.log('surveyData:', surveyData.value);
+
+>>>>>>> db6e296 (feat: 설문조사페이지 제출 성공)
   try {
     const responses = surveyData.value;
 
@@ -54,7 +75,16 @@ const handleSubmit = async () => {
       payload.append('surveyId', item.id); // 설문 문항 번호
       payload.append('surveyResult', item.answer); // 선택된 답변 값
 
+<<<<<<< HEAD
       console.log('전송할 payload:', payload.toString());
+=======
+      const payload = {
+        lecId: selectedLecId.value,
+        surveyId: item.surveyId,
+        loginId: loginInfo.value?.loginId,
+        surveyResult,
+      };
+>>>>>>> db6e296 (feat: 설문조사페이지 제출 성공)
 
 <<<<<<< HEAD
       const res = await axios.post('/api/support/saveResult.do', payload, {
@@ -76,7 +106,7 @@ const handleSubmit = async () => {
     alert('설문이 성공적으로 제출되었습니다.');
   } catch (error) {
     console.error('제출 중 에러 발생:', error);
-    alert('설문 제출 중 오류가 발생했습니다.');
+    alert('제출 중 오류가 발생했습니다.');
   }
 };
 
