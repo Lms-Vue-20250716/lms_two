@@ -56,6 +56,7 @@ const handleSubmit = async () => {
 
       console.log('전송할 payload:', payload.toString());
 
+<<<<<<< HEAD
       const res = await axios.post('/api/support/saveResult.do', payload, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -63,6 +64,13 @@ const handleSubmit = async () => {
       });
 
       console.log('서버 응답:', res.data);
+=======
+      const urlParam = new URLSearchParams(payload);
+
+      console.log('전송할 payload:', payload);
+
+      await axios.post('/api/support/saveResult.do', urlParam);
+>>>>>>> c9a48a9 (feat: 설문조사페이지 제출 성공)
     }
 
     alert('설문이 성공적으로 제출되었습니다.');
