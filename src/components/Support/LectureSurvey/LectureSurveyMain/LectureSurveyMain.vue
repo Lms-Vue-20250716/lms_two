@@ -45,8 +45,6 @@ const fetchSurveyByLecture = async (lecId = selectedLecId.value) => {
 
 // 설문 제출
 const handleSubmit = async () => {
-<<<<<<< HEAD
-=======
   if (!selectedLecId.value) {
     alert('강의가 선택되지 않았습니다.');
     return;
@@ -65,42 +63,29 @@ const handleSubmit = async () => {
 
   console.log('surveyData:', surveyData.value);
 
->>>>>>> db6e296 (feat: 설문조사페이지 제출 성공)
   try {
-    const responses = surveyData.value;
+    for (const item of surveyData.value) {
+      const surveyResult = item.options.includes(item.answer)
+        ? item.options.indexOf(item.answer) + 1
+        : null;
 
-    for (const item of responses) {
-      const payload = new URLSearchParams();
-      payload.append('lecId', selectedLecId.value);
-      payload.append('surveyId', item.id); // 설문 문항 번호
-      payload.append('surveyResult', item.answer); // 선택된 답변 값
+      if (surveyResult === null) {
+        alert(`문항 "${item.question}"에 유효하지 않은 답변이 있습니다.`);
+        return;
+      }
 
-<<<<<<< HEAD
-      console.log('전송할 payload:', payload.toString());
-=======
       const payload = {
         lecId: selectedLecId.value,
         surveyId: item.surveyId,
         loginId: loginInfo.value?.loginId,
         surveyResult,
       };
->>>>>>> db6e296 (feat: 설문조사페이지 제출 성공)
 
-<<<<<<< HEAD
-      const res = await axios.post('/api/support/saveResult.do', payload, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      });
-
-      console.log('서버 응답:', res.data);
-=======
       const urlParam = new URLSearchParams(payload);
 
       console.log('전송할 payload:', payload);
 
       await axios.post('/api/support/saveResult.do', urlParam);
->>>>>>> c9a48a9 (feat: 설문조사페이지 제출 성공)
     }
 
     alert('설문이 성공적으로 제출되었습니다.');
