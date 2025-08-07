@@ -38,9 +38,6 @@ const handlerSearch = () => {
 
       <!-- emit을 부모로 보내기 -->
       <button @click="emit('open-create-modal')">신규</button>
-      =======
-      <button @click="modalState.$patch({ isOpen: true })">신규</button>
-      >>>>>>> 6806e40 (학습지원: Qna 진행중)
     </div>
   </div>
 </template>
