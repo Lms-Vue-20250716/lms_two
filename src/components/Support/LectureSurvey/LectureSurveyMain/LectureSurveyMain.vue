@@ -111,13 +111,15 @@ const handleSubmit = async () => {
   console.log('surveyData:', surveyData.value);
 
   try {
-    const responses = surveyData.value;
+    for (const item of surveyData.value) {
+      const surveyResult = item.options.includes(item.answer)
+        ? item.options.indexOf(item.answer) + 1
+        : null;
 
-    for (const item of responses) {
-      const payload = new URLSearchParams();
-      payload.append('lecId', selectedLecId.value);
-      payload.append('surveyId', item.id); // 설문 문항 번호
-      payload.append('surveyResult', item.answer); // 선택된 답변 값
+      if (surveyResult === null) {
+        alert(`문항 "${item.question}"에 유효하지 않은 답변이 있습니다.`);
+        return;
+      }
 
       const payload = {
         lecId: selectedLecId.value,
@@ -131,6 +133,13 @@ const handleSubmit = async () => {
       console.log('전송할 payload:', payload);
 
       await axios.post('/api/support/saveResult.do', urlParam);
+      const res = await axios.post('/api/support/saveResult.do', payload, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+
+      console.log('서버 응답:', res.data);
     }
 
     alert('설문이 성공적으로 제출되었습니다.');
