@@ -2,6 +2,7 @@
 import { ref, watch, onMounted } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import LectureSurveySearch from '../LectureSurveySearch/LectureSurveySearch.vue';
 
 const selectedLecId = ref(null);
 const surveyData = ref([]);
