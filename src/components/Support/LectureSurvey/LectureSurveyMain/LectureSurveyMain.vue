@@ -33,7 +33,6 @@ const fetchSurveyByLecture = async (lecId = selectedLecId.value) => {
       surveyData.value = data.map((q, idx) => ({
         surveyId: idx + 1,
         question: typeof q === 'string' ? q : q.question,
-        answer: '',
         options: ['매우 나쁨', '나쁨', '보통', '좋음', '매우 좋음'],
         answer: '', // 사용자가 고를 값
       }));
