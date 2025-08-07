@@ -213,10 +213,6 @@ onMounted(() => {
   fetchLectureList();
   if (!isNew.value) fetchDetail();
 });
-
-onUnmounted(() => {
-  emit('unMountedModal', 0);
-});
 </script>
 
 <template>

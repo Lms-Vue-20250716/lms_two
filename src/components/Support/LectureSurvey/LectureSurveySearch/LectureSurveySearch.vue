@@ -2,7 +2,7 @@
 import { ref, onMounted, watch } from 'vue';
 
 const props = defineProps({
-  modelValue: String,
+  modelValue: [String, Number],
 });
 const emit = defineEmits(['update:modelValue', 'lectureSelected']);
 
