@@ -70,7 +70,7 @@ const handleSubmit = async () => {
         : null;
 
       if (surveyResult === null) {
-        alert(문항 "${item.question}"에 유효하지 않은 답변이 있습니다.);
+        alert(`문항 "${item.question}"에 유효하지 않은 답변이 있습니다.`);
         return;
       }
 
