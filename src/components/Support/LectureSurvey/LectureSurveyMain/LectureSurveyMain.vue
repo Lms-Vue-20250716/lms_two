@@ -117,17 +117,15 @@ const handleSubmit = async () => {
         : null;
 
       if (surveyResult === null) {
-        alert(`문항 "${item.question}"에 유효하지 않은 답변이 있습니다.`);
+        alert(문항 "${item.question}"에 유효하지 않은 답변이 있습니다.);
         return;
       }
-
-      console.log('전송할 payload:', payload.toString());
 
       const payload = {
         lecId: selectedLecId.value,
         surveyId: item.surveyId,
         loginId: loginInfo.value?.loginId,
-        surveyResult,
+        surveyResult: surveyResult,
       };
 
       const urlParam = new URLSearchParams(payload);
@@ -135,16 +133,10 @@ const handleSubmit = async () => {
       console.log('전송할 payload:', payload);
 
       await axios.post('/api/support/saveResult.do', urlParam);
-      const res = await axios.post('/api/support/saveResult.do', payload, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      });
-
-      console.log('서버 응답:', res.data);
     }
 
-    alert('설문이 성공적으로 제출되었습니다.');
+    alert('설문이 제출되었습니다.');
+    router.push('/api/support/manage-survey');
   } catch (error) {
     console.error('제출 중 에러 발생:', error);
     alert('제출 중 오류가 발생했습니다.');
