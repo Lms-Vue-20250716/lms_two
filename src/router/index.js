@@ -5,11 +5,8 @@ import LearningMaterials from '@/views/Support/LearningMaterials.vue';
 import LectureSurvey from '@/views/Support/LectureSurvey.vue';
 import ManageSurvey from '@/views/Support/ManageSurvey.vue';
 import Notice from '@/views/Support/Notice.vue';
-<<<<<<< HEAD
 import Statistics from '@/views/User/Statistics.vue';
 import Resume from '@/views/User/Resume.vue';
-=======
->>>>>>> 6806e40 (학습지원: Qna 진행중)
 import Qna from '@/views/Support/Qna.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import Classroom from '@/views/System/Classroom.vue';
@@ -53,7 +50,6 @@ const router = createRouter({
             },
             {
               path: 'qna',
-<<<<<<< HEAD
               name: 'qna',
               component: Qna,
             },
@@ -171,11 +167,6 @@ const router = createRouter({
               name: 'company',
               component: Company,
             },
-=======
-              name: 'Qna',
-              component: Qna,
-            },
->>>>>>> 6806e40 (학습지원: Qna 진행중)
           ],
         },
       ],
