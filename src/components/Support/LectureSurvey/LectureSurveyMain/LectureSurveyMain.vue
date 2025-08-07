@@ -122,6 +122,8 @@ const handleSubmit = async () => {
         return;
       }
 
+      console.log('전송할 payload:', payload.toString());
+
       const payload = {
         lecId: selectedLecId.value,
         surveyId: item.surveyId,
@@ -146,7 +148,7 @@ const handleSubmit = async () => {
     alert('설문이 성공적으로 제출되었습니다.');
   } catch (error) {
     console.error('제출 중 에러 발생:', error);
-    alert('설문 제출 중 오류가 발생했습니다.');
+    alert('제출 중 오류가 발생했습니다.');
   }
 };
 
